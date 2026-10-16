@@ -35,8 +35,8 @@ function loadEnv() {
 loadEnv();
 
 // ค่าคอนฟิก Turso
-let TURSO_URL = process.env.TURSO_DATABASE_URL || '';
-let TURSO_TOKEN = process.env.TURSO_AUTH_TOKEN || '';
+let TURSO_URL = process.env.TURSO_DATABASE_URL || 'libsql://kma-product-list-web-mstackhub.aws-ap-northeast-1.turso.io';
+let TURSO_TOKEN = process.env.TURSO_AUTH_TOKEN || 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTIxMjk1MTMsImlkIjoiMDFhMTQzM2UtMWYwMS03ZWFmLThmOGEtMDk5ZDU4YTFiY2VkIiwia2lkIjoiU1ZYRTc1Vy1QcHV4aWQ2RXJ6WlRRTzVNLW5OeVBzX0RjSm5qa0ZycXZ0YyIsInJpZCI6Ijc5NmMwNmVlLWJkY2EtNDRlYy1iYzEwLWJmOWI5ZmIzZjE5NSJ9.GEqIZaQPTvA9pvVCR5FDoAcekwdU5ijeOJGz0BsdV5ZRmoOxoajodxwgF30gD5agw0416Uaz4lU-t9ZyCqNLCg';
 
 // แปลง libsql:// เป็น https:// สำหรับ HTTP pipeline
 function normalizeTursoUrl(url) {
@@ -266,7 +266,7 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
-const server = http.createServer(async (req, res) => {
+async function requestHandler(req, res) {
   // จัดการ CORS Preflight
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {
@@ -541,17 +541,24 @@ const server = http.createServer(async (req, res) => {
     console.error('Server error:', err);
     sendJson(res, 500, { success: false, error: err.message });
   }
-});
+}
 
-// เริ่มการทำงานของเซิร์ฟเวอร์
-initializeDatabase().then(() => {
-  server.listen(PORT, () => {
-    console.log(`\n======================================================`);
-    console.log(`🚀 Product Management App is running!`);
-    console.log(`🌐 Local URL:  http://localhost:${PORT}`);
-    console.log(`🗄️  Database:   ${TURSO_URL ? 'Turso Cloud (' + TURSO_URL + ')' : 'Local SQLite (' + DB_FILE + ')'}`);
-    console.log(`======================================================\n`);
+const server = http.createServer(requestHandler);
+
+module.exports = requestHandler;
+module.exports.server = server;
+
+// เริ่มการทำงานของเซิร์ฟเวอร์ (Local / Standalone Mode)
+if (require.main === module || !process.env.VERCEL) {
+  initializeDatabase().then(() => {
+    server.listen(PORT, () => {
+      console.log(`\n======================================================`);
+      console.log(`🚀 Product Management App is running!`);
+      console.log(`🌐 Local URL:  http://localhost:${PORT}`);
+      console.log(`🗄️  Database:   ${TURSO_URL ? 'Turso Cloud (' + TURSO_URL + ')' : 'Local SQLite (' + DB_FILE + ')'}`);
+      console.log(`======================================================\n`);
+    });
+  }).catch(err => {
+    console.error('Failed to initialize database:', err);
   });
-}).catch(err => {
-  console.error('Failed to initialize database:', err);
-});
+}
