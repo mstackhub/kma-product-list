@@ -122,48 +122,48 @@ async function queryTurso(sql, args = []) {
 
 // รันคำสั่ง SQL ผ่าน Local SQLite3 CLI (สำหรับ Offline หรือรันทันทีก่อนต่อ Cloud)
 function queryLocalSqlite(sql, args = []) {
-  // สร้างตารางหากยังไม่มี
-  const initSql = `
-    CREATE TABLE IF NOT EXISTS products (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      category TEXT NOT NULL DEFAULT 'ทั่วไป',
-      original_price REAL NOT NULL DEFAULT 0,
-      sale_price REAL NOT NULL DEFAULT 0,
-      image_url TEXT,
-      description TEXT,
-      created_at TEXT DEFAULT (datetime('now', 'localtime')),
-      updated_at TEXT DEFAULT (datetime('now', 'localtime'))
-    );
-  `;
-  execSync(`sqlite3 "${DB_FILE}" "${initSql.replace(/"/g, '\\"')}"`);
+  try {
+    // สร้างตารางหากยังไม่มี
+    const initSql = `
+      CREATE TABLE IF NOT EXISTS products (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        category TEXT NOT NULL DEFAULT 'ทั่วไป',
+        original_price REAL NOT NULL DEFAULT 0,
+        sale_price REAL NOT NULL DEFAULT 0,
+        image_url TEXT,
+        description TEXT,
+        created_at TEXT DEFAULT (datetime('now', 'localtime')),
+        updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+      );
+    `;
+    execSync(`sqlite3 "${DB_FILE}" "${initSql.replace(/"/g, '\\"')}"`);
 
-  // ใส่ parameter แบบปลอดภัย
-  let processedSql = sql;
-  if (args.length > 0) {
-    let argIdx = 0;
-    processedSql = sql.replace(/\?/g, () => {
-      const val = args[argIdx++];
-      if (val === null || val === undefined) return 'NULL';
-      if (typeof val === 'number') return val;
-      return `'${String(val).replace(/'/g, "''")}'`;
-    });
-  }
+    // ใส่ parameter แบบปลอดภัย
+    let processedSql = sql;
+    if (args.length > 0) {
+      let argIdx = 0;
+      processedSql = sql.replace(/\?/g, () => {
+        const val = args[argIdx++];
+        if (val === null || val === undefined) return 'NULL';
+        if (typeof val === 'number') return val;
+        return `'${String(val).replace(/'/g, "''")}'`;
+      });
+    }
 
-  // หากเป็น SELECT ให้ดึง JSON ออกมาด้วย -json flag ของ sqlite3
-  const trimmed = processedSql.trim();
-  if (/^SELECT/i.test(trimmed)) {
-    try {
+    // หากเป็น SELECT ให้ดึง JSON ออกมาด้วย -json flag ของ sqlite3
+    const trimmed = processedSql.trim();
+    if (/^SELECT/i.test(trimmed)) {
       const output = execSync(`sqlite3 -json "${DB_FILE}" "${processedSql.replace(/"/g, '\\"')}"`, { encoding: 'utf8' }).trim();
       if (!output) return [];
       return JSON.parse(output);
-    } catch (e) {
-      console.error('SQLite query error:', e.message);
+    } else {
+      // INSERT / UPDATE / DELETE
+      execSync(`sqlite3 "${DB_FILE}" "${processedSql.replace(/"/g, '\\"')}"`);
       return [];
     }
-  } else {
-    // INSERT / UPDATE / DELETE
-    execSync(`sqlite3 "${DB_FILE}" "${processedSql.replace(/"/g, '\\"')}"`);
+  } catch (err) {
+    console.warn('Local SQLite unavailable (safe in cloud):', err.message);
     return [];
   }
 }
@@ -416,7 +416,7 @@ async function requestHandler(req, res) {
     // API: GET /api/categories - รายชื่อหมวดหมู่ทั้งหมด (แยก Multi-categories)
     // ---------------------------------------------------------
     if (pathname === '/api/categories' && req.method === 'GET') {
-      const rows = await executeDb('SELECT category FROM products WHERE category IS NOT NULL AND category != ""');
+      const rows = await executeDb("SELECT category FROM products WHERE category IS NOT NULL AND category != ''");
       const catSet = new Set();
       rows.forEach(r => {
         if (!r.category) return;
