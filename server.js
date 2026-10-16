@@ -260,6 +260,8 @@ const MIME_TYPES = {
   '.json': 'application/json',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon'
 };
@@ -312,6 +314,48 @@ const server = http.createServer(async (req, res) => {
         message: 'บันทึกการตั้งค่า Turso Database เรียบร้อยแล้ว',
         mode: TURSO_URL && TURSO_TOKEN ? 'turso_cloud' : 'local_sqlite'
       });
+    }
+
+    // ---------------------------------------------------------
+    // API: POST /api/upload - อัปโหลดรูปภาพจาก Local เก็บใน public/uploads
+    // ---------------------------------------------------------
+    if (pathname === '/api/upload' && req.method === 'POST') {
+      try {
+        const body = await parseBody(req);
+        if (!body.data) {
+          return sendJson(res, 400, { success: false, error: 'ไม่พบข้อมูลรูปภาพ' });
+        }
+
+        const matches = body.data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+        if (!matches || matches.length !== 3) {
+          return sendJson(res, 400, { success: false, error: 'รูปแบบ Base64 Image ไม่ถูกต้อง' });
+        }
+
+        const mime = matches[1];
+        const base64Data = matches[2];
+        let ext = '.jpg';
+        if (mime.includes('png')) ext = '.png';
+        else if (mime.includes('webp')) ext = '.webp';
+        else if (mime.includes('gif')) ext = '.gif';
+
+        const fileName = `kma_${Date.now()}_${Math.random().toString(36).substring(2, 8)}${ext}`;
+        const uploadDir = path.join(__dirname, 'public', 'uploads');
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        const filePath = path.join(uploadDir, fileName);
+        fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+
+        const publicUrl = `/uploads/${fileName}`;
+        return sendJson(res, 200, {
+          success: true,
+          url: publicUrl,
+          message: 'อัปโหลดรูปภาพสำเร็จ'
+        });
+      } catch (err) {
+        return sendJson(res, 500, { success: false, error: 'อัปโหลดไม่สำเร็จ: ' + err.message });
+      }
     }
 
     // ---------------------------------------------------------

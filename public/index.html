@@ -300,37 +300,72 @@
           >
         </div>
 
-        <!-- Category & Image URL Row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <!-- Category -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              หมวดหมู่สินค้า <span class="text-rose-500">*</span>
-            </label>
-            <input 
-              type="text" 
-              id="formCategory" 
-              list="categoryOptions" 
-              required 
-              placeholder="เช่น เครื่องสำอาง, ลิปสติก"
-              class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C98b6f] transition"
-            >
-            <datalist id="categoryOptions">
-              <!-- populated dynamically -->
-            </datalist>
-          </div>
+        <!-- Category -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            หมวดหมู่สินค้า <span class="text-rose-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="formCategory" 
+            list="categoryOptions" 
+            required 
+            placeholder="เช่น เครื่องสำอาง, ลิปสติก, แป้งผสมรองพื้น"
+            class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-300 focus:bg-white focus:outline-none focus:border-[#C98b6f] transition"
+          >
+          <datalist id="categoryOptions">
+            <!-- populated dynamically -->
+          </datalist>
+        </div>
 
-          <!-- Image URL -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              URL รูปภาพสินค้า
-            </label>
-            <input 
-              type="url" 
-              id="formImage" 
-              placeholder="https://... (หรือเว้นว่างไว้)"
-              class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C98b6f] transition"
-            >
+        <!-- Image Upload & Preview Section (Local File & URL) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+            <span>รูปภาพสินค้า</span>
+            <span class="text-[11px] font-normal text-slate-400">เลือกรูปจากเครื่อง หรือใส่ URL</span>
+          </label>
+          
+          <div class="border border-slate-200 p-3 bg-slate-50/70">
+            <div class="flex items-start gap-3">
+              <!-- Thumbnail Preview Box -->
+              <div id="imagePreviewContainer" class="w-20 h-20 bg-white border border-slate-300 shrink-0 flex items-center justify-center overflow-hidden relative">
+                <img id="formImagePreview" src="" alt="Preview" class="w-full h-full object-cover hidden">
+                <div id="formImagePlaceholder" class="text-slate-400 text-center p-1">
+                  <i data-lucide="image" class="w-6 h-6 mx-auto mb-0.5 text-slate-300"></i>
+                  <span class="text-[10px] block text-slate-400">ไม่มีรูป</span>
+                </div>
+              </div>
+
+              <!-- File Picker & URL Input -->
+              <div class="flex-1 space-y-2 min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <label class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#C98b6f] hover:bg-[#b87556] active:scale-95 text-white text-xs font-medium cursor-pointer transition select-none">
+                    <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                    <span>เลือกรูปจากเครื่อง</span>
+                    <input type="file" id="localFileInput" accept="image/*" class="hidden" onchange="handleLocalImageSelect(event)">
+                  </label>
+                  <button 
+                    type="button" 
+                    id="removeImageBtn" 
+                    onclick="clearSelectedImage()" 
+                    class="hidden px-2.5 py-1.5 text-xs text-rose-600 hover:text-white hover:bg-rose-600 transition border border-rose-300 cursor-pointer"
+                  >
+                    ลบรูป
+                  </button>
+                  <span id="uploadStatusText" class="text-xs text-slate-500 truncate"></span>
+                </div>
+
+                <div>
+                  <input 
+                    type="text" 
+                    id="formImage" 
+                    placeholder="หรือวาง URL รูปภาพ (https://...)" 
+                    oninput="handleImageUrlInput(this.value)"
+                    class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 focus:outline-none focus:border-[#C98b6f] transition"
+                  >
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1064,16 +1099,138 @@
       renderProducts();
     }
 
+    // ==========================================
+    // Local Image Upload & Preview Handlers
+    // ==========================================
+    function updateImagePreview(url) {
+      const previewImg = document.getElementById('formImagePreview');
+      const placeholder = document.getElementById('formImagePlaceholder');
+      const removeBtn = document.getElementById('removeImageBtn');
+
+      if (url && url.trim()) {
+        previewImg.src = url.trim();
+        previewImg.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        if (removeBtn) removeBtn.classList.remove('hidden');
+      } else {
+        previewImg.src = '';
+        previewImg.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+        if (removeBtn) removeBtn.classList.add('hidden');
+      }
+    }
+
+    function handleImageUrlInput(val) {
+      document.getElementById('uploadStatusText').textContent = '';
+      updateImagePreview(val);
+    }
+
+    function clearSelectedImage() {
+      const fileInput = document.getElementById('localFileInput');
+      const formImage = document.getElementById('formImage');
+      const statusText = document.getElementById('uploadStatusText');
+
+      if (fileInput) fileInput.value = '';
+      if (formImage) formImage.value = '';
+      if (statusText) statusText.textContent = '';
+      updateImagePreview('');
+    }
+
+    // ฟังก์ชันเลือกรูปจากเครื่องและบีบอัดอัตโนมัติ (Fast & Ultra-Light)
+    async function handleLocalImageSelect(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'ไฟล์ไม่ถูกต้อง',
+          text: 'กรุณาเลือกไฟล์ที่เป็นรูปภาพเท่านั้น (JPG, PNG, WebP)'
+        });
+        return;
+      }
+
+      const statusText = document.getElementById('uploadStatusText');
+      statusText.textContent = 'กำลังโหลดรูปภาพ...';
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const rawDataUrl = e.target.result;
+
+        // บีบอัดภาพให้อ่านเร็ว โหลดไว (Max 1200px)
+        const img = new Image();
+        img.onload = async function() {
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 1200;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // แปลงเป็น JPEG คุณภาพสูง 85%
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+          // แสดง Preview ทันที
+          updateImagePreview(compressedDataUrl);
+
+          // ถ้าต่อกับ Node Server ให้ส่งไปเก็บในโฟลเดอร์ public/uploads
+          if (isServerMode) {
+            statusText.textContent = 'กำลังอัปโหลด...';
+            try {
+              const res = await fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: compressedDataUrl })
+              });
+              const result = await res.json();
+              if (result.success && result.url) {
+                document.getElementById('formImage').value = result.url;
+                statusText.textContent = '✓ อัปโหลดสำเร็จ';
+              } else {
+                // ถ้าอัปโหลดไฟล์ไม่สำเร็จ ใช้ Base64 ตรงๆ
+                document.getElementById('formImage').value = compressedDataUrl;
+                statusText.textContent = '✓ บันทึกรูปในระบบ';
+              }
+            } catch (err) {
+              document.getElementById('formImage').value = compressedDataUrl;
+              statusText.textContent = '✓ บันทึกรูปในระบบ';
+            }
+          } else {
+            // Direct Turso Cloud / Standalone mode: เก็บ Data URL ลงในฐานข้อมูลตรงๆ
+            document.getElementById('formImage').value = compressedDataUrl;
+            statusText.textContent = '✓ เลือกรูปภาพแล้ว';
+          }
+        };
+        img.src = rawDataUrl;
+      };
+      reader.readAsDataURL(file);
+    }
+
     // เปิด Modal เพิ่มสินค้า
     function openAddModal() {
       editingProduct = null;
       document.getElementById('productForm').reset();
       document.getElementById('formProductId').value = '';
+      clearSelectedImage();
+
       document.getElementById('modalTitle').textContent = 'เพิ่มรายการสินค้าใหม่';
       document.getElementById('modalSubtitle').textContent = 'บันทึกลง Turso Database ทันที';
       document.getElementById('submitBtnText').textContent = 'บันทึกสินค้า';
       document.getElementById('modalIcon').setAttribute('data-lucide', 'plus');
-      document.getElementById('modalIconBox').className = 'w-8 h-8 rounded-lg bg-pink-100 text-[#C98b6f] flex items-center justify-center';
+      document.getElementById('modalIconBox').className = 'w-8 h-8 bg-pink-100 text-[#C98b6f] flex items-center justify-center';
       document.getElementById('pricePreviewDiscount').classList.add('hidden');
 
       document.getElementById('productModal').classList.remove('hidden');
@@ -1111,12 +1268,15 @@
       document.getElementById('formSalePrice').value = p.sale_price;
       document.getElementById('formImage').value = p.image_url || '';
       document.getElementById('formDescription').value = p.description || '';
+      document.getElementById('uploadStatusText').textContent = '';
+
+      updateImagePreview(p.image_url || '');
 
       document.getElementById('modalTitle').textContent = 'แก้ไขข้อมูลสินค้า';
       document.getElementById('modalSubtitle').textContent = `รหัสสินค้า: ${p.id}`;
       document.getElementById('submitBtnText').textContent = 'อัปเดตข้อมูล';
       document.getElementById('modalIcon').setAttribute('data-lucide', 'edit-3');
-      document.getElementById('modalIconBox').className = 'w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center';
+      document.getElementById('modalIconBox').className = 'w-8 h-8 bg-amber-100 text-amber-600 flex items-center justify-center';
 
       updatePricePreview();
       document.getElementById('productModal').classList.remove('hidden');
