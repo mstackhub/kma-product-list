@@ -11,6 +11,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="KMA Booth">
+  <meta name="msapplication-tap-highlight" content="no">
   <link rel="apple-touch-icon" href="/kma-logo.png">
   
   <!-- Fonts -->
@@ -60,7 +61,22 @@
   <style>
     body { font-family: 'Sarabun', sans-serif; }
     [x-cloak] { display: none !important; }
-    *, *::before, *::after { border-radius: 0px !important; }
+    
+    /* ป้องกัน Tab / Tap Highlight สีฟ้า และกรอบ Focus จาก Chrome / Android / Safari */
+    *, *::before, *::after {
+      border-radius: 0px !important;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+    }
+    button, a, input, select, textarea {
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+    }
+    button:focus, button:focus-visible, button:active,
+    a:focus, a:focus-visible, a:active {
+      -webkit-tap-highlight-color: transparent !important;
+      outline: none !important;
+    }
     
     /* SweetAlert2 KMA Brand Corporate Identity (CI) Customization */
     .swal2-popup:not(.swal2-toast) {
