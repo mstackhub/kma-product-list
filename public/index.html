@@ -68,8 +68,10 @@
     <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-4">
       
       <!-- Brand Logo & Title -->
-      <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-        <img src="/kma-logo.png" alt="KMA Cosmetics" class="h-6 sm:h-7 object-contain shrink-0">
+      <div class="flex items-center gap-2.5 sm:gap-4 min-w-0">
+        <a href="https://www.kmacosme.com" target="_blank" rel="noopener noreferrer" title="ไปยังเว็บไซต์ KMACosme" class="shrink-0 hover:opacity-85 transition">
+          <img src="kma-logo.png" alt="KMA Cosmetics" class="h-6 sm:h-7 object-contain">
+        </a>
         <div class="h-4 w-px bg-slate-300 shrink-0"></div>
         <div class="min-w-0">
           <h1 class="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">Product Catalog</h1>
@@ -79,7 +81,19 @@
 
       <!-- Action Buttons -->
       <div class="flex items-center gap-2 shrink-0">
-        <button onclick="openAddModal()" class="inline-flex items-center gap-1.5 bg-[#C98b6f] hover:bg-[#b87556] active:scale-95 text-white px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition shrink-0 cursor-pointer shadow-xs">
+        <!-- KMACosme Website Link Button -->
+        <a 
+          href="https://www.kmacosme.com" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 bg-white hover:bg-[#faf6f3] text-slate-800 hover:text-[#C98b6f] border border-slate-300 hover:border-[#C98b6f] px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition shrink-0 cursor-pointer shadow-xs"
+          title="ไปยังเว็บไซต์ www.kmacosme.com"
+        >
+          <i data-lucide="globe" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C98b6f]"></i>
+          <span>KMACosme</span>
+        </a>
+
+        <button onclick="openAddModal()" class="inline-flex items-center gap-1.5 bg-[#C98b6f] hover:bg-[#b87556] active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition shrink-0 cursor-pointer shadow-xs">
           <i data-lucide="plus" class="w-4 h-4"></i>
           <span>เพิ่มสินค้า</span>
         </button>
@@ -322,6 +336,15 @@
           >
             <i data-lucide="external-link" class="w-4 h-4"></i>
             เปิด LINE ติดต่อเราทันที
+          </a>
+          <a 
+            href="https://www.kmacosme.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="w-full inline-flex items-center justify-center gap-2 bg-white hover:bg-[#faf6f3] text-slate-800 hover:text-[#C98b6f] border border-slate-300 hover:border-[#C98b6f] text-xs font-semibold py-2 px-4 transition cursor-pointer shadow-2xs"
+          >
+            <i data-lucide="globe" class="w-3.5 h-3.5 text-[#C98b6f]"></i>
+            เข้าชมเว็บไซต์ www.kmacosme.com
           </a>
           <button 
             type="button" 
