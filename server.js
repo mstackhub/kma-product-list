@@ -424,6 +424,93 @@ async function requestHandler(req, res) {
     }
 
     // ---------------------------------------------------------
+    // API: DELETE /api/categories หรือ POST /api/categories/delete
+    // ลบหมวดหมู่ออกจากสินค้าทุกรายการในฐานข้อมูล (ตัวสินค้าไม่ถูกลบ)
+    // ---------------------------------------------------------
+    if ((pathname === '/api/categories' && req.method === 'DELETE') || 
+        (pathname === '/api/categories/delete' && req.method === 'POST')) {
+      let category = urlObj.searchParams.get('category');
+      if (!category && req.method === 'POST') {
+        const body = await parseBody(req);
+        category = body.category;
+      }
+      category = (category || '').trim();
+      if (!category) {
+        return sendJson(res, 400, { success: false, error: 'กรุณาระบุชื่อหมวดหมู่ที่ต้องการลบ' });
+      }
+
+      // ดึงสินค้าทั้งหมดที่มีหมวดหมู่นี้
+      const rows = await executeDb("SELECT id, category FROM products WHERE category LIKE ?", [`%${category}%`]);
+      let updatedCount = 0;
+      const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+
+      for (const row of rows) {
+        if (!row.category) continue;
+        const currentCats = row.category.split(',').map(c => c.trim()).filter(Boolean);
+        const newCats = currentCats.filter(c => c !== category);
+        const finalCategory = newCats.length > 0 ? newCats.join(', ') : 'ทั่วไป';
+        
+        if (finalCategory !== row.category) {
+          await executeDb("UPDATE products SET category = ?, updated_at = ? WHERE id = ?", [finalCategory, now, row.id]);
+          updatedCount++;
+        }
+      }
+
+      return sendJson(res, 200, {
+        success: true,
+        message: `ลบหมวดหมู่ '${category}' ออกจากสินค้าเรียบร้อยแล้ว (${updatedCount} รายการถูกอัปเดต)`,
+        category,
+        updatedCount
+      });
+    }
+
+    // ---------------------------------------------------------
+    // API: POST /api/categories/rename - เปลี่ยนชื่อหมวดหมู่ในสินค้าทุกรายการ
+    // ---------------------------------------------------------
+    if (pathname === '/api/categories/rename' && req.method === 'POST') {
+      const body = await parseBody(req);
+      const oldCat = (body.oldCategory || '').trim();
+      const newCat = (body.newCategory || '').trim();
+
+      if (!oldCat || !newCat) {
+        return sendJson(res, 400, { success: false, error: 'กรุณาระบุชื่อหมวดหมู่เดิมและชื่อหมวดหมู่ใหม่' });
+      }
+
+      const rows = await executeDb("SELECT id, category FROM products WHERE category LIKE ?", [`%${oldCat}%`]);
+      let updatedCount = 0;
+      const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+
+      for (const row of rows) {
+        if (!row.category) continue;
+        const currentCats = row.category.split(',').map(c => c.trim()).filter(Boolean);
+        let hasChanged = false;
+        const newCats = currentCats.map(c => {
+          if (c === oldCat) {
+            hasChanged = true;
+            return newCat;
+          }
+          return c;
+        });
+
+        const uniqueCats = Array.from(new Set(newCats));
+        const finalCategory = uniqueCats.join(', ');
+
+        if (hasChanged && finalCategory !== row.category) {
+          await executeDb("UPDATE products SET category = ?, updated_at = ? WHERE id = ?", [finalCategory, now, row.id]);
+          updatedCount++;
+        }
+      }
+
+      return sendJson(res, 200, {
+        success: true,
+        message: `เปลี่ยนชื่อหมวดหมู่จาก '${oldCat}' เป็น '${newCat}' สำเร็จ (${updatedCount} รายการ)`,
+        oldCategory: oldCat,
+        newCategory: newCat,
+        updatedCount
+      });
+    }
+
+    // ---------------------------------------------------------
     // API: POST /api/products - เพิ่มรายการสินค้าใหม่
     // ---------------------------------------------------------
     if (pathname === '/api/products' && req.method === 'POST') {
