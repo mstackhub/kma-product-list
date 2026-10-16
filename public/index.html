@@ -90,7 +90,7 @@
   <!-- ========================================================================= -->
   <!-- Main Container                                                            -->
   <!-- ========================================================================= -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-5">
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-5 pb-24">
     
     <!-- Controls: Search, Sort, Categories & View Toggle -->
     <section class="bg-white p-3.5 sm:p-4 border border-slate-200 mb-4 space-y-3">
@@ -251,6 +251,115 @@
     </div>
 
   </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Contact Channels (LINE QR Code)                                   -->
+  <!-- ========================================================================= -->
+  <div id="contactModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white max-w-sm sm:max-w-md w-full overflow-hidden shadow-2xl border border-slate-200 transform transition-all animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Modal Header -->
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 bg-emerald-100 text-emerald-600 flex items-center justify-center">
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">ช่องทางการติดต่อ</h3>
+            <p class="text-xs text-slate-500">สอบถาม สั่งซื้อ หรือปรึกษาข้อมูลสินค้า</p>
+          </div>
+        </div>
+        <button onclick="closeContactModal()" class="text-slate-400 hover:text-slate-600 p-1.5 transition cursor-pointer" title="ปิด">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 text-center space-y-4">
+        
+        <!-- LINE Badge -->
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-[#06C755]/10 text-[#06C755] border border-[#06C755]/20 text-xs font-bold uppercase tracking-wider">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path d="M19.365 9.863c.349.000.63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.627.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.477.254l2.486 3.376V8.108c0-.345.282-.63.63-.63.345 0 .624.285.624.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08-.064.445-.297 1.745-.341 2.015-.052.309-.236 1.205 1.058.658 1.295-.547 6.99-4.116 9.539-7.049C23.003 15.42 24 13.005 24 10.314"/>
+          </svg>
+          LINE Official Account
+        </div>
+
+        <!-- LINE QR Code Image -->
+        <div class="relative inline-block p-3 bg-white border border-slate-200 shadow-sm mx-auto">
+          <img 
+            src="line-qr.png" 
+            alt="LINE QR Code" 
+            class="w-52 h-52 sm:w-60 sm:h-60 object-contain mx-auto"
+            onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://line.me'"
+          >
+        </div>
+
+        <div class="space-y-1">
+          <p class="text-sm font-bold text-slate-800">สแกน QR Code เพื่อเพิ่มเพื่อน</p>
+          <p class="text-xs text-slate-500">หรือกดปุ่มด้านล่างเพื่อเปิดแอปพลิเคชัน LINE</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-2 space-y-2">
+          <a 
+            href="https://line.me" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="w-full inline-flex items-center justify-center gap-2 bg-[#06C755] hover:bg-[#05b34c] text-white text-sm font-semibold py-2.5 px-4 transition cursor-pointer shadow-xs"
+          >
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+            เปิด LINE ติดต่อเราทันที
+          </a>
+          <button 
+            type="button" 
+            onclick="closeContactModal()" 
+            class="w-full inline-flex items-center justify-center py-2 px-4 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+          >
+            กลับไปยังรายการสินค้า
+          </button>
+        </div>
+
+        <p class="text-[11px] text-slate-400 pt-1">
+          เวลาทำการ: ทุกวัน 09:00 - 18:00 น.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- Fixed Bottom Navigation Bar (ติดหน้าจอล่างสุด)                             -->
+  <!-- ========================================================================= -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)]">
+    <div class="max-w-md mx-auto grid grid-cols-2 h-14">
+      
+      <!-- เมนู 1: รายการสินค้า -->
+      <button 
+        type="button" 
+        id="navProductsBtn" 
+        onclick="switchToProductsTab()" 
+        class="flex flex-col items-center justify-center h-full text-[#C98b6f] font-semibold transition cursor-pointer hover:bg-[#faf6f3] relative"
+      >
+        <span id="navProductsIndicator" class="absolute top-0 left-0 right-0 h-0.5 bg-[#C98b6f]"></span>
+        <i data-lucide="package" class="w-4 h-4 mb-0.5"></i>
+        <span class="text-xs">รายการสินค้า</span>
+      </button>
+
+      <!-- เมนู 2: ช่องทางการติดต่อ -->
+      <button 
+        type="button" 
+        id="navContactBtn" 
+        onclick="openContactModal()" 
+        class="flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative border-l border-slate-100"
+      >
+        <span id="navContactIndicator" class="absolute top-0 left-0 right-0 h-0.5 bg-[#C98b6f] hidden"></span>
+        <i data-lucide="message-circle" class="w-4 h-4 mb-0.5"></i>
+        <span class="text-xs">ช่องทางการติดต่อ</span>
+      </button>
+
+    </div>
+  </nav>
 
   <!-- ========================================================================= -->
   <!-- MODAL: Add / Edit Product                                                -->
@@ -1683,6 +1792,58 @@
         timer: 3000,
         timerProgressBar: true
       }).fire({ icon, title });
+    }
+
+    // ==========================================
+    // Bottom Navigation & Contact Modal Handlers
+    // ==========================================
+    function switchToProductsTab() {
+      closeContactModal();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openContactModal() {
+      const modal = document.getElementById('contactModal');
+      if (modal) modal.classList.remove('hidden');
+
+      // Update Nav active style
+      const prodBtn = document.getElementById('navProductsBtn');
+      const contactBtn = document.getElementById('navContactBtn');
+      const prodInd = document.getElementById('navProductsIndicator');
+      const contactInd = document.getElementById('navContactIndicator');
+
+      if (prodBtn) {
+        prodBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative';
+      }
+      if (prodInd) prodInd.classList.add('hidden');
+
+      if (contactBtn) {
+        contactBtn.className = 'flex flex-col items-center justify-center h-full text-[#C98b6f] font-semibold transition cursor-pointer hover:bg-[#faf6f3] relative border-l border-slate-100';
+      }
+      if (contactInd) contactInd.classList.remove('hidden');
+
+      lucide.createIcons();
+    }
+
+    function closeContactModal() {
+      const modal = document.getElementById('contactModal');
+      if (modal) modal.classList.add('hidden');
+
+      // Restore Products Tab active style
+      const prodBtn = document.getElementById('navProductsBtn');
+      const contactBtn = document.getElementById('navContactBtn');
+      const prodInd = document.getElementById('navProductsIndicator');
+      const contactInd = document.getElementById('navContactIndicator');
+
+      if (prodBtn) {
+        prodBtn.className = 'flex flex-col items-center justify-center h-full text-[#C98b6f] font-semibold transition cursor-pointer hover:bg-[#faf6f3] relative';
+      }
+      if (prodInd) prodInd.classList.remove('hidden');
+
+      if (contactBtn) {
+        contactBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative border-l border-slate-100';
+      }
+      if (contactInd) contactInd.classList.add('hidden');
     }
 
     // Helpers ป้องกัน XSS
