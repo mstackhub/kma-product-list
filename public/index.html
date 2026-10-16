@@ -412,21 +412,21 @@
         <div class="relative inline-block p-3 bg-white border border-slate-200 shadow-sm mx-auto">
           <img 
             src="line-qr.png" 
-            alt="LINE QR Code" 
+            alt="LINE QR Code: https://lin.ee/xd0c3dv" 
             class="w-52 h-52 sm:w-60 sm:h-60 object-contain mx-auto"
-            onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://line.me'"
+            onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Flin.ee%2Fxd0c3dv'"
           >
         </div>
 
         <div class="space-y-1">
           <p class="text-sm font-bold text-slate-800">สแกน QR Code เพื่อเพิ่มเพื่อน</p>
-          <p class="text-xs text-slate-500">หรือกดปุ่มด้านล่างเพื่อเปิดแอปพลิเคชัน LINE</p>
+          <p class="text-xs text-slate-500">LINE Official Account หรือกดปุ่มด้านล่างเพื่อเปิดแอปทันที</p>
         </div>
 
         <!-- Action Buttons -->
         <div class="pt-2 space-y-2">
           <a 
-            href="https://line.me" 
+            href="https://lin.ee/xd0c3dv" 
             target="_blank" 
             rel="noopener noreferrer"
             class="w-full inline-flex items-center justify-center gap-2 bg-[#06C755] hover:bg-[#05b34c] text-white text-sm font-semibold py-2.5 px-4 transition cursor-pointer shadow-xs"
@@ -855,8 +855,8 @@
     // ข้อมูลเริ่มต้นสำหรับใช้งานจริง (ว่างเปล่า พร้อมบันทึกสินค้าจริง)
     const SEED_PRODUCTS = [];
 
-    // Default placeholder image
-    const DEFAULT_IMG = 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&q=80';
+    // Default placeholder image (KMA Brand Monogram CI Placeholder)
+    const DEFAULT_IMG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%"><rect width="300" height="300" fill="%23FAF6F2"/><rect x="20" y="20" width="260" height="260" fill="none" stroke="%23E8DDD4" stroke-width="1.5" stroke-dasharray="4 4"/><circle cx="150" cy="120" r="42" fill="%23F0E5DC"/><text x="150" y="127" font-family="-apple-system,BlinkMacSystemFont,Sarabun,sans-serif" font-size="20" font-weight="bold" fill="%23C98B6F" text-anchor="middle" letter-spacing="2">KMA</text><text x="150" y="190" font-family="-apple-system,BlinkMacSystemFont,Sarabun,sans-serif" font-size="12" font-weight="600" fill="%23A8978B" text-anchor="middle" letter-spacing="1">NO IMAGE</text><text x="150" y="210" font-family="-apple-system,BlinkMacSystemFont,Sarabun,sans-serif" font-size="11" fill="%23C2B4AA" text-anchor="middle">ไม่มีรูปภาพสินค้า</text></svg>`;
 
     // On Document Ready
     document.addEventListener('DOMContentLoaded', async () => {
