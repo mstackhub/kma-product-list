@@ -511,16 +511,16 @@
   <!-- Floating Booth Cart Sticky Bar (แสดงขึ้นมาเมื่อมีสินค้าในตะกร้า)           -->
   <!-- ========================================================================= -->
   <div id="floatingCartBar" class="hidden fixed bottom-16 left-0 right-0 z-40 px-3 sm:px-4 pointer-events-none">
-    <div class="max-w-md mx-auto pointer-events-auto bg-slate-900 text-white shadow-2xl border border-slate-700 p-2.5 sm:p-3 flex items-center justify-between">
+    <div class="max-w-md mx-auto pointer-events-auto bg-white text-slate-800 shadow-[0_6px_25px_rgba(201,139,111,0.25)] border-2 border-[#C98b6f] p-2.5 sm:p-3 flex items-center justify-between">
       <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 bg-[#C98b6f] text-white flex items-center justify-center font-bold text-sm shrink-0">
+        <div class="w-9 h-9 bg-[#C98b6f] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
           <i data-lucide="shopping-bag" class="w-4 h-4"></i>
         </div>
         <div>
-          <div class="text-[11px] font-medium text-slate-300">
-            ตะกร้าหน้าบูธ (<span id="floatingCartCount" class="text-white font-bold">0</span> รายการ)
+          <div class="text-[11px] font-semibold text-slate-600">
+            ตะกร้าหน้าบูธ (<span id="floatingCartCount" class="text-[#C98b6f] font-bold">0</span> รายการ)
           </div>
-          <div class="text-sm sm:text-base font-bold text-[#dec0b0] leading-tight">
+          <div class="text-sm sm:text-base font-extrabold text-[#C98b6f] leading-tight">
             ฿<span id="floatingCartTotal">0.00</span>
           </div>
         </div>
@@ -2223,24 +2223,44 @@
       const row4Items = [...row4Preset.filter(c => !excludedCategories.includes(c)), ...otherItems];
 
       let html = `
-        <!-- แถวแรก: รองพื้น คุชชั่น แป้ง เบสเมคอัพ -->
-        <div class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-          ${row1Items.map(renderCategoryRowPill).join('')}
+        <!-- แถวแรก: งานผิว & แป้ง -->
+        <div class="space-y-1">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+            <span>✨ งานผิว & แป้ง:</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 py-0.5">
+            ${row1Items.map(renderCategoryRowPill).join('')}
+          </div>
         </div>
 
-        <!-- แถวสอง: แต่งหน้า ลิป ตา ปาก บลัช & แก้ม -->
-        <div class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-          ${row2Items.map(renderCategoryRowPill).join('')}
+        <!-- แถวสอง: แต่งหน้า & ตา & ปาก -->
+        <div class="space-y-1 pt-1 border-t border-[#f0eae4]/60">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+            <span>💄 แต่งแต้มสีสัน (ตา/ปาก/แก้ม):</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 py-0.5">
+            ${row2Items.map(renderCategoryRowPill).join('')}
+          </div>
         </div>
 
-        <!-- แถวสาม: สกินแคร์ กันแดด สเปรย์ เซรั่ม ล้างหน้า -->
-        <div class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-          ${row3Items.map(renderCategoryRowPill).join('')}
+        <!-- แถวสาม: สกินแคร์ & บำรุง -->
+        <div class="space-y-1 pt-1 border-t border-[#f0eae4]/60">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+            <span>🧴 สกินแคร์ & บำรุงผิว:</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 py-0.5">
+            ${row3Items.map(renderCategoryRowPill).join('')}
+          </div>
         </div>
 
-        <!-- แถวสี่: ราคาพิเศษ -->
-        <div class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-          ${row4Items.map(renderCategoryRowPill).join('')}
+        <!-- แถวสี่: โปรพิเศษ & อื่นๆ -->
+        <div class="space-y-1 pt-1 border-t border-[#f0eae4]/60">
+          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+            <span>⭐ พิเศษ & อื่นๆ:</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 py-0.5">
+            ${row4Items.map(renderCategoryRowPill).join('')}
+          </div>
         </div>
       `;
 
@@ -3392,20 +3412,20 @@
       container.innerHTML = '';
 
       const toast = document.createElement('div');
-      toast.className = 'pointer-events-auto bg-[#231E1C]/95 text-[#FAF6F2] border border-[#C98b6f]/50 backdrop-blur-md shadow-xl px-3.5 py-2 flex items-center gap-2 text-xs font-medium animate-in fade-in slide-in-from-top-2 duration-150 transition-all select-none';
+      toast.className = 'pointer-events-auto bg-white text-slate-800 border-2 border-[#C98b6f] shadow-xl px-3.5 py-2 flex items-center gap-2 text-xs font-semibold animate-in fade-in slide-in-from-top-2 duration-150 transition-all select-none';
 
       let iconSvg = '';
       if (type === 'success') {
-        iconSvg = `<span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0"><svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></span>`;
+        iconSvg = `<span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></span>`;
       } else if (type === 'error') {
-        iconSvg = `<span class="w-4 h-4 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0"><svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></span>`;
+        iconSvg = `<span class="w-4 h-4 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0"><svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></span>`;
       } else {
-        iconSvg = `<span class="w-4 h-4 rounded-full bg-[#C98b6f]/20 text-[#C98b6f] flex items-center justify-center shrink-0"><svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>`;
+        iconSvg = `<span class="w-4 h-4 rounded-full bg-[#FAF6F2] text-[#C98b6f] flex items-center justify-center shrink-0"><svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>`;
       }
 
       const isCart = (title || '').includes('ตะกร้า');
       const cartAction = isCart 
-        ? `<button type="button" onclick="openCartModal()" class="ml-1.5 pl-2 border-l border-white/20 text-[#C98b6f] hover:text-[#e4a88f] text-[11px] font-bold cursor-pointer whitespace-nowrap">ดูตะกร้า</button>` 
+        ? `<button type="button" onclick="openCartModal()" class="ml-1.5 pl-2 border-l border-slate-200 text-[#C98b6f] hover:text-[#b87556] text-[11px] font-bold cursor-pointer whitespace-nowrap">ดูตะกร้า</button>` 
         : '';
 
       toast.innerHTML = `
