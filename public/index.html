@@ -534,7 +534,7 @@
             <span class="text-xs font-bold text-pink-900 uppercase tracking-wider flex items-center gap-1">
               <i data-lucide="tag" class="w-3.5 h-3.5 text-[#C98b6f]"></i> กำหนดราคา
             </span>
-            <span id="pricePreviewDiscount" class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 hidden">
+            <span id="pricePreviewDiscount" class="text-xs font-semibold px-2 py-0.5 bg-red-50 text-red-600 border border-red-200 hidden">
               ลด 0%
             </span>
           </div>
@@ -1069,7 +1069,7 @@
             </button>
 
             ${hasDiscount ? `
-              <span class="absolute bottom-2 right-2 px-2 py-0.5 text-[11px] font-bold bg-[#C98b6f] text-white shadow-xs">
+              <span class="absolute bottom-2 right-2 px-2 py-0.5 text-[11px] font-bold bg-rose-600 text-white shadow-xs">
                 ลด ${discountPercent}%
               </span>
             ` : ''}
@@ -1222,7 +1222,7 @@
                   <span class="text-xs text-slate-400 line-through">
                     ฿${original.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                   </span>
-                  <span class="px-1.5 py-0.5 text-[10px] font-bold bg-[#C98b6f]/10 text-[#C98b6f] border border-[#C98b6f]/20">
+                  <span class="px-1.5 py-0.5 text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
                     ลด ${discountPercent}%
                   </span>
                 ` : ''}
