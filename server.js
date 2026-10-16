@@ -370,8 +370,16 @@ const server = http.createServer(async (req, res) => {
       const args = [];
 
       if (category && category !== 'ทั้งหมด') {
-        sql += ' AND category = ?';
-        args.push(category);
+        const cleanCat = category.trim();
+        sql += ' AND (category = ? OR category LIKE ? OR category LIKE ? OR category LIKE ? OR category LIKE ? OR category LIKE ?)';
+        args.push(
+          cleanCat,
+          `${cleanCat},%`,
+          `%, ${cleanCat},%`,
+          `%,${cleanCat},%`,
+          `%, ${cleanCat}`,
+          `%,${cleanCat}`
+        );
       }
 
       if (search && search.trim() !== '') {
@@ -402,14 +410,21 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ---------------------------------------------------------
-    // API: GET /api/categories - รายชื่อหมวดหมู่ทั้งหมด
+    // API: GET /api/categories - รายชื่อหมวดหมู่ทั้งหมด (แยก Multi-categories)
     // ---------------------------------------------------------
     if (pathname === '/api/categories' && req.method === 'GET') {
-      const rows = await executeDb('SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND category != "" ORDER BY category ASC');
-      const categories = rows.map(r => r.category);
+      const rows = await executeDb('SELECT category FROM products WHERE category IS NOT NULL AND category != ""');
+      const catSet = new Set();
+      rows.forEach(r => {
+        if (!r.category) return;
+        r.category.split(',').forEach(c => {
+          const trimmed = c.trim();
+          if (trimmed) catSet.add(trimmed);
+        });
+      });
       return sendJson(res, 200, {
         success: true,
-        data: categories
+        data: Array.from(catSet).sort()
       });
     }
 

@@ -173,22 +173,27 @@
         </div>
       </div>
 
-      <!-- Category Filter Pills -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-0.5 pt-0.5 no-scrollbar">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider shrink-0 mr-1">หมวดหมู่:</span>
-        <div id="categoryContainer" class="flex items-center gap-1.5 shrink-0">
-          <button onclick="selectCategory('ทั้งหมด')" class="category-btn active px-3 py-1 text-xs font-medium bg-[#C98b6f] text-white border border-[#C98b6f] transition cursor-pointer">
-            ทั้งหมด
-          </button>
+      <!-- Category Filter Bar (Wrap-around, completely visible, never disappears) -->
+      <div class="pt-2 border-t border-slate-100">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider shrink-0">หมวดหมู่:</span>
+          <div id="categoryContainer" class="flex flex-wrap items-center gap-1.5 flex-1">
+            <button onclick="selectCategory('ทั้งหมด')" class="category-btn active px-3 py-1.5 text-xs font-medium bg-[#C98b6f] text-white border border-[#C98b6f] transition cursor-pointer">
+              ทั้งหมด
+            </button>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- Stats summary bar -->
     <div class="flex items-center justify-between text-xs text-slate-500 mb-3 px-0.5">
-      <div>
-        แสดง <span id="productCount" class="font-bold text-slate-800">0</span> รายการ
-        <span id="activeFilterBadge" class="hidden ml-2 px-2 py-0.5 text-xs bg-[#C98b6f]/10 text-[#C98b6f] font-semibold border border-[#C98b6f]/20"></span>
+      <div class="flex items-center gap-2 flex-wrap">
+        <span>แสดง <span id="productCount" class="font-bold text-slate-800">0</span> รายการ</span>
+        <span id="activeFilterBadge" class="hidden inline-flex items-center gap-1.5 px-2 py-0.5 text-xs bg-[#C98b6f]/10 text-[#C98b6f] font-semibold border border-[#C98b6f]/30">
+          <span id="activeFilterName"></span>
+          <button type="button" onclick="selectCategory('ทั้งหมด')" class="hover:text-rose-600 font-bold ml-1 cursor-pointer" title="ล้างตัวกรองหมวดหมู่">✕</button>
+        </span>
       </div>
       <div>
         <button onclick="openConfigModal()" title="ตั้งค่าฐานข้อมูล" class="text-slate-300 hover:text-slate-600 transition p-1">
@@ -287,22 +292,53 @@
           >
         </div>
 
-        <!-- Category -->
+        <!-- Multi-Category Selector (Max 5 categories) -->
         <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-            หมวดหมู่สินค้า <span class="text-rose-500">*</span>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+            <span>หมวดหมู่สินค้า <span class="text-rose-500">*</span></span>
+            <span class="text-[11px] font-normal text-slate-500">เลือกได้สูงสุด 5 หมวดหมู่ (<span id="catCountDisplay" class="font-bold text-[#C98b6f]">0</span>/5)</span>
           </label>
-          <input 
-            type="text" 
-            id="formCategory" 
-            list="categoryOptions" 
-            required 
-            placeholder="เช่น เครื่องสำอาง, ลิปสติก, แป้งผสมรองพื้น"
-            class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-300 focus:bg-white focus:outline-none focus:border-[#C98b6f] transition"
-          >
-          <datalist id="categoryOptions">
-            <!-- populated dynamically -->
-          </datalist>
+          
+          <!-- Selected Tags Container -->
+          <div id="selectedCategoriesContainer" class="flex flex-wrap gap-1.5 mb-2 min-h-[38px] p-2 bg-slate-50 border border-slate-300">
+            <span id="noCatSelectedNotice" class="text-xs text-slate-400 italic self-center">ยังไม่ได้เลือกหมวดหมู่ (กรุณาเลือกอย่างน้อย 1 หมวดหมู่)</span>
+          </div>
+
+          <!-- Hidden Input for Form Submission -->
+          <input type="hidden" id="formCategory">
+
+          <!-- Input field + Add button -->
+          <div class="flex items-center gap-2">
+            <div class="relative flex-1">
+              <input 
+                type="text" 
+                id="categoryInputText" 
+                list="categoryOptions" 
+                placeholder="พิมพ์ชื่อหมวดหมู่ แล้วกดเพิ่ม หรือคลิกเลือกจากด้านล่าง..."
+                onkeydown="if(event.key==='Enter'){event.preventDefault(); addCategoryFromInput();}"
+                class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 focus:outline-none focus:border-[#C98b6f] transition"
+              >
+              <datalist id="categoryOptions">
+                <!-- populated dynamically -->
+              </datalist>
+            </div>
+            <button 
+              type="button" 
+              id="addCatBtn"
+              onclick="addCategoryFromInput()" 
+              class="px-3.5 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-900 text-white transition shrink-0 cursor-pointer"
+            >
+              + เพิ่มหมวดหมู่
+            </button>
+          </div>
+
+          <!-- Quick Suggested Categories -->
+          <div class="mt-2 flex flex-wrap items-center gap-1">
+            <span class="text-[11px] text-slate-400 mr-1 shrink-0">เลือกด่วน:</span>
+            <div id="suggestedCategoriesList" class="flex flex-wrap gap-1">
+              <!-- populated dynamically -->
+            </div>
+          </div>
         </div>
 
         <!-- Image Upload & Preview Section (Local File & URL) -->
@@ -524,13 +560,17 @@
     let tursoUrl = localStorage.getItem('turso_db_url') || 'libsql://kma-product-list-web-mstackhub.aws-ap-northeast-1.turso.io';
     let tursoToken = localStorage.getItem('turso_auth_token') || 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTIxMjk1MTMsImlkIjoiMDFhMTQzM2UtMWYwMS03ZWFmLThmOGEtMDk5ZDU4YTFiY2VkIiwia2lkIjoiU1ZYRTc1Vy1QcHV4aWQ2RXJ6WlRRTzVNLW5OeVBzX0RjSm5qa0ZycXZ0YyIsInJpZCI6Ijc5NmMwNmVlLWJkY2EtNDRlYy1iYzEwLWJmOWI5ZmIzZjE5NSJ9.GEqIZaQPTvA9pvVCR5FDoAcekwdU5ijeOJGz0BsdV5ZRmoOxoajodxwgF30gD5agw0416Uaz4lU-t9ZyCqNLCg';
 
+    // Global Master Categories List (ไม่หายเมื่อกดกรอง)
+    let masterCategories = ['เครื่องสำอาง', 'แป้งพัฟ & แป้งฝุ่น', 'ลิปสติก', 'ที่เขียนคิ้ว', 'อายแชโดว์', 'กันน้ำ', 'บำรุงผิว'];
+    let currentSelectedCategories = []; // สำหรับ Form Modal (เลือกได้สูงสุด 5 หมวดหมู่)
+
     // Sample fallback data if offline or first time
     const SEED_PRODUCTS = [
-      { id: 'PRD-1001', name: 'KMA Water Resist Liquid Foundation', category: 'เครื่องสำอาง', original_price: 490, sale_price: 399, image_url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&q=80', description: 'รองพื้นสูตรคุมมัน กันน้ำ กันเหงื่อ เนียนสนิทตลอดวัน', created_at: '2026-10-16 10:00:00' },
-      { id: 'PRD-1002', name: 'KMA Sheer Soft Loose Powder', category: 'แป้งพัฟ & แป้งฝุ่น', original_price: 350, sale_price: 280, image_url: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80', description: 'แป้งฝุ่นเนื้อละเอียด สัมผัสบางเบา คุมความมัน', created_at: '2026-10-16 10:05:00' },
-      { id: 'PRD-1003', name: 'KMA Glamour Velvet Lip Color', category: 'ลิปสติก', original_price: 290, sale_price: 199, image_url: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=500&q=80', description: 'ลิปกำมะหยี่สีชัด ติดทนนาน ไม่ทำให้ปากแห้ง', created_at: '2026-10-16 10:10:00' },
-      { id: 'PRD-1004', name: 'KMA Perfect Brow Pencil Waterproof', category: 'ที่เขียนคิ้ว', original_price: 199, sale_price: 149, image_url: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&q=80', description: 'ดินสอเขียนคิ้วหัวสลิม วาดเส้นคิ้วสวยคมเป็นธรรมชาติ', created_at: '2026-10-16 10:15:00' },
-      { id: 'PRD-1005', name: 'KMA Professional Eye Shadow Palette', category: 'อายแชโดว์', original_price: 590, sale_price: 450, image_url: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80', description: 'พาเลตต์อายแชโดว์ 9 เฉดสี เกลี่ยง่าย ชิมเมอร์ประกาย', created_at: '2026-10-16 10:20:00' }
+      { id: 'PRD-1001', name: 'KMA Water Resist Liquid Foundation', category: 'เครื่องสำอาง, รองพื้น, กันน้ำ', original_price: 490, sale_price: 399, image_url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&q=80', description: 'รองพื้นสูตรคุมมัน กันน้ำ กันเหงื่อ เนียนสนิทตลอดวัน', created_at: '2026-10-16 10:00:00' },
+      { id: 'PRD-1002', name: 'KMA Sheer Soft Loose Powder', category: 'แป้งพัฟ & แป้งฝุ่น, เครื่องสำอาง', original_price: 350, sale_price: 280, image_url: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80', description: 'แป้งฝุ่นเนื้อละเอียด สัมผัสบางเบา คุมความมัน', created_at: '2026-10-16 10:05:00' },
+      { id: 'PRD-1003', name: 'KMA Glamour Velvet Lip Color', category: 'ลิปสติก, เครื่องสำอาง', original_price: 290, sale_price: 199, image_url: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=500&q=80', description: 'ลิปกำมะหยี่สีชัด ติดทนนาน ไม่ทำให้ปากแห้ง', created_at: '2026-10-16 10:10:00' },
+      { id: 'PRD-1004', name: 'KMA Perfect Brow Pencil Waterproof', category: 'ที่เขียนคิ้ว, กันน้ำ', original_price: 199, sale_price: 149, image_url: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&q=80', description: 'ดินสอเขียนคิ้วหัวสลิม วาดเส้นคิ้วสวยคมเป็นธรรมชาติ', created_at: '2026-10-16 10:15:00' },
+      { id: 'PRD-1005', name: 'KMA Professional Eye Shadow Palette', category: 'อายแชโดว์, เครื่องสำอาง', original_price: 590, sale_price: 450, image_url: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80', description: 'พาเลตต์อายแชโดว์ 9 เฉดสี เกลี่ยง่าย ชิมเมอร์ประกาย', created_at: '2026-10-16 10:20:00' }
     ];
 
     // Default placeholder image
@@ -539,9 +579,47 @@
     // On Document Ready
     document.addEventListener('DOMContentLoaded', async () => {
       await checkDatabaseStatus();
+      await loadAllCategories();
       await fetchProducts();
       lucide.createIcons();
     });
+
+    // โหลดหมวดหมู่ทั้งหมดจาก API เพื่อคงปุ่มหมวดหมู่ไว้เสมอ
+    async function loadAllCategories() {
+      try {
+        if (isServerMode) {
+          const res = await fetch('/api/categories');
+          const result = await res.json();
+          if (result.success && Array.isArray(result.data)) {
+            result.data.forEach(c => {
+              if (c && !masterCategories.includes(c)) masterCategories.push(c);
+            });
+            masterCategories.sort();
+            updateCategoriesFilter();
+          }
+        }
+      } catch (e) {}
+    }
+
+    // สกัดหมวดหมู่ทั้งหมดจากรายการสินค้าโดยแยกเครื่องหมายจุลภาค (,)
+    function extractCategoriesFromProducts(list) {
+      if (!list || !Array.isArray(list)) return;
+      let changed = false;
+      list.forEach(p => {
+        if (!p.category) return;
+        p.category.split(',').forEach(c => {
+          const trimmed = c.trim();
+          if (trimmed && !masterCategories.includes(trimmed)) {
+            masterCategories.push(trimmed);
+            changed = true;
+          }
+        });
+      });
+      if (changed) {
+        masterCategories.sort();
+        updateCategoriesFilter();
+      }
+    }
 
     // ตรวจสอบสถานะว่าต่อผ่าน Server หรือ Standalone Client
     async function checkDatabaseStatus() {
@@ -640,6 +718,7 @@
           const result = await res.json();
           if (result.success) {
             products = result.data || [];
+            extractCategoriesFromProducts(products);
           } else {
             throw new Error(result.error);
           }
@@ -661,12 +740,14 @@
             }
             rows = await queryTursoDirect(sql);
           }
+          extractCategoriesFromProducts(rows);
           products = filterAndSortLocal(rows);
         } else {
           // Standalone LocalStorage Mode
           let stored = localStorage.getItem('local_products');
           let list = stored ? JSON.parse(stored) : SEED_PRODUCTS;
           if (!stored) localStorage.setItem('local_products', JSON.stringify(SEED_PRODUCTS));
+          extractCategoriesFromProducts(list);
           products = filterAndSortLocal(list);
         }
 
@@ -676,7 +757,9 @@
         console.warn('Fetch error:', err);
         // Fallback to local memory if anything fails
         let stored = localStorage.getItem('local_products');
-        products = filterAndSortLocal(stored ? JSON.parse(stored) : SEED_PRODUCTS);
+        const fallbackList = stored ? JSON.parse(stored) : SEED_PRODUCTS;
+        extractCategoriesFromProducts(fallbackList);
+        products = filterAndSortLocal(fallbackList);
         renderProducts();
         updateCategoriesFilter();
       } finally {
@@ -689,9 +772,13 @@
     function filterAndSortLocal(list) {
       let filtered = [...list];
 
-      // Filter category
+      // Filter category (supports comma-separated multi-categories)
       if (currentCategory && currentCategory !== 'ทั้งหมด') {
-        filtered = filtered.filter(p => p.category === currentCategory);
+        const target = currentCategory.toLowerCase().trim();
+        filtered = filtered.filter(p => {
+          if (!p.category) return false;
+          return p.category.split(',').map(c => c.trim().toLowerCase()).includes(target);
+        });
       }
 
       // Filter search
@@ -775,11 +862,12 @@
       const hasDiscount = sale < original;
       const discountPercent = hasDiscount ? Math.round(((original - sale) / original) * 100) : 0;
       const img = p.image_url || DEFAULT_IMG;
+      const cats = (p.category || 'ทั่วไป').split(',').map(c => c.trim()).filter(Boolean);
 
       return `
         <div class="group bg-white border border-slate-200 hover:border-[#C98b6f] transition flex flex-col">
           
-          <!-- Image & Category Badge -->
+          <!-- Image & Category Badges -->
           <div class="relative w-full aspect-square bg-slate-50 overflow-hidden border-b border-slate-100">
             <img 
               src="${escapeHtml(img)}" 
@@ -788,12 +876,17 @@
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             >
             
-            <span class="absolute top-2.5 left-2.5 px-2 py-0.5 text-[11px] font-semibold bg-white text-[#C98b6f] border border-slate-200">
-              ${escapeHtml(p.category || 'ทั่วไป')}
-            </span>
+            <!-- Category Badges (Max 5 tags) -->
+            <div class="absolute top-2 left-2 flex flex-wrap gap-1 max-w-[75%] z-10">
+              ${cats.map(c => `
+                <button type="button" onclick="event.stopPropagation(); selectCategory('${escapeJs(c)}')" class="px-2 py-0.5 text-[10px] font-semibold bg-white/95 text-[#C98b6f] border border-slate-200 shadow-xs cursor-pointer hover:bg-[#C98b6f] hover:text-white transition" title="กรองหมวดหมู่: ${escapeHtml(c)}">
+                  ${escapeHtml(c)}
+                </button>
+              `).join('')}
+            </div>
 
             ${hasDiscount ? `
-              <span class="absolute top-2.5 right-2.5 px-2 py-0.5 text-[11px] font-bold bg-[#C98b6f] text-white">
+              <span class="absolute top-2 right-2 px-2 py-0.5 text-[11px] font-bold bg-[#C98b6f] text-white">
                 ลด ${discountPercent}%
               </span>
             ` : ''}
@@ -857,6 +950,7 @@
       const hasDiscount = sale < original;
       const discountPercent = hasDiscount ? Math.round(((original - sale) / original) * 100) : 0;
       const img = p.image_url || DEFAULT_IMG;
+      const cats = (p.category || 'ทั่วไป').split(',').map(c => c.trim()).filter(Boolean);
 
       return `
         <div class="bg-white border border-slate-200 hover:border-[#C98b6f] transition p-3 sm:p-4 group">
@@ -875,12 +969,16 @@
             <!-- Product Details -->
             <div class="flex-1 min-w-0 flex flex-col justify-between self-stretch">
               
-              <!-- Top Row: Category on left, Actions on right -->
+              <!-- Top Row: Category Tags on left, Actions on right -->
               <div>
-                <div class="flex items-center justify-between gap-2 mb-1">
-                  <span class="text-[11px] font-semibold text-[#C98b6f] tracking-wider uppercase truncate">
-                    ${escapeHtml(p.category || 'ทั่วไป')}
-                  </span>
+                <div class="flex items-start justify-between gap-2 mb-1.5">
+                  <div class="flex flex-wrap items-center gap-1">
+                    ${cats.map(c => `
+                      <button type="button" onclick="selectCategory('${escapeJs(c)}')" class="px-2 py-0.5 text-[11px] font-semibold bg-slate-100 hover:bg-[#C98b6f] text-slate-700 hover:text-white border border-slate-200 transition cursor-pointer" title="กรองหมวดหมู่: ${escapeHtml(c)}">
+                        ${escapeHtml(c)}
+                      </button>
+                    `).join('')}
+                  </div>
                   
                   <!-- Action Buttons -->
                   <div class="flex items-center gap-1 shrink-0">
@@ -934,19 +1032,21 @@
       `;
     }
 
-    // อัปเดต Category Pills จากสินค้าจริง
+    // อัปเดต Category Pills จาก masterCategories (ไม่หายเมื่อกดกรอง)
     function updateCategoriesFilter() {
       const container = document.getElementById('categoryContainer');
       const datalist = document.getElementById('categoryOptions');
       
-      const cats = Array.from(new Set(products.map(p => p.category).filter(Boolean))).sort();
+      const cats = [...masterCategories].sort();
 
       // Datalist สำหรับ autocomplete ใน Form
-      datalist.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}"></option>`).join('');
+      if (datalist) {
+        datalist.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}"></option>`).join('');
+      }
 
       // Pills filter buttons
       let html = `
-        <button onclick="selectCategory('ทั้งหมด')" class="category-btn ${currentCategory === 'ทั้งหมด' ? 'active bg-[#C98b6f] text-white border-[#C98b6f]' : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300'} px-3 py-1 text-xs font-medium border transition cursor-pointer">
+        <button data-cat="ทั้งหมด" onclick="selectCategory('ทั้งหมด')" class="category-btn ${currentCategory === 'ทั้งหมด' ? 'active bg-[#C98b6f] text-white border-[#C98b6f]' : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300'} px-3 py-1.5 text-xs font-medium border transition cursor-pointer">
           ทั้งหมด
         </button>
       `;
@@ -954,26 +1054,137 @@
       cats.forEach(cat => {
         const isActive = currentCategory === cat;
         html += `
-          <button onclick="selectCategory('${escapeJs(cat)}')" class="category-btn ${isActive ? 'active bg-[#C98b6f] text-white border-[#C98b6f]' : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300'} px-3 py-1 text-xs font-medium border transition cursor-pointer">
+          <button data-cat="${escapeHtml(cat)}" onclick="selectCategory('${escapeJs(cat)}')" class="category-btn ${isActive ? 'active bg-[#C98b6f] text-white border-[#C98b6f]' : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300'} px-3 py-1.5 text-xs font-medium border transition cursor-pointer">
             ${escapeHtml(cat)}
           </button>
         `;
       });
 
-      container.innerHTML = html;
+      if (container) container.innerHTML = html;
+      renderSuggestedCategories();
     }
 
-    // กรองตามหมวดหมู่
+    // กรองตามหมวดหมู่ (คงปุ่มหมวดหมู่อื่นๆ ไว้ครบถ้วนเสมอ)
     function selectCategory(cat) {
       currentCategory = cat;
       const badge = document.getElementById('activeFilterBadge');
+      const nameEl = document.getElementById('activeFilterName');
       if (cat !== 'ทั้งหมด') {
-        badge.textContent = `หมวดหมู่: ${cat}`;
-        badge.classList.remove('hidden');
+        if (nameEl) nameEl.textContent = `หมวดหมู่: ${cat}`;
+        if (badge) badge.classList.remove('hidden');
       } else {
-        badge.classList.add('hidden');
+        if (badge) badge.classList.add('hidden');
       }
+
+      // ปรับแต่งปุ่มหมวดหมู่ให้ active ตามที่เลือกทันที
+      document.querySelectorAll('#categoryContainer .category-btn').forEach(btn => {
+        const btnCat = btn.getAttribute('data-cat') || 'ทั้งหมด';
+        const isActive = btnCat === currentCategory;
+        if (isActive) {
+          btn.className = 'category-btn active px-3 py-1.5 text-xs font-medium bg-[#C98b6f] text-white border border-[#C98b6f] transition cursor-pointer';
+        } else {
+          btn.className = 'category-btn px-3 py-1.5 text-xs font-medium bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 transition cursor-pointer';
+        }
+      });
+
       fetchProducts();
+    }
+
+    // ==========================================
+    // Multi-Category Tag Handlers (สูงสุด 5 หมวดหมู่)
+    // ==========================================
+    function renderSelectedCategoryTags() {
+      const container = document.getElementById('selectedCategoriesContainer');
+      const counter = document.getElementById('catCountDisplay');
+      const hiddenInput = document.getElementById('formCategory');
+
+      if (counter) counter.textContent = currentSelectedCategories.length;
+      if (hiddenInput) hiddenInput.value = currentSelectedCategories.join(', ');
+
+      if (!container) return;
+
+      if (currentSelectedCategories.length === 0) {
+        container.innerHTML = '<span id="noCatSelectedNotice" class="text-xs text-slate-400 italic self-center">ยังไม่ได้เลือกหมวดหมู่ (กรุณาเลือกอย่างน้อย 1 หมวดหมู่ สูงสุด 5)</span>';
+      } else {
+        container.innerHTML = currentSelectedCategories.map(cat => `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold bg-[#C98b6f]/10 text-[#C98b6f] border border-[#C98b6f]/30">
+            <span>${escapeHtml(cat)}</span>
+            <button type="button" onclick="removeCategoryTag('${escapeJs(cat)}')" class="hover:text-rose-600 font-bold ml-0.5 leading-none cursor-pointer" title="ลบหมวดหมู่นี้">✕</button>
+          </span>
+        `).join('');
+      }
+      renderSuggestedCategories();
+    }
+
+    function addCategoryTag(cat) {
+      const clean = (cat || '').trim();
+      if (!clean) return;
+      if (currentSelectedCategories.length >= 5) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'เลือกได้สูงสุด 5 หมวดหมู่',
+          text: 'สินค้า 1 ชิ้นสามารถกำหนดหมวดหมู่ได้ไม่เกิน 5 หมวดหมู่',
+          confirmButtonColor: '#C98b6f'
+        });
+        return;
+      }
+      if (currentSelectedCategories.includes(clean)) {
+        return;
+      }
+      currentSelectedCategories.push(clean);
+      if (!masterCategories.includes(clean)) {
+        masterCategories.push(clean);
+        masterCategories.sort();
+        updateCategoriesFilter();
+      }
+      renderSelectedCategoryTags();
+    }
+
+    function removeCategoryTag(cat) {
+      currentSelectedCategories = currentSelectedCategories.filter(c => c !== cat);
+      renderSelectedCategoryTags();
+    }
+
+    function addCategoryFromInput() {
+      const input = document.getElementById('categoryInputText');
+      if (!input) return;
+      const val = input.value.trim();
+      if (!val) return;
+      
+      const parts = val.split(',').map(s => s.trim()).filter(Boolean);
+      for (const p of parts) {
+        if (currentSelectedCategories.length >= 5) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'เลือกได้สูงสุด 5 หมวดหมู่',
+            text: 'สินค้า 1 ชิ้นสามารถกำหนดหมวดหมู่ได้ไม่เกิน 5 หมวดหมู่',
+            confirmButtonColor: '#C98b6f'
+          });
+          break;
+        }
+        addCategoryTag(p);
+      }
+      input.value = '';
+    }
+
+    function renderSuggestedCategories() {
+      const container = document.getElementById('suggestedCategoriesList');
+      if (!container) return;
+      
+      const unselected = masterCategories.filter(c => !currentSelectedCategories.includes(c));
+      if (unselected.length === 0) {
+        container.innerHTML = '<span class="text-[11px] text-slate-400 italic">เลือกครบทุกหมวดหมู่แล้ว หรือพิมพ์เพิ่มใหม่ได้</span>';
+        return;
+      }
+      container.innerHTML = unselected.map(cat => `
+        <button 
+          type="button" 
+          onclick="addCategoryTag('${escapeJs(cat)}')" 
+          class="px-2 py-0.5 text-[11px] bg-slate-100 hover:bg-[#C98b6f]/10 text-slate-600 hover:text-[#C98b6f] border border-slate-200 hover:border-[#C98b6f]/40 transition cursor-pointer"
+        >
+          + ${escapeHtml(cat)}
+        </button>
+      `).join('');
     }
 
     // การค้นหาแบบ Realtime พร้อม Debounce
@@ -1194,6 +1405,11 @@
       document.getElementById('formProductId').value = '';
       clearSelectedImage();
 
+      currentSelectedCategories = [];
+      const catInput = document.getElementById('categoryInputText');
+      if (catInput) catInput.value = '';
+      renderSelectedCategoryTags();
+
       document.getElementById('modalTitle').textContent = 'เพิ่มรายการสินค้าใหม่';
       document.getElementById('modalSubtitle').textContent = 'บันทึกลง Turso Database ทันที';
       document.getElementById('submitBtnText').textContent = 'บันทึกสินค้า';
@@ -1231,7 +1447,17 @@
       editingProduct = p;
       document.getElementById('formProductId').value = p.id;
       document.getElementById('formName').value = p.name;
-      document.getElementById('formCategory').value = p.category || '';
+      
+      // ดึง Categories เดิมออกมาใส่ Tags (สูงสุด 5)
+      if (p.category) {
+        currentSelectedCategories = p.category.split(',').map(c => c.trim()).filter(Boolean).slice(0, 5);
+      } else {
+        currentSelectedCategories = [];
+      }
+      const catInput = document.getElementById('categoryInputText');
+      if (catInput) catInput.value = '';
+      renderSelectedCategoryTags();
+
       document.getElementById('formOriginalPrice').value = p.original_price;
       document.getElementById('formSalePrice').value = p.sale_price;
       document.getElementById('formImage').value = p.image_url || '';
@@ -1255,9 +1481,19 @@
     async function handleProductSubmit(e) {
       e.preventDefault();
 
+      if (currentSelectedCategories.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'กรุณาเลือกหมวดหมู่',
+          text: 'กรุณาระบุหรือเลือกหมวดหมู่อย่างน้อย 1 หมวดหมู่ (สูงสุด 5 หมวดหมู่)',
+          confirmButtonColor: '#C98b6f'
+        });
+        return;
+      }
+
       const id = document.getElementById('formProductId').value;
       const name = document.getElementById('formName').value.trim();
-      const category = document.getElementById('formCategory').value.trim();
+      const category = currentSelectedCategories.join(', ');
       const original_price = Number(document.getElementById('formOriginalPrice').value);
       const sale_price = Number(document.getElementById('formSalePrice').value);
       const image_url = document.getElementById('formImage').value.trim();
