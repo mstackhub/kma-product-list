@@ -182,6 +182,18 @@
               ทั้งหมด
             </button>
           </div>
+          <!-- Favorite Filter Button -->
+          <button 
+            type="button" 
+            id="favPillBtn" 
+            onclick="toggleFavoritesOnly()" 
+            class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-300 transition cursor-pointer shrink-0"
+            title="ดูเฉพาะสินค้าที่ถูกใจ"
+          >
+            <i data-lucide="heart" class="w-3.5 h-3.5 text-rose-500"></i>
+            <span>ที่ถูกใจ</span>
+            <span id="favPillCount" class="font-bold text-rose-600">0</span>
+          </button>
         </div>
       </div>
     </section>
@@ -332,7 +344,7 @@
   <!-- Fixed Bottom Navigation Bar (ติดหน้าจอล่างสุด)                             -->
   <!-- ========================================================================= -->
   <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)]">
-    <div class="max-w-md mx-auto grid grid-cols-2 h-14">
+    <div class="max-w-md mx-auto grid grid-cols-3 h-14">
       
       <!-- เมนู 1: รายการสินค้า -->
       <button 
@@ -346,7 +358,22 @@
         <span class="text-xs">รายการสินค้า</span>
       </button>
 
-      <!-- เมนู 2: ช่องทางการติดต่อ -->
+      <!-- เมนู 2: ที่ถูกใจ (Favorites Wishlist) -->
+      <button 
+        type="button" 
+        id="navFavoritesBtn" 
+        onclick="switchToFavoritesTab()" 
+        class="flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative border-l border-slate-100"
+      >
+        <span id="navFavoritesIndicator" class="absolute top-0 left-0 right-0 h-0.5 bg-rose-500 hidden"></span>
+        <div class="relative">
+          <i data-lucide="heart" class="w-4 h-4 mb-0.5 text-rose-500"></i>
+          <span id="bottomFavBadge" class="hidden absolute -top-1.5 -right-3.5 px-1 py-0.2 text-[9px] font-bold bg-rose-500 text-white leading-none">0</span>
+        </div>
+        <span class="text-xs">ที่ถูกใจ</span>
+      </button>
+
+      <!-- เมนู 3: ช่องทางการติดต่อ -->
       <button 
         type="button" 
         id="navContactBtn" 
@@ -673,6 +700,10 @@
     let masterCategories = ['เครื่องสำอาง', 'แป้งพัฟ & แป้งฝุ่น', 'ลิปสติก', 'ที่เขียนคิ้ว', 'อายแชโดว์', 'กันน้ำ', 'บำรุงผิว'];
     let currentSelectedCategories = []; // สำหรับ Form Modal (เลือกได้สูงสุด 5 หมวดหมู่)
 
+    // Favorites State (LocalStorage - แบบที่ 1)
+    let favorites = JSON.parse(localStorage.getItem('kma_favorites') || '[]');
+    let showFavoritesOnly = false;
+
     // Sample fallback data if offline or first time
     const SEED_PRODUCTS = [
       { id: 'PRD-1001', name: 'KMA Water Resist Liquid Foundation', category: 'เครื่องสำอาง, รองพื้น, กันน้ำ', original_price: 490, sale_price: 399, image_url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&q=80', description: 'รองพื้นสูตรคุมมัน กันน้ำ กันเหงื่อ เนียนสนิทตลอดวัน', created_at: '2026-10-16 10:00:00' },
@@ -689,6 +720,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
       await checkDatabaseStatus();
       await loadAllCategories();
+      updateFavoritesBadges();
       await fetchProducts();
       lucide.createIcons();
     });
@@ -860,6 +892,10 @@
           products = filterAndSortLocal(list);
         }
 
+        if (showFavoritesOnly) {
+          products = products.filter(p => favorites.includes(p.id));
+        }
+
         renderProducts();
         updateCategoriesFilter();
       } catch (err) {
@@ -869,6 +905,9 @@
         const fallbackList = stored ? JSON.parse(stored) : SEED_PRODUCTS;
         extractCategoriesFromProducts(fallbackList);
         products = filterAndSortLocal(fallbackList);
+        if (showFavoritesOnly) {
+          products = products.filter(p => favorites.includes(p.id));
+        }
         renderProducts();
         updateCategoriesFilter();
       } finally {
@@ -945,6 +984,30 @@
         grid.classList.add('hidden');
         table.classList.add('hidden');
         empty.classList.remove('hidden');
+
+        if (showFavoritesOnly) {
+          empty.innerHTML = `
+            <div class="w-14 h-14 bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="heart-off" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800">ยังไม่มีสินค้าที่ถูกใจ</h3>
+            <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">แตะไอคอนรูปหัวใจ ❤️ บนสินค้าที่คุณชอบเพื่อบันทึกไว้ในรายการโปรด</p>
+            <button onclick="toggleFavoritesOnly(false)" class="mt-4 inline-flex items-center gap-2 bg-[#C98b6f] hover:bg-[#b87556] text-white px-4 py-2 text-sm font-medium transition shadow-xs cursor-pointer">
+              ดูสินค้าทั้งหมด
+            </button>
+          `;
+        } else {
+          empty.innerHTML = `
+            <div class="w-14 h-14 bg-pink-50 text-pink-500 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="package-x" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800">ไม่พบรายการสินค้า</h3>
+            <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">ลองค้นหาด้วยคำอื่น หรือกดปุ่ม "เพิ่มสินค้า" เพื่อบันทึกสินค้าใหม่ลงใน Turso Database</p>
+            <button onclick="openAddModal()" class="mt-4 inline-flex items-center gap-2 bg-[#C98b6f] hover:bg-[#b87556] text-white px-4 py-2 text-sm font-medium transition shadow-xs cursor-pointer">
+              <i data-lucide="plus" class="w-4 h-4"></i> เพิ่มสินค้าชิ้นแรก
+            </button>
+          `;
+        }
         lucide.createIcons();
         return;
       }
@@ -972,11 +1035,12 @@
       const discountPercent = hasDiscount ? Math.round(((original - sale) / original) * 100) : 0;
       const img = p.image_url || DEFAULT_IMG;
       const cats = (p.category || 'ทั่วไป').split(',').map(c => c.trim()).filter(Boolean);
+      const isFav = isFavorite(p.id);
 
       return `
         <div class="group bg-white border border-slate-200 hover:border-[#C98b6f] transition flex flex-col">
           
-          <!-- Image & Category Badges -->
+          <!-- Image & Category Badges & Favorite Heart -->
           <div class="relative w-full aspect-square bg-slate-50 overflow-hidden border-b border-slate-100">
             <img 
               src="${escapeHtml(img)}" 
@@ -986,7 +1050,7 @@
             >
             
             <!-- Category Badges (Max 5 tags) -->
-            <div class="absolute top-2 left-2 flex flex-wrap gap-1 max-w-[75%] z-10">
+            <div class="absolute top-2 left-2 flex flex-wrap gap-1 max-w-[70%] z-10">
               ${cats.map(c => `
                 <button type="button" onclick="event.stopPropagation(); selectCategory('${escapeJs(c)}')" class="px-2 py-0.5 text-[10px] font-semibold bg-white/95 text-[#C98b6f] border border-slate-200 shadow-xs cursor-pointer hover:bg-[#C98b6f] hover:text-white transition" title="กรองหมวดหมู่: ${escapeHtml(c)}">
                   ${escapeHtml(c)}
@@ -994,8 +1058,18 @@
               `).join('')}
             </div>
 
+            <!-- Heart Button (Favorite) -->
+            <button 
+              type="button" 
+              onclick="event.stopPropagation(); toggleFavorite('${p.id}')" 
+              class="absolute top-2 right-2 z-10 w-8 h-8 flex items-center justify-center bg-white/95 hover:bg-white border border-slate-200 shadow-xs transition hover:scale-110 active:scale-95 cursor-pointer ${isFav ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500'}"
+              title="${isFav ? 'นำออกจากสินค้าที่ถูกใจ' : 'บันทึกเป็นสินค้าที่ถูกใจ'}"
+            >
+              <i data-lucide="heart" class="w-4 h-4 ${isFav ? 'fill-rose-500 text-rose-500' : ''}"></i>
+            </button>
+
             ${hasDiscount ? `
-              <span class="absolute top-2 right-2 px-2 py-0.5 text-[11px] font-bold bg-[#C98b6f] text-white">
+              <span class="absolute bottom-2 right-2 px-2 py-0.5 text-[11px] font-bold bg-[#C98b6f] text-white shadow-xs">
                 ลด ${discountPercent}%
               </span>
             ` : ''}
@@ -1060,12 +1134,13 @@
       const discountPercent = hasDiscount ? Math.round(((original - sale) / original) * 100) : 0;
       const img = p.image_url || DEFAULT_IMG;
       const cats = (p.category || 'ทั่วไป').split(',').map(c => c.trim()).filter(Boolean);
+      const isFav = isFavorite(p.id);
 
       return `
         <div class="bg-white border border-slate-200 hover:border-[#C98b6f] transition p-3 sm:p-4 group">
           <div class="flex items-start gap-3 sm:gap-4">
             
-            <!-- Product Thumbnail -->
+            <!-- Product Thumbnail with Mobile Heart Button -->
             <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-slate-50 border border-slate-200 overflow-hidden relative">
               <img 
                 src="${escapeHtml(img)}" 
@@ -1073,6 +1148,14 @@
                 onerror="this.src='${DEFAULT_IMG}'" 
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               >
+              <button 
+                type="button" 
+                onclick="event.stopPropagation(); toggleFavorite('${p.id}')" 
+                class="sm:hidden absolute top-1 right-1 z-10 w-6 h-6 flex items-center justify-center bg-white/95 border border-slate-200 shadow-xs transition hover:scale-110 active:scale-95 cursor-pointer ${isFav ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500'}"
+                title="${isFav ? 'นำออกจากสินค้าที่ถูกใจ' : 'บันทึกเป็นสินค้าที่ถูกใจ'}"
+              >
+                <i data-lucide="heart" class="w-3.5 h-3.5 ${isFav ? 'fill-rose-500 text-rose-500' : ''}"></i>
+              </button>
             </div>
 
             <!-- Product Details -->
@@ -1091,6 +1174,16 @@
                   
                   <!-- Action Buttons -->
                   <div class="flex items-center gap-1 shrink-0">
+                    <!-- Desktop Heart Button -->
+                    <button 
+                      type="button"
+                      onclick="toggleFavorite('${p.id}')" 
+                      class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-xs ${isFav ? 'text-rose-600 bg-rose-50 border-rose-200' : 'text-slate-500 hover:text-rose-600 bg-slate-50 hover:bg-white border-slate-200 hover:border-rose-200'} border transition font-medium cursor-pointer"
+                      title="${isFav ? 'นำออกจากสินค้าที่ถูกใจ' : 'บันทึกเป็นสินค้าที่ถูกใจ'}"
+                    >
+                      <i data-lucide="heart" class="w-3 h-3 ${isFav ? 'fill-rose-500 text-rose-500' : ''}"></i>
+                      <span>${isFav ? 'ถูกใจแล้ว' : 'ถูกใจ'}</span>
+                    </button>
                     <button 
                       onclick="promptEditProduct('${p.id}')" 
                       class="px-2 py-0.5 text-xs text-slate-600 hover:text-[#C98b6f] bg-slate-50 hover:bg-white border border-slate-200 hover:border-[#C98b6f] transition font-medium cursor-pointer"
@@ -1155,13 +1248,13 @@
 
       // Pills filter buttons
       let html = `
-        <button data-cat="ทั้งหมด" onclick="selectCategory('ทั้งหมด')" class="category-btn ${currentCategory === 'ทั้งหมด' ? 'active bg-[#C98b6f] text-white border-[#C98b6f]' : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300'} px-3 py-1.5 text-xs font-medium border transition cursor-pointer">
+        <button data-cat="ทั้งหมด" onclick="selectCategory('ทั้งหมด')" class="category-btn ${currentCategory === 'ทั้งหมด' && !showFavoritesOnly ? 'active bg-[#C98b6f] text-white border-[#C98b6f]' : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300'} px-3 py-1.5 text-xs font-medium border transition cursor-pointer">
           ทั้งหมด
         </button>
       `;
 
       cats.forEach(cat => {
-        const isActive = currentCategory === cat;
+        const isActive = currentCategory === cat && !showFavoritesOnly;
         html += `
           <button data-cat="${escapeHtml(cat)}" onclick="selectCategory('${escapeJs(cat)}')" class="category-btn ${isActive ? 'active bg-[#C98b6f] text-white border-[#C98b6f]' : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300'} px-3 py-1.5 text-xs font-medium border transition cursor-pointer">
             ${escapeHtml(cat)}
@@ -1175,6 +1268,22 @@
 
     // กรองตามหมวดหมู่ (คงปุ่มหมวดหมู่อื่นๆ ไว้ครบถ้วนเสมอ)
     function selectCategory(cat) {
+      if (showFavoritesOnly) {
+        showFavoritesOnly = false;
+        const pillBtn = document.getElementById('favPillBtn');
+        if (pillBtn) {
+          pillBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-300 transition cursor-pointer shrink-0';
+        }
+        const navFavInd = document.getElementById('navFavoritesIndicator');
+        const navProdInd = document.getElementById('navProductsIndicator');
+        const navFavBtn = document.getElementById('navFavoritesBtn');
+        const navProdBtn = document.getElementById('navProductsBtn');
+        if (navFavInd) navFavInd.classList.add('hidden');
+        if (navProdInd) navProdInd.classList.remove('hidden');
+        if (navFavBtn) navFavBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative border-l border-slate-100';
+        if (navProdBtn) navProdBtn.className = 'flex flex-col items-center justify-center h-full text-[#C98b6f] font-semibold transition cursor-pointer hover:bg-[#faf6f3] relative';
+      }
+
       currentCategory = cat;
       const badge = document.getElementById('activeFilterBadge');
       const nameEl = document.getElementById('activeFilterName');
@@ -1795,10 +1904,109 @@
     }
 
     // ==========================================
-    // Bottom Navigation & Contact Modal Handlers
+    // Favorites & Bottom Navigation Handlers (แบบที่ 1 LocalStorage)
     // ==========================================
+    function isFavorite(id) {
+      return favorites.includes(id);
+    }
+
+    function saveFavorites() {
+      localStorage.setItem('kma_favorites', JSON.stringify(favorites));
+      updateFavoritesBadges();
+    }
+
+    function updateFavoritesBadges() {
+      const count = favorites.length;
+      const bottomBadge = document.getElementById('bottomFavBadge');
+      const pillCount = document.getElementById('favPillCount');
+
+      if (bottomBadge) {
+        bottomBadge.textContent = count;
+        bottomBadge.classList.toggle('hidden', count === 0);
+      }
+      if (pillCount) {
+        pillCount.textContent = count;
+      }
+    }
+
+    function toggleFavorite(id) {
+      const idx = favorites.indexOf(id);
+      const isAdding = idx === -1;
+      if (isAdding) {
+        favorites.push(id);
+        showToast('success', 'บันทึกในรายการที่ถูกใจแล้ว ❤️');
+      } else {
+        favorites.splice(idx, 1);
+        showToast('info', 'นำออกจากรายการที่ถูกใจแล้ว');
+      }
+      saveFavorites();
+
+      if (showFavoritesOnly) {
+        fetchProducts();
+      } else {
+        renderProducts();
+      }
+    }
+
+    function toggleFavoritesOnly(forceVal) {
+      if (typeof forceVal === 'boolean') {
+        showFavoritesOnly = forceVal;
+      } else {
+        showFavoritesOnly = !showFavoritesOnly;
+      }
+
+      closeContactModal();
+
+      const badge = document.getElementById('activeFilterBadge');
+      const nameEl = document.getElementById('activeFilterName');
+      const pillBtn = document.getElementById('favPillBtn');
+      const navProdBtn = document.getElementById('navProductsBtn');
+      const navFavBtn = document.getElementById('navFavoritesBtn');
+      const navProdInd = document.getElementById('navProductsIndicator');
+      const navFavInd = document.getElementById('navFavoritesIndicator');
+
+      if (showFavoritesOnly) {
+        if (nameEl) nameEl.textContent = 'รายการที่ถูกใจ ❤️';
+        if (badge) badge.classList.remove('hidden');
+        if (pillBtn) {
+          pillBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-rose-500 text-white border border-rose-500 transition cursor-pointer shadow-xs shrink-0';
+        }
+        if (navFavBtn) navFavBtn.className = 'flex flex-col items-center justify-center h-full text-rose-600 font-semibold transition cursor-pointer hover:bg-rose-50/50 relative border-l border-slate-100';
+        if (navFavInd) navFavInd.classList.remove('hidden');
+        if (navProdBtn) navProdBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative';
+        if (navProdInd) navProdInd.classList.add('hidden');
+      } else {
+        if (pillBtn) {
+          pillBtn.className = 'flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white text-slate-600 hover:text-rose-600 border border-slate-200 hover:border-rose-300 transition cursor-pointer shrink-0';
+        }
+        if (currentCategory === 'ทั้งหมด') {
+          if (badge) badge.classList.add('hidden');
+        } else {
+          if (nameEl) nameEl.textContent = `หมวดหมู่: ${currentCategory}`;
+          if (badge) badge.classList.remove('hidden');
+        }
+        if (navProdBtn) navProdBtn.className = 'flex flex-col items-center justify-center h-full text-[#C98b6f] font-semibold transition cursor-pointer hover:bg-[#faf6f3] relative';
+        if (navProdInd) navProdInd.classList.remove('hidden');
+        if (navFavBtn) navFavBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative border-l border-slate-100';
+        if (navFavInd) navFavInd.classList.add('hidden');
+      }
+
+      fetchProducts();
+    }
+
     function switchToProductsTab() {
       closeContactModal();
+      if (showFavoritesOnly) {
+        toggleFavoritesOnly(false);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function switchToFavoritesTab() {
+      closeContactModal();
+      if (!showFavoritesOnly) {
+        toggleFavoritesOnly(true);
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -1808,14 +2016,21 @@
 
       // Update Nav active style
       const prodBtn = document.getElementById('navProductsBtn');
+      const favBtn = document.getElementById('navFavoritesBtn');
       const contactBtn = document.getElementById('navContactBtn');
       const prodInd = document.getElementById('navProductsIndicator');
+      const favInd = document.getElementById('navFavoritesIndicator');
       const contactInd = document.getElementById('navContactIndicator');
 
       if (prodBtn) {
         prodBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative';
       }
       if (prodInd) prodInd.classList.add('hidden');
+
+      if (favBtn) {
+        favBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative border-l border-slate-100';
+      }
+      if (favInd) favInd.classList.add('hidden');
 
       if (contactBtn) {
         contactBtn.className = 'flex flex-col items-center justify-center h-full text-[#C98b6f] font-semibold transition cursor-pointer hover:bg-[#faf6f3] relative border-l border-slate-100';
@@ -1829,21 +2044,30 @@
       const modal = document.getElementById('contactModal');
       if (modal) modal.classList.add('hidden');
 
-      // Restore Products Tab active style
+      // Restore Active Tab style based on showFavoritesOnly
       const prodBtn = document.getElementById('navProductsBtn');
+      const favBtn = document.getElementById('navFavoritesBtn');
       const contactBtn = document.getElementById('navContactBtn');
       const prodInd = document.getElementById('navProductsIndicator');
+      const favInd = document.getElementById('navFavoritesIndicator');
       const contactInd = document.getElementById('navContactIndicator');
-
-      if (prodBtn) {
-        prodBtn.className = 'flex flex-col items-center justify-center h-full text-[#C98b6f] font-semibold transition cursor-pointer hover:bg-[#faf6f3] relative';
-      }
-      if (prodInd) prodInd.classList.remove('hidden');
 
       if (contactBtn) {
         contactBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative border-l border-slate-100';
       }
       if (contactInd) contactInd.classList.add('hidden');
+
+      if (showFavoritesOnly) {
+        if (favBtn) favBtn.className = 'flex flex-col items-center justify-center h-full text-rose-600 font-semibold transition cursor-pointer hover:bg-rose-50/50 relative border-l border-slate-100';
+        if (favInd) favInd.classList.remove('hidden');
+        if (prodBtn) prodBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative';
+        if (prodInd) prodInd.classList.add('hidden');
+      } else {
+        if (prodBtn) prodBtn.className = 'flex flex-col items-center justify-center h-full text-[#C98b6f] font-semibold transition cursor-pointer hover:bg-[#faf6f3] relative';
+        if (prodInd) prodInd.classList.remove('hidden');
+        if (favBtn) favBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative border-l border-slate-100';
+        if (favInd) favInd.classList.add('hidden');
+      }
     }
 
     // Helpers ป้องกัน XSS
