@@ -1106,6 +1106,7 @@
           if (currentCategory && currentCategory !== 'ทั้งหมด') params.append('category', currentCategory);
           if (currentSort) params.append('sort', currentSort);
           if (currentSearch) params.append('q', currentSearch);
+          params.append('_t', Date.now());
 
           const res = await fetch(`/api/products?${params.toString()}`);
           const result = await res.json();
@@ -2021,8 +2022,23 @@
           const data = await res.json();
           if (data.success) {
             closeProductModal();
-            await fetchProducts();
+            // Optimistic UI Update: อัปเดตข้อมูลบนหน้าจอและแคชทันที 0 มิลลิวินาที!
+            if (data.data) {
+              if (id) {
+                const idx = products.findIndex(p => p.id === id);
+                if (idx !== -1) products[idx] = { ...products[idx], ...data.data };
+              } else {
+                products.unshift(data.data);
+              }
+              try {
+                localStorage.setItem('kma_cached_products', JSON.stringify(products));
+              } catch (e) {}
+              extractCategoriesFromProducts(products);
+              renderProducts();
+              updateCategoriesFilter();
+            }
             showToast('success', id ? 'แก้ไขข้อมูลสำเร็จแล้ว' : 'เพิ่มสินค้าเรียบร้อยแล้ว');
+            await fetchProducts(true);
           } else {
             showToast('error', data.error || 'เกิดข้อผิดพลาดในการบันทึก');
           }
@@ -2034,16 +2050,25 @@
               'UPDATE products SET name = ?, category = ?, original_price = ?, sale_price = ?, image_url = ?, description = ?, updated_at = ? WHERE id = ?',
               [name, category, original_price, sale_price, image_url, description, now, id]
             );
+            const idx = products.findIndex(p => p.id === id);
+            if (idx !== -1) products[idx] = { ...products[idx], ...payload, updated_at: now };
           } else {
             const newId = 'PRD-' + Date.now().toString().slice(-6);
             await queryTursoDirect(
               'INSERT INTO products (id, name, category, original_price, sale_price, image_url, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
               [newId, name, category, original_price, sale_price, image_url, description, now, now]
             );
+            products.unshift({ id: newId, ...payload, created_at: now, updated_at: now });
           }
+          try {
+            localStorage.setItem('kma_cached_products', JSON.stringify(products));
+          } catch (e) {}
+          extractCategoriesFromProducts(products);
+          renderProducts();
+          updateCategoriesFilter();
           closeProductModal();
-          await fetchProducts();
           showToast('success', id ? 'แก้ไขข้อมูลบน Turso สำเร็จแล้ว' : 'เพิ่มสินค้าบน Turso เรียบร้อยแล้ว');
+          await fetchProducts(true);
         } else {
           // LocalStorage Mode
           let stored = JSON.parse(localStorage.getItem('local_products') || '[]');
@@ -2058,9 +2083,13 @@
             stored.unshift({ id: newId, name, category, original_price, sale_price, image_url, description, created_at: now, updated_at: now });
           }
           localStorage.setItem('local_products', JSON.stringify(stored));
+          localStorage.setItem('kma_cached_products', JSON.stringify(stored));
+          products = stored;
+          extractCategoriesFromProducts(products);
+          renderProducts();
+          updateCategoriesFilter();
           closeProductModal();
-          await fetchProducts();
-          showToast('success', id ? 'แก้ไขข้อมูลสำเร็จแล้ว' : 'เพิ่มสินค้าเรียบร้อยแล้ว');
+          showToast('success', id ? 'แก้ไขข้อมูลเรียบร้อยแล้ว' : 'เพิ่มสินค้าเรียบร้อยแล้ว');
         }
       } catch (err) {
         console.error('Submit error:', err);
@@ -2090,20 +2119,36 @@
             const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
             const data = await res.json();
             if (data.success) {
-              await fetchProducts();
+              // Optimistic UI Update: ลบออกจากหน้าจอและแคชทันที 0 มิลลิวินาที!
+              products = products.filter(item => item.id !== id);
+              try {
+                localStorage.setItem('kma_cached_products', JSON.stringify(products));
+              } catch (e) {}
+              renderProducts();
+              updateCategoriesFilter();
               showToast('success', `ลบสินค้า ${id} เรียบร้อยแล้ว`);
+              await fetchProducts(true);
             } else {
               showToast('error', data.error || 'ลบสินค้าไม่สำเร็จ');
             }
           } else if (tursoUrl && tursoToken) {
             await queryTursoDirect('DELETE FROM products WHERE id = ?', [id]);
-            await fetchProducts();
+            products = products.filter(item => item.id !== id);
+            try {
+              localStorage.setItem('kma_cached_products', JSON.stringify(products));
+            } catch (e) {}
+            renderProducts();
+            updateCategoriesFilter();
             showToast('success', `ลบสินค้า ${id} บน Turso เรียบร้อยแล้ว`);
+            await fetchProducts(true);
           } else {
             let stored = JSON.parse(localStorage.getItem('local_products') || '[]');
             stored = stored.filter(item => item.id !== id);
             localStorage.setItem('local_products', JSON.stringify(stored));
-            await fetchProducts();
+            localStorage.setItem('kma_cached_products', JSON.stringify(stored));
+            products = stored;
+            renderProducts();
+            updateCategoriesFilter();
             showToast('success', `ลบสินค้า ${id} เรียบร้อยแล้ว`);
           }
         } catch (err) {

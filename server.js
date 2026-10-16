@@ -394,7 +394,7 @@ async function requestHandler(req, res) {
         count: products.length,
         data: products
       }, {
-        'Cache-Control': 'public, max-age=3, s-maxage=8, stale-while-revalidate=30'
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
       });
     }
 
@@ -415,7 +415,7 @@ async function requestHandler(req, res) {
         success: true,
         data: Array.from(catSet).sort()
       }, {
-        'Cache-Control': 'public, max-age=15, s-maxage=30, stale-while-revalidate=120'
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
       });
     }
 
