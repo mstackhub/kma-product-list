@@ -53,7 +53,100 @@
     body { font-family: 'Sarabun', sans-serif; }
     [x-cloak] { display: none !important; }
     *, *::before, *::after { border-radius: 0px !important; }
-    .swal2-popup { font-family: 'Sarabun', sans-serif !important; border-radius: 0px !important; }
+    
+    /* SweetAlert2 KMA Brand Corporate Identity (CI) Customization */
+    .swal2-popup {
+      font-family: 'Sarabun', sans-serif !important;
+      border-radius: 0px !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+      padding: 2rem 1.5rem !important;
+    }
+    .swal2-title {
+      font-family: 'Sarabun', sans-serif !important;
+      color: #1e293b !important;
+      font-weight: 700 !important;
+      font-size: 1.35rem !important;
+      padding-top: 0.5rem !important;
+    }
+    .swal2-html-container {
+      font-family: 'Sarabun', sans-serif !important;
+      color: #64748b !important;
+      font-size: 0.95rem !important;
+      line-height: 1.6 !important;
+    }
+    /* SweetAlert2 Brand CI Icons */
+    .swal2-icon.swal2-warning {
+      border-color: #C98b6f !important;
+      color: #C98b6f !important;
+    }
+    .swal2-icon.swal2-warning .swal2-icon-content {
+      color: #C98b6f !important;
+    }
+    .swal2-icon.swal2-question {
+      border-color: #C98b6f !important;
+      color: #C98b6f !important;
+    }
+    .swal2-icon.swal2-question .swal2-icon-content {
+      color: #C98b6f !important;
+    }
+    .swal2-icon.swal2-info {
+      border-color: #C98b6f !important;
+      color: #C98b6f !important;
+    }
+    .swal2-icon.swal2-success {
+      border-color: #C98b6f !important;
+      color: #C98b6f !important;
+    }
+    .swal2-icon.swal2-success [class^='swal2-success-line'] {
+      background-color: #C98b6f !important;
+    }
+    .swal2-icon.swal2-success .swal2-success-ring {
+      border-color: rgba(201, 139, 111, 0.35) !important;
+    }
+    /* SweetAlert2 Brand CI Buttons */
+    .swal2-actions {
+      gap: 0.75rem !important;
+      margin-top: 1.5rem !important;
+    }
+    .swal2-styled {
+      border-radius: 0px !important;
+      font-family: 'Sarabun', sans-serif !important;
+      font-size: 0.875rem !important;
+      font-weight: 600 !important;
+      padding: 0.65rem 1.5rem !important;
+      box-shadow: none !important;
+      letter-spacing: 0.02em !important;
+      transition: all 0.15s ease-in-out !important;
+    }
+    .swal2-styled.swal2-confirm {
+      background-color: #C98b6f !important;
+      border: 1px solid #C98b6f !important;
+      color: #ffffff !important;
+    }
+    .swal2-styled.swal2-confirm:hover {
+      background-color: #b87556 !important;
+      border-color: #b87556 !important;
+    }
+    .swal2-styled.swal2-confirm:focus {
+      box-shadow: 0 0 0 3px rgba(201, 139, 111, 0.25) !important;
+    }
+    .swal2-styled.swal2-cancel {
+      background-color: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #475569 !important;
+    }
+    .swal2-styled.swal2-cancel:hover {
+      background-color: #f8fafc !important;
+      border-color: #94a3b8 !important;
+      color: #0f172a !important;
+    }
+    .swal2-styled.swal2-cancel:focus {
+      box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.25) !important;
+    }
+    .swal2-timer-progress-bar {
+      background: #C98b6f !important;
+    }
   </style>
 </head>
 <body class="min-h-full flex flex-col text-slate-800 antialiased selection:bg-pink-100 selection:text-[#C98b6f]">
@@ -1570,7 +1663,8 @@
         Swal.fire({
           icon: 'warning',
           title: 'ไฟล์ไม่ถูกต้อง',
-          text: 'กรุณาเลือกไฟล์ที่เป็นรูปภาพเท่านั้น (JPG, PNG, WebP)'
+          text: 'กรุณาเลือกไฟล์ที่เป็นรูปภาพเท่านั้น (JPG, PNG, WebP)',
+          confirmButtonColor: '#C98b6f'
         });
         return;
       }
@@ -1755,7 +1849,7 @@
           icon: 'question',
           showCancelButton: true,
           confirmButtonColor: '#C98b6f',
-          cancelButtonColor: '#64748b',
+          cancelButtonColor: '#94a3b8',
           confirmButtonText: 'ยืนยันบันทึก',
           cancelButtonText: 'ยกเลิก',
           reverseButtons: true
@@ -1834,12 +1928,12 @@
     async function promptDeleteProduct(id, productName) {
       const result = await Swal.fire({
         title: 'ยืนยันการลบสินค้า?',
-        html: `คุณแน่ใจหรือไม่ว่าต้องการลบรายการ: <br><strong class="text-rose-600 text-base">"${escapeHtml(productName)}"</strong><br><span class="text-xs text-slate-400">รหัส: ${escapeHtml(id)}</span><br><br><span class="text-xs text-slate-500">ข้อมูลจะถูกลบออกจาก Turso Database ถาวร</span>`,
+        html: `คุณแน่ใจหรือไม่ว่าต้องการลบรายการ: <br><strong class="text-[#C98b6f] text-base">"${escapeHtml(productName)}"</strong><br><span class="text-xs text-slate-400">รหัส: ${escapeHtml(id)}</span><br><br><span class="text-xs text-slate-500">ข้อมูลจะถูกลบออกจาก Turso Database ถาวร</span>`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#e11d48',
-        cancelButtonColor: '#64748b',
-        confirmButtonText: 'ใช่, ต้องการลบ!',
+        confirmButtonColor: '#C98b6f',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'ใช่, ต้องการลบ',
         cancelButtonText: 'ยกเลิก',
         reverseButtons: true
       });
