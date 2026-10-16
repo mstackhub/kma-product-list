@@ -814,7 +814,7 @@
     let tursoUrl = localStorage.getItem('turso_db_url') || 'libsql://kma-product-list-web-mstackhub.aws-ap-northeast-1.turso.io';
     let tursoToken = localStorage.getItem('turso_auth_token') || 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTIxMjk1MTMsImlkIjoiMDFhMTQzM2UtMWYwMS03ZWFmLThmOGEtMDk5ZDU4YTFiY2VkIiwia2lkIjoiU1ZYRTc1Vy1QcHV4aWQ2RXJ6WlRRTzVNLW5OeVBzX0RjSm5qa0ZycXZ0YyIsInJpZCI6Ijc5NmMwNmVlLWJkY2EtNDRlYy1iYzEwLWJmOWI5ZmIzZjE5NSJ9.GEqIZaQPTvA9pvVCR5FDoAcekwdU5ijeOJGz0BsdV5ZRmoOxoajodxwgF30gD5agw0416Uaz4lU-t9ZyCqNLCg';
 
-    // รายการหมวดหมู่ "เลือกด่วน" ที่กำหนด
+    // รายการหมวดหมู่ "เลือกด่วน" ที่กำหนด (7 หมวดหมู่หลัก)
     const quickCategories = [
       'รองพื้น',
       'แป้ง',
@@ -823,6 +823,16 @@
       'คุชชั่น',
       'อุปกรณ์แต่งหน้า',
       'ราคาพิเศษ'
+    ];
+
+    // รายการหมวดหมู่ที่ยกเลิก / ไม่ใช้งาน (นำออกตามคำขอ)
+    const excludedCategories = [
+      'เครื่องสำอาง',
+      'แป้งพัฟ & แป้งฝุ่น',
+      'อายแชโดว์',
+      'อายแชโดว',
+      'ที่เขียนคิ้ว',
+      'ลิปสติก'
     ];
 
     // Global Master Categories List (ไม่หายเมื่อกดกรอง)
@@ -835,11 +845,11 @@
 
     // Sample fallback data if offline or first time
     const SEED_PRODUCTS = [
-      { id: 'PRD-1001', name: 'KMA Water Resist Liquid Foundation', category: 'เครื่องสำอาง, รองพื้น, กันน้ำ', original_price: 490, sale_price: 399, image_url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&q=80', description: 'รองพื้นสูตรคุมมัน กันน้ำ กันเหงื่อ เนียนสนิทตลอดวัน', created_at: '2026-10-16 10:00:00' },
-      { id: 'PRD-1002', name: 'KMA Sheer Soft Loose Powder', category: 'แป้งพัฟ & แป้งฝุ่น, เครื่องสำอาง', original_price: 350, sale_price: 280, image_url: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80', description: 'แป้งฝุ่นเนื้อละเอียด สัมผัสบางเบา คุมความมัน', created_at: '2026-10-16 10:05:00' },
-      { id: 'PRD-1003', name: 'KMA Glamour Velvet Lip Color', category: 'ลิปสติก, เครื่องสำอาง', original_price: 290, sale_price: 199, image_url: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=500&q=80', description: 'ลิปกำมะหยี่สีชัด ติดทนนาน ไม่ทำให้ปากแห้ง', created_at: '2026-10-16 10:10:00' },
-      { id: 'PRD-1004', name: 'KMA Perfect Brow Pencil Waterproof', category: 'ที่เขียนคิ้ว, กันน้ำ', original_price: 199, sale_price: 149, image_url: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&q=80', description: 'ดินสอเขียนคิ้วหัวสลิม วาดเส้นคิ้วสวยคมเป็นธรรมชาติ', created_at: '2026-10-16 10:15:00' },
-      { id: 'PRD-1005', name: 'KMA Professional Eye Shadow Palette', category: 'อายแชโดว์, เครื่องสำอาง', original_price: 590, sale_price: 450, image_url: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80', description: 'พาเลตต์อายแชโดว์ 9 เฉดสี เกลี่ยง่าย ชิมเมอร์ประกาย', created_at: '2026-10-16 10:20:00' }
+      { id: 'PRD-1001', name: 'KMA Water Resist Liquid Foundation', category: 'รองพื้น', original_price: 490, sale_price: 399, image_url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&q=80', description: 'รองพื้นสูตรคุมมัน กันน้ำ กันเหงื่อ เนียนสนิทตลอดวัน', created_at: '2026-10-16 10:00:00' },
+      { id: 'PRD-1002', name: 'KMA Sheer Soft Loose Powder', category: 'แป้ง', original_price: 350, sale_price: 280, image_url: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80', description: 'แป้งฝุ่นเนื้อละเอียด สัมผัสบางเบา คุมความมัน', created_at: '2026-10-16 10:05:00' },
+      { id: 'PRD-1003', name: 'KMA Glamour Velvet Lip Color', category: 'แต่งหน้า', original_price: 290, sale_price: 199, image_url: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=500&q=80', description: 'ลิปกำมะหยี่สีชัด ติดทนนาน ไม่ทำให้ปากแห้ง', created_at: '2026-10-16 10:10:00' },
+      { id: 'PRD-1004', name: 'KMA Perfect Brow Pencil Waterproof', category: 'แต่งหน้า, อุปกรณ์แต่งหน้า', original_price: 199, sale_price: 149, image_url: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&q=80', description: 'ดินสอเขียนคิ้วหัวสลิม วาดเส้นคิ้วสวยคมเป็นธรรมชาติ', created_at: '2026-10-16 10:15:00' },
+      { id: 'PRD-1005', name: 'KMA Professional Eye Shadow Palette', category: 'แต่งหน้า', original_price: 590, sale_price: 450, image_url: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80', description: 'พาเลตต์อายแชโดว์ 9 เฉดสี เกลี่ยง่าย ชิมเมอร์ประกาย', created_at: '2026-10-16 10:20:00' }
     ];
 
     // Default placeholder image
@@ -862,7 +872,10 @@
           const result = await res.json();
           if (result.success && Array.isArray(result.data)) {
             result.data.forEach(c => {
-              if (c && !masterCategories.includes(c)) masterCategories.push(c);
+              const clean = (c || '').trim();
+              if (clean && !excludedCategories.includes(clean) && !masterCategories.includes(clean)) {
+                masterCategories.push(clean);
+              }
             });
             masterCategories.sort();
             updateCategoriesFilter();
@@ -879,7 +892,7 @@
         if (!p.category) return;
         p.category.split(',').forEach(c => {
           const trimmed = c.trim();
-          if (trimmed && !masterCategories.includes(trimmed)) {
+          if (trimmed && !excludedCategories.includes(trimmed) && !masterCategories.includes(trimmed)) {
             masterCategories.push(trimmed);
             changed = true;
           }
@@ -1465,7 +1478,7 @@
 
     function addCategoryTag(cat) {
       const clean = (cat || '').trim();
-      if (!clean) return;
+      if (!clean || excludedCategories.includes(clean)) return;
       if (currentSelectedCategories.length >= 5) {
         Swal.fire({
           icon: 'warning',
