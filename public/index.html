@@ -139,10 +139,7 @@
               onclick="toggleSortDropdown()"
               class="w-full sm:w-56 px-3.5 py-2 text-sm bg-white border border-slate-300 hover:border-[#C98b6f] focus:outline-none focus:border-[#C98b6f] flex items-center justify-between gap-2 text-slate-800 font-medium transition cursor-pointer"
             >
-              <div class="flex items-center gap-2 truncate">
-                <i data-lucide="arrow-up-down" class="w-4 h-4 text-slate-400 shrink-0"></i>
-                <span id="sortSelectedLabel" class="truncate font-medium">🕒 วันที่สร้าง: ล่าสุด</span>
-              </div>
+              <span id="sortSelectedLabel" class="truncate font-medium">วันที่สร้าง: ล่าสุด</span>
               <i data-lucide="chevron-down" id="sortChevronIcon" class="w-4 h-4 text-slate-400 shrink-0 transform transition-transform"></i>
             </button>
 
@@ -151,24 +148,24 @@
               id="sortDropdownMenu" 
               class="hidden absolute right-0 mt-1 w-full sm:w-60 bg-white border border-slate-300 shadow-2xl z-50 py-1"
             >
-              <button type="button" onclick="selectCustomSort('newest', '🕒 วันที่สร้าง: ล่าสุด')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] bg-[#faf6f3] text-[#C98b6f] font-semibold transition" data-value="newest">
-                <span>🕒 วันที่สร้าง: ล่าสุด</span>
+              <button type="button" onclick="selectCustomSort('newest', 'วันที่สร้าง: ล่าสุด')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] bg-[#faf6f3] text-[#C98b6f] font-semibold transition" data-value="newest">
+                <span>วันที่สร้าง: ล่าสุด</span>
                 <span class="sort-check text-[#C98b6f] font-bold">✓</span>
               </button>
-              <button type="button" onclick="selectCustomSort('price_asc', '📈 ราคา: น้อยไปมาก (ASC)')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="price_asc">
-                <span>📈 ราคา: น้อยไปมาก (ASC)</span>
+              <button type="button" onclick="selectCustomSort('price_asc', 'ราคา: น้อยไปมาก (ASC)')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="price_asc">
+                <span>ราคา: น้อยไปมาก (ASC)</span>
                 <span class="sort-check text-[#C98b6f] font-bold hidden">✓</span>
               </button>
-              <button type="button" onclick="selectCustomSort('price_desc', '📉 ราคา: มากไปน้อย (DESC)')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="price_desc">
-                <span>📉 ราคา: มากไปน้อย (DESC)</span>
+              <button type="button" onclick="selectCustomSort('price_desc', 'ราคา: มากไปน้อย (DESC)')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="price_desc">
+                <span>ราคา: มากไปน้อย (DESC)</span>
                 <span class="sort-check text-[#C98b6f] font-bold hidden">✓</span>
               </button>
-              <button type="button" onclick="selectCustomSort('discount_desc', '🔥 ส่วนลด: มากไปน้อย')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="discount_desc">
-                <span>🔥 ส่วนลด: มากไปน้อย</span>
+              <button type="button" onclick="selectCustomSort('discount_desc', 'ส่วนลด: มากไปน้อย')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="discount_desc">
+                <span>ส่วนลด: มากไปน้อย</span>
                 <span class="sort-check text-[#C98b6f] font-bold hidden">✓</span>
               </button>
-              <button type="button" onclick="selectCustomSort('name', '🔤 ชื่อสินค้า: ก-ฮ (A-Z)')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="name">
-                <span>🔤 ชื่อสินค้า: ก-ฮ (A-Z)</span>
+              <button type="button" onclick="selectCustomSort('name', 'ชื่อสินค้า: ก-ฮ (A-Z)')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="name">
+                <span>ชื่อสินค้า: ก-ฮ (A-Z)</span>
                 <span class="sort-check text-[#C98b6f] font-bold hidden">✓</span>
               </button>
             </div>
