@@ -743,11 +743,91 @@
         <!-- Summary & Cash Calculation Box -->
         <div id="cartCalculationBox" class="bg-slate-50 border border-slate-200 p-4 space-y-3.5">
           
-          <!-- Grand Total Row -->
+          <!-- Subtotal & Discount Section -->
+          <div class="space-y-2 border-b border-slate-200 pb-3">
+            
+            <!-- Subtotal Row -->
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500 font-semibold">ยอดรวมสินค้า (<span id="cartTotalItemsCount">0</span> ชิ้น)</span>
+              <span class="font-bold text-slate-800">฿<span id="cartSubtotalText">0.00</span></span>
+            </div>
+
+            <!-- Discount Input Field (ช่องส่วนลดรวม) -->
+            <div class="pt-1">
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <i data-lucide="badge-percent" class="w-3.5 h-3.5 text-rose-500"></i>
+                  <span>ส่วนลดรวม (Discount)</span>
+                </label>
+                <!-- Discount Unit Toggle (฿ / %) -->
+                <div class="inline-flex border border-slate-300 bg-white p-0.5 text-[11px]">
+                  <button 
+                    type="button" 
+                    id="discountTypeBahtBtn"
+                    onclick="setDiscountType('baht')" 
+                    class="px-2.5 py-0.5 font-bold transition cursor-pointer bg-[#C98b6f] text-white shadow-2xs"
+                  >
+                    ฿ บาท
+                  </button>
+                  <button 
+                    type="button" 
+                    id="discountTypePercentBtn"
+                    onclick="setDiscountType('percent')" 
+                    class="px-2.5 py-0.5 font-bold transition cursor-pointer text-slate-600 hover:text-slate-900"
+                  >
+                    % เปอร์เซ็นต์
+                  </button>
+                </div>
+              </div>
+
+              <!-- Discount Input with Prefix & Clear button -->
+              <div class="relative">
+                <span id="discountPrefixIcon" class="absolute left-3 top-1/2 -translate-y-1/2 text-rose-500 font-bold text-sm">฿</span>
+                <input 
+                  type="number" 
+                  id="cartDiscountInput" 
+                  placeholder="0.00" 
+                  step="any"
+                  min="0"
+                  oninput="calculateCartTotals()"
+                  class="w-full pl-8 pr-16 py-2 text-sm font-bold bg-white border border-slate-300 focus:outline-none focus:border-[#C98b6f] focus:ring-1 focus:ring-[#C98b6f] transition text-rose-600"
+                >
+                <button 
+                  type="button" 
+                  onclick="clearDiscount()" 
+                  id="clearDiscountBtn"
+                  class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-rose-600 cursor-pointer px-1.5 py-0.5"
+                  title="ล้างส่วนลด"
+                >
+                  ✕ ล้าง
+                </button>
+              </div>
+
+              <!-- Quick Discount Buttons -->
+              <div class="flex items-center gap-1.5 mt-2 overflow-x-auto no-scrollbar">
+                <span class="text-[10px] text-slate-400 font-medium shrink-0">ส่วนลดด่วน:</span>
+                <button type="button" onclick="applyQuickDiscount('baht', 20)" class="px-2 py-0.5 text-[11px] font-semibold bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 border border-slate-200 transition cursor-pointer shrink-0">-฿20</button>
+                <button type="button" onclick="applyQuickDiscount('baht', 50)" class="px-2 py-0.5 text-[11px] font-semibold bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 border border-slate-200 transition cursor-pointer shrink-0">-฿50</button>
+                <button type="button" onclick="applyQuickDiscount('baht', 100)" class="px-2 py-0.5 text-[11px] font-semibold bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 border border-slate-200 transition cursor-pointer shrink-0">-฿100</button>
+                <button type="button" onclick="applyQuickDiscount('percent', 5)" class="px-2 py-0.5 text-[11px] font-semibold bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 border border-slate-200 transition cursor-pointer shrink-0">-5%</button>
+                <button type="button" onclick="applyQuickDiscount('percent', 10)" class="px-2 py-0.5 text-[11px] font-semibold bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 border border-slate-200 transition cursor-pointer shrink-0">-10%</button>
+                <button type="button" onclick="applyQuickDiscount('percent', 20)" class="px-2 py-0.5 text-[11px] font-semibold bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 border border-slate-200 transition cursor-pointer shrink-0">-20%</button>
+              </div>
+            </div>
+
+            <!-- Discount Calculated Summary (Show when discount > 0) -->
+            <div id="discountSummaryRow" class="hidden flex items-center justify-between text-xs text-rose-600 font-semibold pt-1">
+              <span>ส่วนลดรวมที่ได้รับ:</span>
+              <span>-฿<span id="discountAmountText">0.00</span></span>
+            </div>
+
+          </div>
+
+          <!-- Net Total Row (ยอดชำระสุทธิ) -->
           <div class="flex items-baseline justify-between border-b border-slate-200 pb-2.5">
             <div>
-              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">ยอดรวมทั้งสิ้น (Total)</span>
-              <span class="text-[11px] text-slate-400"><span id="cartTotalItemsCount">0</span> ชิ้น</span>
+              <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">ยอดชำระสุทธิ (Net Total)</span>
+              <span class="text-[11px] text-slate-400">ราคาสุดท้ายหลังหักส่วนลด</span>
             </div>
             <div class="text-2xl sm:text-3xl font-extrabold text-[#C98b6f] tracking-tight">
               ฿<span id="cartGrandTotalText">0.00</span>
@@ -3574,20 +3654,103 @@
       calculateChange();
     }
 
+    let cartDiscountType = 'baht'; // 'baht' | 'percent'
+
+    function setDiscountType(type) {
+      cartDiscountType = type;
+      const bBtn = document.getElementById('discountTypeBahtBtn');
+      const pBtn = document.getElementById('discountTypePercentBtn');
+      const icon = document.getElementById('discountPrefixIcon');
+      const input = document.getElementById('cartDiscountInput');
+
+      if (type === 'baht') {
+        if (bBtn) bBtn.className = 'px-2.5 py-0.5 font-bold transition cursor-pointer bg-[#C98b6f] text-white shadow-2xs';
+        if (pBtn) pBtn.className = 'px-2.5 py-0.5 font-bold transition cursor-pointer text-slate-600 hover:text-slate-900';
+        if (icon) icon.textContent = '฿';
+        if (input) input.placeholder = '0.00';
+      } else {
+        if (bBtn) bBtn.className = 'px-2.5 py-0.5 font-bold transition cursor-pointer text-slate-600 hover:text-slate-900';
+        if (pBtn) pBtn.className = 'px-2.5 py-0.5 font-bold transition cursor-pointer bg-[#C98b6f] text-white shadow-2xs';
+        if (icon) icon.textContent = '%';
+        if (input) input.placeholder = '0%';
+      }
+      calculateCartTotals();
+    }
+
+    function applyQuickDiscount(type, val) {
+      setDiscountType(type);
+      const input = document.getElementById('cartDiscountInput');
+      if (input) input.value = val;
+      calculateCartTotals();
+    }
+
+    function clearDiscount() {
+      const input = document.getElementById('cartDiscountInput');
+      if (input) input.value = '';
+      calculateCartTotals();
+    }
+
+    function getCartTotals() {
+      const subtotal = cart.reduce((sum, item) => sum + ((Number(item.sale_price) || 0) * (item.qty || 1)), 0);
+      const input = document.getElementById('cartDiscountInput');
+      const discountVal = Math.max(0, Number(input?.value) || 0);
+      
+      let discountAmount = 0;
+      if (discountVal > 0) {
+        if (cartDiscountType === 'percent') {
+          discountAmount = (subtotal * discountVal) / 100;
+        } else {
+          discountAmount = discountVal;
+        }
+      }
+
+      if (discountAmount > subtotal) {
+        discountAmount = subtotal;
+      }
+
+      const netTotal = Math.max(0, subtotal - discountAmount);
+      return { subtotal, discountVal, discountAmount, netTotal };
+    }
+
+    function calculateCartTotals() {
+      const { subtotal, discountVal, discountAmount, netTotal } = getCartTotals();
+      
+      const subtotalEl = document.getElementById('cartSubtotalText');
+      const discountRow = document.getElementById('discountSummaryRow');
+      const discountEl = document.getElementById('discountAmountText');
+      const totalEl = document.getElementById('cartGrandTotalText');
+      const clearBtn = document.getElementById('clearDiscountBtn');
+
+      if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (totalEl) totalEl.textContent = netTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      if (discountRow && discountEl) {
+        if (discountAmount > 0) {
+          discountRow.classList.remove('hidden');
+          const typeLabel = cartDiscountType === 'percent' ? ` (${discountVal}%)` : '';
+          discountEl.textContent = discountAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + typeLabel;
+        } else {
+          discountRow.classList.add('hidden');
+        }
+      }
+
+      if (clearBtn) {
+        clearBtn.classList.toggle('hidden', !discountVal);
+      }
+
+      calculateChange();
+    }
+
     function renderCart() {
       const container = document.getElementById('cartItemsContainer');
       const emptyState = document.getElementById('cartEmptyState');
       const calcBox = document.getElementById('cartCalculationBox');
       const countEl = document.getElementById('cartTotalItemsCount');
-      const totalEl = document.getElementById('cartGrandTotalText');
 
       if (!container) return;
 
       const totalCount = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
-      const totalPrice = cart.reduce((sum, item) => sum + ((Number(item.sale_price) || 0) * (item.qty || 1)), 0);
-
       if (countEl) countEl.textContent = totalCount;
-      if (totalEl) totalEl.textContent = totalPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
       if (cart.length === 0) {
         container.innerHTML = '';
@@ -3629,12 +3792,12 @@
         `;
       }).join('');
 
+      calculateCartTotals();
       lucide.createIcons();
     }
 
     function openCartModal() {
       renderCart();
-      calculateChange();
       document.getElementById('cartModal')?.classList.remove('hidden');
       lucide.createIcons();
     }
@@ -3644,12 +3807,12 @@
     }
 
     function setQuickCash(amount) {
-      const totalPrice = cart.reduce((sum, item) => sum + ((Number(item.sale_price) || 0) * (item.qty || 1)), 0);
+      const { netTotal } = getCartTotals();
       const input = document.getElementById('cashReceivedInput');
       if (!input) return;
 
       if (amount === 'exact') {
-        input.value = totalPrice;
+        input.value = netTotal;
       } else {
         input.value = amount;
       }
@@ -3657,7 +3820,7 @@
     }
 
     function calculateChange() {
-      const totalPrice = cart.reduce((sum, item) => sum + ((Number(item.sale_price) || 0) * (item.qty || 1)), 0);
+      const { netTotal } = getCartTotals();
       const input = document.getElementById('cashReceivedInput');
       const dueBox = document.getElementById('changeDueBox');
       const labelEl = document.getElementById('changeStatusLabel');
@@ -3667,9 +3830,9 @@
       if (!input || !dueBox || !textEl) return;
 
       const cash = Number(input.value) || 0;
-      const change = cash - totalPrice;
+      const change = cash - netTotal;
 
-      if (cash === 0 && totalPrice > 0) {
+      if (cash === 0 && netTotal > 0) {
         dueBox.className = 'p-3 border flex items-center justify-between bg-slate-100 border-slate-300';
         labelEl.className = 'text-xs font-bold text-slate-700 uppercase tracking-wider';
         labelEl.textContent = 'เงินทอน (Change Due)';
@@ -3711,10 +3874,10 @@
       if (result.isConfirmed) {
         cart = [];
         saveCartToStorage();
-        renderCart();
         const cashInput = document.getElementById('cashReceivedInput');
         if (cashInput) cashInput.value = '';
-        calculateChange();
+        clearDiscount();
+        renderCart();
       }
     }
 
@@ -3723,29 +3886,53 @@
         showToast('error', 'ไม่มีสินค้าในตะกร้า');
         return;
       }
-      const totalPrice = cart.reduce((sum, item) => sum + ((Number(item.sale_price) || 0) * (item.qty || 1)), 0);
+      const { subtotal, discountAmount, netTotal } = getCartTotals();
       const cashInput = document.getElementById('cashReceivedInput');
       const cash = Number(cashInput?.value) || 0;
-      const change = cash - totalPrice;
+      const change = cash - netTotal;
 
       if (cash > 0 && change < 0) {
         Swal.fire({
           icon: 'warning',
           title: 'เงินสดยังไม่ครบ',
-          html: `ยอดรวมคือ <b>฿${totalPrice.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</b><br>ยังขาดอีก <b>฿${Math.abs(change).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</b>`,
+          html: `ยอดชำระสุทธิคือ <b>฿${netTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</b><br>ยังขาดอีก <b>฿${Math.abs(change).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</b>`,
           confirmButtonColor: '#C98b6f'
         });
         return;
       }
 
       const changeMsg = change >= 0 && cash > 0 
-        ? `<br><div class="p-3 bg-emerald-50 border border-emerald-200 mt-2 text-emerald-800 text-sm font-bold">เงินทอนให้ลูกค้า: ฿${change.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</div>` 
+        ? `<div class="p-3 bg-emerald-50 border border-emerald-200 mt-2 text-emerald-800 text-sm font-bold">เงินทอนให้ลูกค้า: ฿${change.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</div>` 
         : '';
 
       await Swal.fire({
         icon: 'success',
         title: 'เสร็จสิ้นการขายเรียบร้อย',
-        html: `ยอดเงินทั้งสิ้น: <b>฿${totalPrice.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</b>${changeMsg}`,
+        html: `
+          <div class="space-y-1.5 mt-2 text-left bg-slate-50 p-3 border border-slate-200">
+            <div class="flex justify-between text-xs text-slate-500">
+              <span>ยอดรวมสินค้า:</span>
+              <span>฿${subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+            </div>
+            ${discountAmount > 0 ? `
+              <div class="flex justify-between text-xs text-rose-600 font-semibold">
+                <span>ส่วนลดรวม:</span>
+                <span>-฿${discountAmount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+              </div>
+            ` : ''}
+            <div class="flex justify-between text-sm font-bold text-slate-800 pt-1.5 border-t border-slate-200">
+              <span>ยอดชำระสุทธิ:</span>
+              <span class="text-[#C98b6f]">฿${netTotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+            </div>
+            ${cash > 0 ? `
+              <div class="flex justify-between text-xs text-slate-600 pt-1">
+                <span>รับเงินสด:</span>
+                <span>฿${cash.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span>
+              </div>
+            ` : ''}
+          </div>
+          ${changeMsg}
+        `,
         confirmButtonColor: '#C98b6f',
         confirmButtonText: 'เริ่มออเดอร์ใหม่'
       });
@@ -3753,6 +3940,7 @@
       cart = [];
       saveCartToStorage();
       if (cashInput) cashInput.value = '';
+      clearDiscount();
       renderCart();
       closeCartModal();
     }
