@@ -1934,10 +1934,8 @@
       const isAdding = idx === -1;
       if (isAdding) {
         favorites.push(id);
-        showToast('success', 'บันทึกในรายการที่ถูกใจแล้ว ❤️');
       } else {
         favorites.splice(idx, 1);
-        showToast('info', 'นำออกจากรายการที่ถูกใจแล้ว');
       }
       saveFavorites();
 
