@@ -277,8 +277,11 @@ async function requestHandler(req, res) {
     return res.end();
   }
 
-  const urlObj = new URL(req.url, `http://${req.headers.host}`);
-  const pathname = urlObj.pathname;
+  const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  let pathname = urlObj.pathname;
+  if (!pathname.startsWith('/api') && (pathname === '/products' || pathname.startsWith('/products/') || pathname === '/status' || pathname === '/categories' || pathname === '/config' || pathname === '/upload' || pathname === '/stats' || pathname === '/health')) {
+    pathname = '/api' + pathname;
+  }
 
   try {
     // ---------------------------------------------------------
