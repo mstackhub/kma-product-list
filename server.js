@@ -198,25 +198,6 @@ async function initializeDatabase() {
     );
   `;
   await executeDb(createTableSql);
-
-  // เช็คว่ามีสินค้าหรือยัง ถ้ายังไม่มีให้ใส่ตัวอย่าง
-  const existing = await executeDb('SELECT id FROM products LIMIT 1');
-  if (existing.length === 0) {
-    console.log('📦 Seeding sample products...');
-    const samples = [
-      ['PRD-1001', 'KMA Water Resist Liquid Foundation', 'รองพื้น', 490, 399, 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&q=80', 'รองพื้นสูตรคุมมัน กันน้ำ กันเหงื่อ เนียนสนิทตลอดวัน'],
-      ['PRD-1002', 'KMA Sheer Soft Loose Powder', 'แป้ง', 350, 280, 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80', 'แป้งฝุ่นเนื้อละเอียด สัมผัสบางเบา คุมความมัน'],
-      ['PRD-1003', 'KMA Glamour Velvet Lip Color', 'แต่งหน้า', 290, 199, 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=500&q=80', 'ลิปกำมะหยี่สีชัด ติดทนนาน ไม่ทำให้ปากแห้ง'],
-      ['PRD-1004', 'KMA Perfect Brow Pencil Waterproof', 'แต่งหน้า, อุปกรณ์แต่งหน้า', 199, 149, 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&q=80', 'ดินสอเขียนคิ้วหัวสลิม วาดเส้นคิ้วสวยคมเป็นธรรมชาติ'],
-      ['PRD-1005', 'KMA Professional Eye Shadow Palette', 'แต่งหน้า', 590, 450, 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80', 'พาเลตต์อายแชโดว์ 9 เฉดสี เกลี่ยง่าย ชิมเมอร์ประกาย']
-    ];
-    for (const item of samples) {
-      await executeDb(
-        'INSERT INTO products (id, name, category, original_price, sale_price, image_url, description) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        item
-      );
-    }
-  }
 }
 
 /**
