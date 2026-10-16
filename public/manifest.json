@@ -1,0 +1,18 @@
+{
+  "name": "KMA Product List - แคตตาล็อกและคิดเงินหน้าบูธ",
+  "short_name": "KMA Booth",
+  "description": "ระบบดูราคาสินค้า แคตตาล็อกเครื่องสำอาง และคิดเงินด่วนหน้าบูธ KMA",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF6F2",
+  "theme_color": "#C98B6F",
+  "icons": [
+    {
+      "src": "/line-qr.png",
+      "sizes": "192x192 400x400 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

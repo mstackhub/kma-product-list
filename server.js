@@ -193,11 +193,15 @@ async function initializeDatabase() {
       sale_price REAL NOT NULL DEFAULT 0,
       image_url TEXT,
       description TEXT,
+      promotion TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now', 'localtime')),
       updated_at TEXT DEFAULT (datetime('now', 'localtime'))
     );
   `;
   await executeDb(createTableSql);
+  try {
+    await executeDb("ALTER TABLE products ADD COLUMN promotion TEXT DEFAULT ''");
+  } catch (e) {}
 }
 
 /**
@@ -437,12 +441,13 @@ async function requestHandler(req, res) {
         : originalPrice;
       const imageUrl = body.image_url ? body.image_url.trim() : '';
       const description = body.description ? body.description.trim() : '';
+      const promotion = body.promotion ? body.promotion.trim() : '';
 
       const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
 
       await executeDb(
-        'INSERT INTO products (id, name, category, original_price, sale_price, image_url, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [id, name, category, originalPrice, salePrice, imageUrl, description, now, now]
+        'INSERT INTO products (id, name, category, original_price, sale_price, image_url, description, promotion, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [id, name, category, originalPrice, salePrice, imageUrl, description, promotion, now, now]
       );
 
       return sendJson(res, 201, {
@@ -450,9 +455,59 @@ async function requestHandler(req, res) {
         message: 'เพิ่มสินค้าสำเร็จ',
         data: {
           id, name, category, original_price: originalPrice, sale_price: salePrice,
-          image_url: imageUrl, description, created_at: now, updated_at: now
+          image_url: imageUrl, description, promotion, created_at: now, updated_at: now
         }
       });
+    }
+
+    // ---------------------------------------------------------
+    // API: POST /api/products/bulk - นำเข้าสินค้าหลายรายการ (Bulk Import CSV)
+    // ---------------------------------------------------------
+    if (pathname === '/api/products/bulk' && req.method === 'POST') {
+      try {
+        const body = await parseBody(req);
+        const items = Array.isArray(body.items) ? body.items : [];
+        if (items.length === 0) {
+          return sendJson(res, 400, { success: false, error: 'ไม่พบรายการสินค้าที่จะนำเข้า' });
+        }
+
+        const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+        const inserted = [];
+
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (!item.name || !item.name.trim()) continue;
+          const id = item.id && item.id.trim() ? item.id.trim() : ('PRD-' + (Date.now() + i).toString().slice(-6));
+          const name = item.name.trim();
+          const category = item.category ? item.category.trim() : 'ทั่วไป';
+          const originalPrice = Number(item.original_price) || 0;
+          const salePrice = (item.sale_price !== undefined && item.sale_price !== null && item.sale_price !== '') 
+            ? Number(item.sale_price) 
+            : originalPrice;
+          const imageUrl = item.image_url ? item.image_url.trim() : '';
+          const description = item.description ? item.description.trim() : '';
+          const promotion = item.promotion ? item.promotion.trim() : '';
+
+          await executeDb(
+            'INSERT OR REPLACE INTO products (id, name, category, original_price, sale_price, image_url, description, promotion, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, name, category, originalPrice, salePrice, imageUrl, description, promotion, now, now]
+          );
+
+          inserted.push({
+            id, name, category, original_price: originalPrice, sale_price: salePrice,
+            image_url: imageUrl, description, promotion, created_at: now, updated_at: now
+          });
+        }
+
+        return sendJson(res, 200, {
+          success: true,
+          message: `นำเข้าสินค้าสำเร็จ ${inserted.length} รายการ`,
+          count: inserted.length,
+          data: inserted
+        });
+      } catch (err) {
+        return sendJson(res, 500, { success: false, error: 'นำเข้าไม่สำเร็จ: ' + err.message });
+      }
     }
 
     // ---------------------------------------------------------
@@ -475,17 +530,18 @@ async function requestHandler(req, res) {
         : originalPrice;
       const imageUrl = body.image_url !== undefined ? body.image_url.trim() : '';
       const description = body.description !== undefined ? body.description.trim() : '';
+      const promotion = body.promotion !== undefined ? body.promotion.trim() : '';
       const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
 
       await executeDb(
-        'UPDATE products SET name = ?, category = ?, original_price = ?, sale_price = ?, image_url = ?, description = ?, updated_at = ? WHERE id = ?',
-        [name, category, originalPrice, salePrice, imageUrl, description, now, id]
+        'UPDATE products SET name = ?, category = ?, original_price = ?, sale_price = ?, image_url = ?, description = ?, promotion = ?, updated_at = ? WHERE id = ?',
+        [name, category, originalPrice, salePrice, imageUrl, description, promotion, now, id]
       );
 
       return sendJson(res, 200, {
         success: true,
         message: `อัปเดตข้อมูลสินค้า ${id} เรียบร้อยแล้ว`,
-        data: { id, name, category, original_price: originalPrice, sale_price: salePrice, image_url: imageUrl, description, updated_at: now }
+        data: { id, name, category, original_price: originalPrice, sale_price: salePrice, image_url: imageUrl, description, promotion, updated_at: now }
       });
     }
 
