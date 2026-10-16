@@ -1359,6 +1359,16 @@
               <!-- Action Buttons -->
               <div class="flex items-center gap-1">
                 <button 
+                  type="button"
+                  onclick="duplicateProduct('${p.id}')" 
+                  class="px-2 py-1 text-xs text-slate-600 hover:text-[#C98b6f] bg-slate-50 hover:bg-white border border-slate-200 hover:border-[#C98b6f] transition font-medium cursor-pointer inline-flex items-center gap-1"
+                  title="คัดลอกสินค้านี้เพื่อสร้างรายการใหม่"
+                >
+                  <i data-lucide="copy" class="w-3 h-3"></i>
+                  <span>คัดลอก</span>
+                </button>
+                <button 
+                  type="button"
                   onclick="promptEditProduct('${p.id}')" 
                   class="px-2 py-1 text-xs text-slate-600 hover:text-[#C98b6f] bg-slate-50 hover:bg-white border border-slate-200 hover:border-[#C98b6f] transition font-medium cursor-pointer"
                   title="แก้ไข"
@@ -1366,6 +1376,7 @@
                   แก้ไข
                 </button>
                 <button 
+                  type="button"
                   onclick="promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
                   class="px-2 py-1 text-xs text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition font-medium cursor-pointer"
                   title="ลบ"
@@ -1441,6 +1452,16 @@
                       <span>${isFav ? 'ถูกใจแล้ว' : 'ถูกใจ'}</span>
                     </button>
                     <button 
+                      type="button"
+                      onclick="duplicateProduct('${p.id}')" 
+                      class="px-2 py-0.5 text-xs text-slate-600 hover:text-[#C98b6f] bg-slate-50 hover:bg-white border border-slate-200 hover:border-[#C98b6f] transition font-medium cursor-pointer inline-flex items-center gap-0.5"
+                      title="คัดลอกสินค้านี้เพื่อสร้างรายการใหม่"
+                    >
+                      <i data-lucide="copy" class="w-3 h-3"></i>
+                      <span>คัดลอก</span>
+                    </button>
+                    <button 
+                      type="button"
                       onclick="promptEditProduct('${p.id}')" 
                       class="px-2 py-0.5 text-xs text-slate-600 hover:text-[#C98b6f] bg-slate-50 hover:bg-white border border-slate-200 hover:border-[#C98b6f] transition font-medium cursor-pointer"
                       title="แก้ไข"
@@ -1448,6 +1469,7 @@
                       แก้ไข
                     </button>
                     <button 
+                      type="button"
                       onclick="promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
                       class="px-2 py-0.5 text-xs text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition font-medium cursor-pointer"
                       title="ลบ"
@@ -1962,6 +1984,56 @@
 
       const formEl = document.getElementById('productForm');
       if (formEl) formEl.scrollTop = 0;
+    }
+
+    // =========================================================================
+    // การคัดลอกสินค้า (Duplicate Product)
+    // =========================================================================
+    function duplicateProduct(id) {
+      const p = products.find(item => item.id === id);
+      if (!p) return;
+
+      editingProduct = null; // โหมดสร้างใหม่ ไม่ใช่โหมดแก้ไข ID เดิม
+      document.getElementById('formProductId').value = ''; // ปล่อยว่างเพื่อสร้าง ID ใหม่
+      document.getElementById('formName').value = p.name ? `${p.name} (คัดลอก)` : '';
+
+      // ดึง Categories เดิมออกมาใส่ Tags
+      if (p.category) {
+        currentSelectedCategories = p.category.split(',').map(c => c.trim()).filter(Boolean).slice(0, 5);
+      } else {
+        currentSelectedCategories = [];
+      }
+      const catInput = document.getElementById('categoryInputText');
+      if (catInput) catInput.value = '';
+      renderSelectedCategoryTags();
+
+      document.getElementById('formOriginalPrice').value = p.original_price || '';
+      document.getElementById('formSalePrice').value = (p.sale_price !== undefined && p.sale_price !== null) ? p.sale_price : '';
+      document.getElementById('formImage').value = p.image_url || '';
+      document.getElementById('formDescription').value = p.description || '';
+      document.getElementById('uploadStatusText').textContent = '';
+
+      updateImagePreview(p.image_url || '');
+
+      document.getElementById('modalTitle').textContent = 'คัดลอกและสร้างสินค้าใหม่';
+      document.getElementById('modalSubtitle').textContent = `คัดลอกจาก: ${p.name}`;
+      document.getElementById('submitBtnText').textContent = 'บันทึกเป็นสินค้าใหม่';
+      document.getElementById('modalIcon').setAttribute('data-lucide', 'copy');
+      document.getElementById('modalIconBox').className = 'w-8 h-8 bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center shrink-0 shadow-2xs';
+
+      updatePricePreview();
+      document.getElementById('productModal').classList.remove('hidden');
+      lucide.createIcons();
+
+      const formEl = document.getElementById('productForm');
+      if (formEl) formEl.scrollTop = 0;
+      setTimeout(() => {
+        const nameInput = document.getElementById('formName');
+        if (nameInput) {
+          nameInput.focus({ preventScroll: true });
+          nameInput.select(); // ไฮไลท์ชื่อสินค้าไว้ให้ผู้ใช้พิมพ์เปลี่ยนไซส์/เฉดสี ได้ทันที
+        }
+      }, 60);
     }
 
     // Submit Form (มี Alert ตรวจสอบยืนยันเสมอ)
