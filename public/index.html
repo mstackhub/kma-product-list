@@ -314,26 +314,32 @@
         </div>
       </div>
 
-      <!-- Category Filter Bar (Clean & Elegant KMA Aesthetic) -->
-      <div class="pt-2 border-t border-[#f0eae4]">
-        <div class="flex items-center gap-2 w-full overflow-hidden">
-          <div class="flex items-center gap-1.5 shrink-0">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">หมวดหมู่:</span>
-            <button 
-              type="button" 
-              onclick="openCategoryManagerModal()" 
-              title="จัดการหมวดหมู่ (ลบ / เปลี่ยนชื่อ / เพิ่ม)"
-              class="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold text-[#C98b6f] hover:text-[#b87556] bg-white hover:bg-[#FAF6F2] border border-[#C98b6f]/40 hover:border-[#C98b6f] transition cursor-pointer shadow-2xs"
-            >
-              <i data-lucide="settings-2" class="w-3 h-3"></i>
-              <span>จัดการ</span>
-            </button>
+      <!-- Category Filter Section (Header on Top + 4 Organized Rows) -->
+      <div class="pt-2.5 pb-1 border-t border-[#f0eae4]">
+        <!-- Header Row (ไว้ด้านบน) -->
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#f0eae4]/70">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-[#C98b6f]"></i>
+              <span>หมวดหมู่สินค้า</span>
+            </span>
+            <span class="text-[11px] text-slate-400 hidden sm:inline">| แตะเลือกหมวดหมู่เพื่อกรองสินค้า</span>
           </div>
-          <div id="categoryContainer" class="flex items-center gap-1.5 flex-1 overflow-x-auto no-scrollbar py-0.5">
-            <button onclick="selectCategory('ทั้งหมด')" class="category-btn active px-3.5 py-1.5 text-xs font-semibold bg-[#C98b6f] text-white border border-[#C98b6f] shadow-xs transition cursor-pointer shrink-0">
-              ทั้งหมด
-            </button>
-          </div>
+          
+          <button 
+            type="button" 
+            onclick="openCategoryManagerModal()" 
+            title="จัดการหมวดหมู่ (ลบ / เปลี่ยนชื่อ / เพิ่ม)"
+            class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-[#C98b6f] hover:text-[#b87556] bg-white hover:bg-[#FAF6F2] border border-[#C98b6f]/40 hover:border-[#C98b6f] transition cursor-pointer shadow-2xs"
+          >
+            <i data-lucide="settings-2" class="w-3.5 h-3.5"></i>
+            <span>จัดการหมวดหมู่</span>
+          </button>
+        </div>
+
+        <!-- Category Rows Container (4 แถวตามที่กำหนด) -->
+        <div id="categoryContainer" class="space-y-1.5 py-0.5">
+          <!-- Dynamically populated 4 rows -->
         </div>
       </div>
     </section>
@@ -1422,14 +1428,11 @@
     let tursoUrl = localStorage.getItem('turso_db_url') || 'libsql://kma-product-list-web-mstackhub.aws-ap-northeast-1.turso.io';
     let tursoToken = localStorage.getItem('turso_auth_token') || 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTIxMjk1MTMsImlkIjoiMDFhMTQzM2UtMWYwMS03ZWFmLThmOGEtMDk5ZDU4YTFiY2VkIiwia2lkIjoiU1ZYRTc1Vy1QcHV4aWQ2RXJ6WlRRTzVNLW5OeVBzX0RjSm5qa0ZycXZ0YyIsInJpZCI6Ijc5NmMwNmVlLWJkY2EtNDRlYy1iYzEwLWJmOWI5ZmIzZjE5NSJ9.GEqIZaQPTvA9pvVCR5FDoAcekwdU5ijeOJGz0BsdV5ZRmoOxoajodxwgF30gD5agw0416Uaz4lU-t9ZyCqNLCg';
 
-    // รายการหมวดหมู่ "เลือกด่วน" ที่กำหนด (7 หมวดหมู่หลัก)
+    // รายการหมวดหมู่หลัก KMA (4 กลุ่มแถวตามที่ผู้ใช้กำหนด)
     const quickCategories = [
-      'รองพื้น',
-      'แป้ง',
-      'แต่งหน้า',
-      'สกินแคร์',
-      'คุชชั่น',
-      'อุปกรณ์แต่งหน้า',
+      'รองพื้น', 'คุชชั่น', 'แป้ง', 'เบสเมคอัพ',
+      'แต่งหน้า', 'ลิป', 'ตา', 'ปาก', 'บลัช & แก้ม',
+      'สกินแคร์', 'กันแดด', 'สเปรย์', 'เซรั่ม', 'ล้างหน้า',
       'ราคาพิเศษ'
     ];
 
@@ -1440,7 +1443,8 @@
       'อายแชโดว์',
       'อายแชโดว',
       'ที่เขียนคิ้ว',
-      'ลิปสติก'
+      'ลิปสติก',
+      'บลัช & แก้ม ✕ แต่งหน้า'
     ];
     let savedExcluded = [];
     try {
@@ -1802,7 +1806,8 @@
         const target = currentCategory.toLowerCase().trim();
         filtered = filtered.filter(p => {
           if (!p.category) return false;
-          return p.category.split(',').map(c => c.trim().toLowerCase()).includes(target);
+          const cats = p.category.split(',').map(c => c.trim().toLowerCase());
+          return cats.some(c => c === target || (target.length >= 2 && (c.includes(target) || target.includes(c))));
         });
       }
 
@@ -2187,50 +2192,84 @@
       `;
     }
 
-    // อัปเดต Category Pills จาก masterCategories (ไม่หายเมื่อกดกรอง)
+    function renderCategoryRowPill(cat) {
+      const isAll = cat === 'ทั้งหมด';
+      const isActive = isAll 
+        ? (currentCategory === 'ทั้งหมด' && !showFavoritesOnly)
+        : (currentCategory === cat && !showFavoritesOnly);
+
+      const activeCls = 'active bg-[#C98b6f] text-white border-[#C98b6f] shadow-xs font-bold';
+      const inactiveCls = 'bg-[#faf6f3] hover:bg-white text-slate-700 hover:text-[#C98b6f] border-[#eadfd7] hover:border-[#C98b6f]/50 font-semibold';
+
+      return `
+        <button 
+          type="button"
+          data-cat="${escapeHtml(cat)}" 
+          onclick="selectCategory('${escapeJs(cat)}')" 
+          class="category-btn ${isActive ? activeCls : inactiveCls} px-3.5 py-1.5 text-xs border transition cursor-pointer shrink-0"
+        >
+          ${escapeHtml(cat)}
+        </button>
+      `;
+    }
+
+    // อัปเดต Category Pills โดยจัดวางเป็น 4 แถวตามที่ผู้ใช้กำหนด
     function updateCategoriesFilter() {
       const container = document.getElementById('categoryContainer');
       const datalist = document.getElementById('categoryOptions');
       
-      const cats = [...masterCategories].sort();
+      const allActiveCats = [...masterCategories].filter(c => !excludedCategories.includes(c));
 
       // Datalist สำหรับ autocomplete ใน Form
       if (datalist) {
-        datalist.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}"></option>`).join('');
+        datalist.innerHTML = allActiveCats.map(c => `<option value="${escapeHtml(c)}"></option>`).join('');
       }
 
-      // Pills filter buttons
+      if (!container) return;
+
+      // 4 แถวตามที่ผู้ใช้กำหนด:
+      // แถวแรก: ทั้งหมด, รองพื้น, คุชชั่น, แป้ง, เบสเมคอัพ
+      // แถวสอง: แต่งหน้า, ลิป, ตา, ปาก, บลัช & แก้ม
+      // แถวสาม: สกินแคร์, กันแดด, สเปรย์, เซรั่ม, ล้างหน้า
+      // แถวสี่: ราคาพิเศษ (และหมวดหมู่อื่นๆ ที่เพิ่มเข้ามา)
+      const row1Preset = ['ทั้งหมด', 'รองพื้น', 'คุชชั่น', 'แป้ง', 'เบสเมคอัพ'];
+      const row2Preset = ['แต่งหน้า', 'ลิป', 'ตา', 'ปาก', 'บลัช & แก้ม'];
+      const row3Preset = ['สกินแคร์', 'กันแดด', 'สเปรย์', 'เซรั่ม', 'ล้างหน้า'];
+      const row4Preset = ['ราคาพิเศษ'];
+
+      const row1Items = row1Preset.filter(c => c === 'ทั้งหมด' || !excludedCategories.includes(c));
+      const row2Items = row2Preset.filter(c => !excludedCategories.includes(c));
+      const row3Items = row3Preset.filter(c => !excludedCategories.includes(c));
+
+      // รวบรวมหมวดหมู่อื่นๆ นอกเหนือจาก 3 แถวแรก นำมาแสดงในแถวที่ 4
+      const definedInFirstThree = new Set([...row1Preset, ...row2Preset, ...row3Preset]);
+      const otherItems = allActiveCats.filter(c => !definedInFirstThree.has(c) && !row4Preset.includes(c));
+      const row4Items = [...row4Preset.filter(c => !excludedCategories.includes(c)), ...otherItems];
+
       let html = `
-        <button data-cat="ทั้งหมด" onclick="selectCategory('ทั้งหมด')" class="category-btn ${currentCategory === 'ทั้งหมด' && !showFavoritesOnly ? 'active bg-[#C98b6f] text-white border-[#C98b6f] shadow-xs' : 'bg-[#faf6f3] hover:bg-white text-slate-700 hover:text-[#C98b6f] border-[#eadfd7] hover:border-[#C98b6f]/50'} px-3.5 py-1.5 text-xs font-semibold border transition cursor-pointer shrink-0">
-          ทั้งหมด
-        </button>
+        <!-- แถวแรก: รองพื้น คุชชั่น แป้ง เบสเมคอัพ -->
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          ${row1Items.map(renderCategoryRowPill).join('')}
+        </div>
+
+        <!-- แถวสอง: แต่งหน้า ลิป ตา ปาก บลัช & แก้ม -->
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          ${row2Items.map(renderCategoryRowPill).join('')}
+        </div>
+
+        <!-- แถวสาม: สกินแคร์ กันแดด สเปรย์ เซรั่ม ล้างหน้า -->
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          ${row3Items.map(renderCategoryRowPill).join('')}
+        </div>
+
+        <!-- แถวสี่: ราคาพิเศษ -->
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          ${row4Items.map(renderCategoryRowPill).join('')}
+        </div>
       `;
 
-      cats.forEach(cat => {
-        const isActive = currentCategory === cat && !showFavoritesOnly;
-        html += `
-          <button data-cat="${escapeHtml(cat)}" onclick="selectCategory('${escapeJs(cat)}')" class="category-btn ${isActive ? 'active bg-[#C98b6f] text-white border-[#C98b6f] shadow-xs' : 'bg-[#faf6f3] hover:bg-white text-slate-700 hover:text-[#C98b6f] border-[#eadfd7] hover:border-[#C98b6f]/50'} px-3.5 py-1.5 text-xs font-semibold border transition cursor-pointer shrink-0">
-            ${escapeHtml(cat)}
-          </button>
-        `;
-      });
-
-      if (container) container.innerHTML = html;
+      container.innerHTML = html;
       renderSuggestedCategories();
-
-      // Count promo items for badge (Feature 4)
-      const rawStored = localStorage.getItem('kma_cached_products');
-      const allItems = rawStored ? JSON.parse(rawStored) : products;
-      const promoCount = (allItems || []).filter(p => p.promotion && p.promotion.trim() !== '').length;
-      const promoBadge = document.getElementById('promoFilterCount');
-      if (promoBadge) {
-        if (promoCount > 0) {
-          promoBadge.textContent = promoCount;
-          promoBadge.classList.remove('hidden');
-        } else {
-          promoBadge.classList.add('hidden');
-        }
-      }
     }
 
     // กรองตามหมวดหมู่ (คงปุ่มหมวดหมู่อื่นๆ ไว้ครบถ้วนเสมอ)
