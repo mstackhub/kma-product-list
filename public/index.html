@@ -855,8 +855,90 @@
     // ข้อมูลเริ่มต้นสำหรับใช้งานจริง (ว่างเปล่า พร้อมบันทึกสินค้าจริง)
     const SEED_PRODUCTS = [];
 
-    // Default placeholder image (KMA Brand Monogram CI Placeholder)
-    const DEFAULT_IMG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%"><rect width="300" height="300" fill="%23FAF6F2"/><rect x="20" y="20" width="260" height="260" fill="none" stroke="%23E8DDD4" stroke-width="1.5" stroke-dasharray="4 4"/><circle cx="150" cy="120" r="42" fill="%23F0E5DC"/><text x="150" y="127" font-family="-apple-system,BlinkMacSystemFont,Sarabun,sans-serif" font-size="20" font-weight="bold" fill="%23C98B6F" text-anchor="middle" letter-spacing="2">KMA</text><text x="150" y="190" font-family="-apple-system,BlinkMacSystemFont,Sarabun,sans-serif" font-size="12" font-weight="600" fill="%23A8978B" text-anchor="middle" letter-spacing="1">NO IMAGE</text><text x="150" y="210" font-family="-apple-system,BlinkMacSystemFont,Sarabun,sans-serif" font-size="11" fill="%23C2B4AA" text-anchor="middle">ไม่มีรูปภาพสินค้า</text></svg>`;
+    // สร้าง SVG Placeholder อัตโนมัติตามหมวดหมู่สินค้า (Category-based Icon)
+    function getCategoryPlaceholder(rawCategory) {
+      const cat = (rawCategory || '').toLowerCase();
+      let iconSvg = '';
+      let label = 'สินค้า KMA';
+
+      if (cat.includes('รองพื้น')) {
+        label = 'หมวด: รองพื้น';
+        iconSvg = `
+          <rect x="126" y="96" width="48" height="64" rx="6" fill="#C98B6F" opacity="0.9"/>
+          <rect x="140" y="84" width="20" height="12" fill="#B87556"/>
+          <path d="M144 84 V72 H162 V77 H154 V84" fill="#8C7A70"/>
+          <path d="M136 108 Q140 118 136 128" stroke="#FAF6F2" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        `;
+      } else if (cat.includes('แป้ง')) {
+        label = 'หมวด: แป้ง';
+        iconSvg = `
+          <circle cx="150" cy="115" r="38" fill="#C98B6F" opacity="0.9"/>
+          <circle cx="150" cy="115" r="28" fill="#FAF6F2"/>
+          <path d="M132 115 H168" stroke="#C98B6F" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="150" cy="100" r="2.5" fill="#B87556"/>
+          <circle cx="140" cy="125" r="2.5" fill="#B87556"/>
+          <circle cx="160" cy="125" r="2.5" fill="#B87556"/>
+        `;
+      } else if (cat.includes('คุชชั่น')) {
+        label = 'หมวด: คุชชั่น';
+        iconSvg = `
+          <rect x="115" y="82" width="70" height="66" rx="20" fill="#C98B6F" opacity="0.9"/>
+          <ellipse cx="150" cy="115" rx="25" ry="22" fill="#FAF6F2"/>
+          <circle cx="150" cy="115" r="14" fill="#E8DDD4"/>
+          <circle cx="150" cy="115" r="6" fill="#C98B6F" opacity="0.6"/>
+        `;
+      } else if (cat.includes('แต่งหน้า') || cat.includes('ลิป') || cat.includes('ตา') || cat.includes('คิ้ว')) {
+        label = 'หมวด: แต่งหน้า';
+        iconSvg = `
+          <rect x="135" y="112" width="30" height="48" rx="3" fill="#3A3A3A"/>
+          <rect x="133" y="106" width="34" height="6" fill="#C98B6F"/>
+          <rect x="138" y="94" width="24" height="12" fill="#E8DDD4"/>
+          <path d="M138 94 L138 78 Q150 68 162 74 L162 94 Z" fill="#D9534F"/>
+        `;
+      } else if (cat.includes('สกินแคร์') || cat.includes('เซรั่ม') || cat.includes('ครีม') || cat.includes('บำรุง')) {
+        label = 'หมวด: สกินแคร์';
+        iconSvg = `
+          <path d="M142 66 C142 62 158 62 158 66 L156 76 L144 76 Z" fill="#8C7A70"/>
+          <rect x="138" y="76" width="24" height="8" rx="2" fill="#B87556"/>
+          <path d="M138 84 H162 C168 84 172 88 172 96 V145 C172 152 168 156 160 156 H140 C132 156 128 152 128 145 V96 C128 88 132 84 138 84 Z" fill="#C98B6F" opacity="0.9"/>
+          <circle cx="150" cy="120" r="10" fill="#FAF6F2"/>
+          <path d="M150 112 Q144 122 150 126 Q156 122 150 112 Z" fill="#C98B6F"/>
+        `;
+      } else if (cat.includes('อุปกรณ์') || cat.includes('แปรง') || cat.includes('พัฟ')) {
+        label = 'หมวด: อุปกรณ์แต่งหน้า';
+        iconSvg = `
+          <path d="M146 160 L148 108 L152 108 L154 160 Z" fill="#3A3A3A"/>
+          <rect x="144" y="98" width="12" height="10" fill="#C98B6F"/>
+          <path d="M144 98 C140 86 142 70 150 66 C158 70 160 86 156 98 Z" fill="#8C7A70"/>
+          <path d="M147 72 C149 68 151 68 153 72" stroke="#FAF6F2" stroke-width="2" fill="none"/>
+        `;
+      } else if (cat.includes('ราคาพิเศษ') || cat.includes('โปร') || cat.includes('sale') || cat.includes('ลด')) {
+        label = 'หมวด: ราคาพิเศษ';
+        iconSvg = `
+          <path d="M125 102 L150 76 L175 102 L175 146 C175 151 171 155 166 155 L134 155 C129 155 125 151 125 146 Z" fill="#C98B6F" opacity="0.9"/>
+          <circle cx="150" cy="92" r="5" fill="#FAF6F2"/>
+          <text x="150" y="136" font-family="-apple-system,BlinkMacSystemFont,Sarabun,sans-serif" font-size="22" font-weight="bold" fill="#FFFFFF" text-anchor="middle">%</text>
+        `;
+      } else {
+        label = 'สินค้า KMA';
+        iconSvg = `
+          <circle cx="150" cy="115" r="38" fill="#F0E5DC"/>
+          <text x="150" y="122" font-family="-apple-system,BlinkMacSystemFont,Sarabun,sans-serif" font-size="20" font-weight="bold" fill="#C98B6F" text-anchor="middle" letter-spacing="2">KMA</text>
+        `;
+      }
+
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+        <rect width="300" height="300" fill="#FAF6F2"/>
+        <rect x="18" y="18" width="264" height="264" fill="none" stroke="#E8DDD4" stroke-width="1.5" stroke-dasharray="4 4"/>
+        ${iconSvg}
+        <text x="150" y="194" font-family="-apple-system,BlinkMacSystemFont,Sarabun,sans-serif" font-size="14" font-weight="600" fill="#7A675C" text-anchor="middle" letter-spacing="0.5">${label}</text>
+        <text x="150" y="214" font-family="-apple-system,BlinkMacSystemFont,Sarabun,sans-serif" font-size="11" fill="#B0A096" text-anchor="middle">ไม่มีรูปภาพสินค้า</text>
+      </svg>`.replace(/[\\n\\r\\t]/g, ' ');
+
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    const DEFAULT_IMG = getCategoryPlaceholder('ทั่วไป');
 
     // On Document Ready
     document.addEventListener('DOMContentLoaded', async () => {
@@ -1169,7 +1251,8 @@
       const sale = Number(p.sale_price) || original;
       const hasDiscount = sale < original;
       const discountPercent = hasDiscount ? Math.round(((original - sale) / original) * 100) : 0;
-      const img = p.image_url || DEFAULT_IMG;
+      const categoryPlaceholder = getCategoryPlaceholder(p.category);
+      const img = (p.image_url && p.image_url.trim()) ? p.image_url.trim() : categoryPlaceholder;
       const cats = (p.category || 'ทั่วไป').split(',').map(c => c.trim()).filter(Boolean);
       const isFav = isFavorite(p.id);
 
@@ -1181,7 +1264,7 @@
             <img 
               src="${escapeHtml(img)}" 
               alt="${escapeHtml(p.name)}" 
-              onerror="this.src='${DEFAULT_IMG}'" 
+              onerror="this.src=getCategoryPlaceholder('${escapeJs(p.category || '')}')" 
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             >
             
@@ -1268,7 +1351,8 @@
       const sale = Number(p.sale_price) || original;
       const hasDiscount = sale < original;
       const discountPercent = hasDiscount ? Math.round(((original - sale) / original) * 100) : 0;
-      const img = p.image_url || DEFAULT_IMG;
+      const categoryPlaceholder = getCategoryPlaceholder(p.category);
+      const img = (p.image_url && p.image_url.trim()) ? p.image_url.trim() : categoryPlaceholder;
       const cats = (p.category || 'ทั่วไป').split(',').map(c => c.trim()).filter(Boolean);
       const isFav = isFavorite(p.id);
 
@@ -1281,7 +1365,7 @@
               <img 
                 src="${escapeHtml(img)}" 
                 alt="${escapeHtml(p.name)}" 
-                onerror="this.src='${DEFAULT_IMG}'" 
+                onerror="this.src=getCategoryPlaceholder('${escapeJs(p.category || '')}')" 
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               >
               <button 
