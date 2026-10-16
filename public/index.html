@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจัดการข้อมูลสินค้า | Turso Database</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Sarabun', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#faf6f3',
+              100: '#f4ece6',
+              200: '#ebd9cf',
+              300: '#dec0b0',
+              400: '#d1a38d',
+              500: '#C98b6f',
+              600: '#b87556',
+              700: '#995c41',
+              800: '#7c4b36',
+              900: '#663f2f',
+            },
+            turso: {
+              DEFAULT: '#00EB8A',
+              dark: '#1e293b',
+              glow: '#00eb8a33'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- SweetAlert2 for Clean Confirmation Alerts -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+    [x-cloak] { display: none !important; }
+    *, *::before, *::after { border-radius: 0px !important; }
+    .swal2-popup { font-family: 'Sarabun', sans-serif !important; border-radius: 0px !important; }
+  </style>
+</head>
+<body class="min-h-full flex flex-col text-slate-800 antialiased selection:bg-pink-100 selection:text-[#C98b6f]">
+
+  <!-- ========================================================================= -->
+  <!-- Top Navigation Bar                                                        -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
+      
+      <!-- Brand Logo & Title -->
+      <div class="flex items-center gap-2.5 sm:gap-4 min-w-0">
+        <img src="/kma-logo.png" alt="KMA Cosmetics" class="h-6 sm:h-8 object-contain shrink-0">
+        <div class="h-5 w-px bg-slate-200 shrink-0"></div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <h1 class="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">Product Catalog</h1>
+            <span class="text-[10px] sm:text-xs px-1.5 py-0.5 font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center gap-1 shrink-0">
+              <span class="w-1.5 h-1.5 bg-emerald-500 animate-pulse"></span>
+              Turso
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-500 hidden sm:block">ระบบจัดการสินค้าประสิทธิภาพสูง</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons & Database Status -->
+      <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <!-- DB Mode Badge Button -->
+        <button onclick="openConfigModal()" id="dbStatusBadge" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition border border-slate-200">
+          <i data-lucide="database" class="w-3.5 h-3.5 text-slate-500"></i>
+          <span id="dbModeText">กำลังโหลด...</span>
+        </button>
+
+        <!-- Turso Config Button -->
+        <button onclick="openConfigModal()" title="ตั้งค่าเชื่อมต่อ Turso" class="p-1.5 sm:p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200">
+          <i data-lucide="settings" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+        </button>
+
+        <!-- Add Product Button -->
+        <button onclick="openAddModal()" class="inline-flex items-center gap-1.5 bg-[#C98b6f] hover:bg-[#b87556] text-white px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium shadow-sm shadow-[#C98b6f]/20 active:scale-95 transition shrink-0">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+          <span>เพิ่มสินค้า</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- Main Container                                                            -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- Controls: Search, Sort, Categories & View Toggle -->
+    <section class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm mb-6 space-y-4">
+      
+      <!-- Top Row: Search & Sort & View Switcher -->
+      <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+        
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="ค้นหาชื่อสินค้า, หมวดหมู่, หรือรายละเอียด..." 
+            oninput="handleSearch(this.value)"
+            class="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C98b6f] focus:border-transparent transition"
+          >
+          <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Sort & View Controls -->
+        <div class="flex items-center gap-2 self-end sm:self-auto w-full sm:w-auto">
+          
+          <!-- Custom Sort Dropdown -->
+          <div class="relative flex-1 sm:flex-initial" id="sortDropdownContainer">
+            <button 
+              type="button" 
+              id="sortDropdownBtn" 
+              onclick="toggleSortDropdown()"
+              class="w-full sm:w-56 px-3.5 py-2 text-sm bg-white border border-slate-300 hover:border-[#C98b6f] focus:outline-none focus:border-[#C98b6f] flex items-center justify-between gap-2 text-slate-800 font-medium transition cursor-pointer"
+            >
+              <div class="flex items-center gap-2 truncate">
+                <i data-lucide="arrow-up-down" class="w-4 h-4 text-slate-400 shrink-0"></i>
+                <span id="sortSelectedLabel" class="truncate font-medium">🕒 วันที่สร้าง: ล่าสุด</span>
+              </div>
+              <i data-lucide="chevron-down" id="sortChevronIcon" class="w-4 h-4 text-slate-400 shrink-0 transform transition-transform"></i>
+            </button>
+
+            <!-- Custom Dropdown Menu -->
+            <div 
+              id="sortDropdownMenu" 
+              class="hidden absolute right-0 mt-1 w-full sm:w-60 bg-white border border-slate-300 shadow-2xl z-50 py-1"
+            >
+              <button type="button" onclick="selectCustomSort('newest', '🕒 วันที่สร้าง: ล่าสุด')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] bg-[#faf6f3] text-[#C98b6f] font-semibold transition" data-value="newest">
+                <span>🕒 วันที่สร้าง: ล่าสุด</span>
+                <span class="sort-check text-[#C98b6f] font-bold">✓</span>
+              </button>
+              <button type="button" onclick="selectCustomSort('price_asc', '📈 ราคา: น้อยไปมาก (ASC)')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="price_asc">
+                <span>📈 ราคา: น้อยไปมาก (ASC)</span>
+                <span class="sort-check text-[#C98b6f] font-bold hidden">✓</span>
+              </button>
+              <button type="button" onclick="selectCustomSort('price_desc', '📉 ราคา: มากไปน้อย (DESC)')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="price_desc">
+                <span>📉 ราคา: มากไปน้อย (DESC)</span>
+                <span class="sort-check text-[#C98b6f] font-bold hidden">✓</span>
+              </button>
+              <button type="button" onclick="selectCustomSort('discount_desc', '🔥 ส่วนลด: มากไปน้อย')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="discount_desc">
+                <span>🔥 ส่วนลด: มากไปน้อย</span>
+                <span class="sort-check text-[#C98b6f] font-bold hidden">✓</span>
+              </button>
+              <button type="button" onclick="selectCustomSort('name', '🔤 ชื่อสินค้า: ก-ฮ (A-Z)')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="name">
+                <span>🔤 ชื่อสินค้า: ก-ฮ (A-Z)</span>
+                <span class="sort-check text-[#C98b6f] font-bold hidden">✓</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- View Toggle (List / Grid) -->
+          <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button id="viewListBtn" onclick="setViewMode('list')" title="แสดงแบบรายการ (List)" class="p-1.5 rounded-lg text-slate-700 bg-white shadow-xs transition">
+              <i data-lucide="list" class="w-4 h-4"></i>
+            </button>
+            <button id="viewGridBtn" onclick="setViewMode('grid')" title="แสดงแบบการ์ด (Grid)" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+              <i data-lucide="layout-grid" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Refresh Button -->
+          <button onclick="fetchProducts()" title="รีเฟรชข้อมูล" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition border border-slate-200">
+            <i data-lucide="refresh-cw" id="refreshIcon" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider shrink-0 mr-1">หมวดหมู่:</span>
+        <div id="categoryContainer" class="flex items-center gap-1.5 shrink-0">
+          <button onclick="selectCategory('ทั้งหมด')" class="category-btn active px-3 py-1 rounded-full text-xs font-medium bg-slate-900 text-white transition">
+            ทั้งหมด
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats summary bar -->
+    <div class="flex items-center justify-between text-xs text-slate-500 mb-3 px-1">
+      <div>
+        แสดง <span id="productCount" class="font-bold text-slate-800">0</span> รายการ
+        <span id="activeFilterBadge" class="hidden ml-2 px-2 py-0.5 rounded-md bg-pink-50 text-pink-700 font-medium"></span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> ข้อมูลสดจาก Turso</span>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- Product Display Area                                                      -->
+    <!-- ========================================================================= -->
+
+    <!-- Loading Skeleton -->
+    <div id="loadingState" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 animate-pulse space-y-3">
+        <div class="w-full h-44 bg-slate-200 rounded-xl"></div>
+        <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+        <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+        <div class="h-8 bg-slate-200 rounded-xl"></div>
+      </div>
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 animate-pulse space-y-3">
+        <div class="w-full h-44 bg-slate-200 rounded-xl"></div>
+        <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+        <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+        <div class="h-8 bg-slate-200 rounded-xl"></div>
+      </div>
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 animate-pulse space-y-3">
+        <div class="w-full h-44 bg-slate-200 rounded-xl"></div>
+        <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+        <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+        <div class="h-8 bg-slate-200 rounded-xl"></div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden bg-white rounded-2xl p-12 text-center border border-dashed border-slate-300">
+      <div class="w-14 h-14 bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="package-x" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-800">ไม่พบรายการสินค้า</h3>
+      <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">ลองค้นหาด้วยคำอื่น หรือกดปุ่ม "เพิ่มสินค้า" เพื่อบันทึกสินค้าใหม่ลงใน Turso Database</p>
+      <button onclick="openAddModal()" class="mt-4 inline-flex items-center gap-2 bg-[#C98b6f] hover:bg-[#b87556] text-white px-4 py-2 rounded-xl text-sm font-medium transition shadow-sm">
+        <i data-lucide="plus" class="w-4 h-4"></i> เพิ่มสินค้าชิ้นแรก
+      </button>
+    </div>
+
+    <!-- Grid View Container -->
+    <div id="gridContainer" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <!-- Product Cards will be rendered dynamically here -->
+    </div>
+
+    <!-- List View Container (Mobile First - Always shows Name + Price) -->
+    <div id="tableContainer" class="hidden space-y-3">
+      <!-- List items rendered here directly -->
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Add / Edit Product                                                -->
+  <!-- ========================================================================= -->
+  <div id="productModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 transform transition-all animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div class="flex items-center gap-2.5">
+          <div id="modalIconBox" class="w-8 h-8 rounded-lg bg-pink-100 text-[#C98b6f] flex items-center justify-center">
+            <i data-lucide="plus" id="modalIcon" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 id="modalTitle" class="text-base font-bold text-slate-900">เพิ่มรายการสินค้าใหม่</h3>
+            <p id="modalSubtitle" class="text-xs text-slate-500">บันทึกลง Turso Database ทันที</p>
+          </div>
+        </div>
+        <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Form -->
+      <form id="productForm" onsubmit="handleProductSubmit(event)" class="p-6 space-y-4">
+        <input type="hidden" id="formProductId">
+
+        <!-- Product Name -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            ชื่อสินค้า <span class="text-rose-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="formName" 
+            required 
+            placeholder="เช่น KMA Water Resist Liquid Foundation"
+            class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C98b6f] transition"
+          >
+        </div>
+
+        <!-- Category & Image URL Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Category -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              หมวดหมู่สินค้า <span class="text-rose-500">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="formCategory" 
+              list="categoryOptions" 
+              required 
+              placeholder="เช่น เครื่องสำอาง, ลิปสติก"
+              class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C98b6f] transition"
+            >
+            <datalist id="categoryOptions">
+              <!-- populated dynamically -->
+            </datalist>
+          </div>
+
+          <!-- Image URL -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              URL รูปภาพสินค้า
+            </label>
+            <input 
+              type="url" 
+              id="formImage" 
+              placeholder="https://... (หรือเว้นว่างไว้)"
+              class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C98b6f] transition"
+            >
+          </div>
+        </div>
+
+        <!-- Price Section: Original Price & Sale Price -->
+        <div class="bg-pink-50/50 p-3.5 rounded-xl border border-pink-100 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-pink-900 uppercase tracking-wider flex items-center gap-1">
+              <i data-lucide="tag" class="w-3.5 h-3.5 text-[#C98b6f]"></i> กำหนดราคา
+            </span>
+            <span id="pricePreviewDiscount" class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 hidden">
+              ลด 0%
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <!-- Original Price -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">
+                ราคาเต็ม (บาท) <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">฿</span>
+                <input 
+                  type="number" 
+                  step="0.01" 
+                  min="0" 
+                  id="formOriginalPrice" 
+                  required 
+                  placeholder="0.00"
+                  oninput="updatePricePreview()"
+                  class="w-full pl-7 pr-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C98b6f] font-semibold transition"
+                >
+              </div>
+            </div>
+
+            <!-- Sale Price -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">
+                ราคาลด (บาท) <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 text-xs font-bold">฿</span>
+                <input 
+                  type="number" 
+                  step="0.01" 
+                  min="0" 
+                  id="formSalePrice" 
+                  required 
+                  placeholder="0.00"
+                  oninput="updatePricePreview()"
+                  class="w-full pl-7 pr-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C98b6f] font-bold text-emerald-600 transition"
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            รายละเอียดสินค้า (คำโปรยสั้นๆ)
+          </label>
+          <textarea 
+            id="formDescription" 
+            rows="2" 
+            placeholder="คุณสมบัติเด่นของสินค้า..."
+            class="w-full px-3.5 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C98b6f] transition"
+          ></textarea>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+          <button 
+            type="button" 
+            onclick="closeProductModal()"
+            class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition"
+          >
+            ยกเลิก
+          </button>
+          <button 
+            type="submit" 
+            id="submitBtn"
+            class="inline-flex items-center gap-2 bg-[#C98b6f] hover:bg-[#b87556] active:scale-95 text-white px-5 py-2 rounded-xl text-sm font-medium shadow-sm transition"
+          >
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span id="submitBtnText">บันทึกข้อมูล</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Turso Database Configuration                                      -->
+  <!-- ========================================================================= -->
+  <div id="configModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 transform transition-all">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="database" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">ตั้งค่า Turso Database (libSQL)</h3>
+            <p class="text-xs text-slate-400">เชื่อมต่อกับ Cloud SQLite ที่เร็วที่สุดในโลก</p>
+          </div>
+        </div>
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleConfigSubmit(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            Turso Database URL
+          </label>
+          <input 
+            type="text" 
+            id="configTursoUrl" 
+            placeholder="libsql://your-db-org.turso.io"
+            class="w-full px-3.5 py-2 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+          <p class="text-[11px] text-slate-500 mt-1">ดูได้จากคำสั่ง <code>turso db show &lt;db-name&gt;</code> ในเทอร์มินัล</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            Turso Auth Token
+          </label>
+          <input 
+            type="password" 
+            id="configTursoToken" 
+            placeholder="eyJhbGciOi..."
+            class="w-full px-3.5 py-2 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+          <p class="text-[11px] text-slate-500 mt-1">สร้างได้จาก <code>turso db tokens create &lt;db-name&gt;</code></p>
+        </div>
+
+        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
+          💡 หากยังไม่มีหรือเว้นว่างไว้ ระบบจะสลับไปใช้ <strong>Local SQLite (products.db)</strong> ให้ทำงานได้ทันที 100% โดยไม่ต้องรอ!
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeConfigModal()" class="px-4 py-2 text-sm text-slate-600 hover:text-slate-800">
+            ปิด
+          </button>
+          <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-xl text-sm font-medium transition shadow-sm">
+            บันทึกและเชื่อมต่อ
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- JavaScript Application Logic                                              -->
+  <!-- ========================================================================= -->
+  <script>
+    // App State
+    let products = [];
+    let currentCategory = 'ทั้งหมด';
+    let currentSort = 'newest';
+    let currentSearch = '';
+    let viewMode = 'list'; // 'list' | 'grid' (Default เป็นแบบ List รายการ)
+    let editingProduct = null;
+    let isServerMode = true; // true = call /api/..., false = direct Turso / local
+    let tursoUrl = localStorage.getItem('turso_db_url') || 'libsql://kma-product-list-web-mstackhub.aws-ap-northeast-1.turso.io';
+    let tursoToken = localStorage.getItem('turso_auth_token') || 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTIxMjk1MTMsImlkIjoiMDFhMTQzM2UtMWYwMS03ZWFmLThmOGEtMDk5ZDU4YTFiY2VkIiwia2lkIjoiU1ZYRTc1Vy1QcHV4aWQ2RXJ6WlRRTzVNLW5OeVBzX0RjSm5qa0ZycXZ0YyIsInJpZCI6Ijc5NmMwNmVlLWJkY2EtNDRlYy1iYzEwLWJmOWI5ZmIzZjE5NSJ9.GEqIZaQPTvA9pvVCR5FDoAcekwdU5ijeOJGz0BsdV5ZRmoOxoajodxwgF30gD5agw0416Uaz4lU-t9ZyCqNLCg';
+
+    // Sample fallback data if offline or first time
+    const SEED_PRODUCTS = [
+      { id: 'PRD-1001', name: 'KMA Water Resist Liquid Foundation', category: 'เครื่องสำอาง', original_price: 490, sale_price: 399, image_url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&q=80', description: 'รองพื้นสูตรคุมมัน กันน้ำ กันเหงื่อ เนียนสนิทตลอดวัน', created_at: '2026-10-16 10:00:00' },
+      { id: 'PRD-1002', name: 'KMA Sheer Soft Loose Powder', category: 'แป้งพัฟ & แป้งฝุ่น', original_price: 350, sale_price: 280, image_url: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80', description: 'แป้งฝุ่นเนื้อละเอียด สัมผัสบางเบา คุมความมัน', created_at: '2026-10-16 10:05:00' },
+      { id: 'PRD-1003', name: 'KMA Glamour Velvet Lip Color', category: 'ลิปสติก', original_price: 290, sale_price: 199, image_url: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=500&q=80', description: 'ลิปกำมะหยี่สีชัด ติดทนนาน ไม่ทำให้ปากแห้ง', created_at: '2026-10-16 10:10:00' },
+      { id: 'PRD-1004', name: 'KMA Perfect Brow Pencil Waterproof', category: 'ที่เขียนคิ้ว', original_price: 199, sale_price: 149, image_url: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&q=80', description: 'ดินสอเขียนคิ้วหัวสลิม วาดเส้นคิ้วสวยคมเป็นธรรมชาติ', created_at: '2026-10-16 10:15:00' },
+      { id: 'PRD-1005', name: 'KMA Professional Eye Shadow Palette', category: 'อายแชโดว์', original_price: 590, sale_price: 450, image_url: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80', description: 'พาเลตต์อายแชโดว์ 9 เฉดสี เกลี่ยง่าย ชิมเมอร์ประกาย', created_at: '2026-10-16 10:20:00' }
+    ];
+
+    // Default placeholder image
+    const DEFAULT_IMG = 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=500&q=80';
+
+    // On Document Ready
+    document.addEventListener('DOMContentLoaded', async () => {
+      await checkDatabaseStatus();
+      await fetchProducts();
+      lucide.createIcons();
+    });
+
+    // ตรวจสอบสถานะว่าต่อผ่าน Server หรือ Standalone Client
+    async function checkDatabaseStatus() {
+      const badge = document.getElementById('dbStatusBadge');
+      const text = document.getElementById('dbModeText');
+
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 1200);
+        const res = await fetch('/api/status', { signal: controller.signal });
+        clearTimeout(timeout);
+        const data = await res.json();
+        
+        isServerMode = true;
+        if (data.mode === 'turso_cloud') {
+          text.innerHTML = '<span class="text-emerald-600 font-semibold">Turso Cloud ⚡</span>';
+          badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 transition border border-emerald-200';
+        } else {
+          text.innerHTML = 'Local SQLite (Server)';
+          badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 transition border border-slate-200';
+        }
+      } catch (e) {
+        // Standalone Mode (เปิดไฟล์ตรง หรือไม่มี Node server)
+        isServerMode = false;
+        if (tursoUrl && tursoToken) {
+          text.innerHTML = '<span class="text-emerald-600 font-semibold">Turso Direct ⚡</span>';
+          badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 transition border border-emerald-200';
+        } else {
+          text.innerHTML = 'Local Browser Mode';
+          badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 transition border border-amber-200';
+        }
+      }
+    }
+
+    // Direct Turso HTTP Pipeline Helper (เมื่อรันแบบ Standalone ใน Browser)
+    async function queryTursoDirect(sql, args = []) {
+      if (!tursoUrl || !tursoToken) throw new Error('Turso credentials not configured');
+      let url = tursoUrl.trim();
+      if (url.startsWith('libsql://')) url = 'https://' + url.slice('libsql://'.length);
+      url = url.replace(/\/+$/, '') + '/v2/pipeline';
+
+      const typedArgs = args.map(val => {
+        if (val === null || val === undefined) return { type: 'null' };
+        if (typeof val === 'number') return Number.isInteger(val) ? { type: 'integer', value: String(val) } : { type: 'float', value: val };
+        return { type: 'text', value: String(val) };
+      });
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${tursoToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          requests: [
+            { type: 'execute', stmt: { sql, args: typedArgs } },
+            { type: 'close' }
+          ]
+        })
+      });
+
+      const json = await res.json();
+      const result = json.results?.[0]?.response?.result;
+      if (!result) return [];
+      const cols = result.cols.map(c => c.name);
+      return result.rows.map(row => {
+        const obj = {};
+        row.forEach((cell, idx) => {
+          let val = cell.value;
+          if (cell.type === 'integer' || cell.type === 'float') val = Number(val);
+          obj[cols[idx]] = val;
+        });
+        return obj;
+      });
+    }
+
+    // ดึงข้อมูลสินค้า
+    async function fetchProducts() {
+      const refreshIcon = document.getElementById('refreshIcon');
+      if (refreshIcon) refreshIcon.classList.add('animate-spin');
+
+      showLoading(true);
+
+      try {
+        if (isServerMode) {
+          const params = new URLSearchParams();
+          if (currentCategory && currentCategory !== 'ทั้งหมด') params.append('category', currentCategory);
+          if (currentSort) params.append('sort', currentSort);
+          if (currentSearch) params.append('q', currentSearch);
+
+          const res = await fetch(`/api/products?${params.toString()}`);
+          const result = await res.json();
+          if (result.success) {
+            products = result.data || [];
+          } else {
+            throw new Error(result.error);
+          }
+        } else if (tursoUrl && tursoToken) {
+          // Direct Turso Cloud
+          await queryTursoDirect(`CREATE TABLE IF NOT EXISTS products (
+            id TEXT PRIMARY KEY, name TEXT NOT NULL, category TEXT DEFAULT 'ทั่วไป',
+            original_price REAL DEFAULT 0, sale_price REAL DEFAULT 0,
+            image_url TEXT, description TEXT, created_at TEXT, updated_at TEXT
+          );`);
+          let sql = 'SELECT * FROM products';
+          let rows = await queryTursoDirect(sql);
+          if (rows.length === 0) {
+            // Seed
+            for (const item of SEED_PRODUCTS) {
+              await queryTursoDirect('INSERT INTO products VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                item.id, item.name, item.category, item.original_price, item.sale_price, item.image_url, item.description, item.created_at, item.created_at
+              ]);
+            }
+            rows = await queryTursoDirect(sql);
+          }
+          products = filterAndSortLocal(rows);
+        } else {
+          // Standalone LocalStorage Mode
+          let stored = localStorage.getItem('local_products');
+          let list = stored ? JSON.parse(stored) : SEED_PRODUCTS;
+          if (!stored) localStorage.setItem('local_products', JSON.stringify(SEED_PRODUCTS));
+          products = filterAndSortLocal(list);
+        }
+
+        renderProducts();
+        updateCategoriesFilter();
+      } catch (err) {
+        console.warn('Fetch error:', err);
+        // Fallback to local memory if anything fails
+        let stored = localStorage.getItem('local_products');
+        products = filterAndSortLocal(stored ? JSON.parse(stored) : SEED_PRODUCTS);
+        renderProducts();
+        updateCategoriesFilter();
+      } finally {
+        showLoading(false);
+        if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+      }
+    }
+
+    // Client-side Filter & Sort
+    function filterAndSortLocal(list) {
+      let filtered = [...list];
+
+      // Filter category
+      if (currentCategory && currentCategory !== 'ทั้งหมด') {
+        filtered = filtered.filter(p => p.category === currentCategory);
+      }
+
+      // Filter search
+      if (currentSearch && currentSearch.trim() !== '') {
+        const q = currentSearch.toLowerCase().trim();
+        filtered = filtered.filter(p => 
+          (p.name && p.name.toLowerCase().includes(q)) ||
+          (p.category && p.category.toLowerCase().includes(q)) ||
+          (p.description && p.description.toLowerCase().includes(q)) ||
+          (p.id && p.id.toLowerCase().includes(q))
+        );
+      }
+
+      // Sort
+      if (currentSort === 'price_asc') {
+        filtered.sort((a, b) => (Number(a.sale_price) || 0) - (Number(b.sale_price) || 0));
+      } else if (currentSort === 'price_desc') {
+        filtered.sort((a, b) => (Number(b.sale_price) || 0) - (Number(a.sale_price) || 0));
+      } else if (currentSort === 'discount_desc') {
+        filtered.sort((a, b) => {
+          const discA = (Number(a.original_price) || 0) - (Number(a.sale_price) || 0);
+          const discB = (Number(b.original_price) || 0) - (Number(b.sale_price) || 0);
+          return discB - discA;
+        });
+      } else if (currentSort === 'name') {
+        filtered.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+      } else {
+        filtered.sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+      }
+
+      return filtered;
+    }
+
+    // แสดงสถานะ Loading
+    function showLoading(isLoading) {
+      document.getElementById('loadingState').classList.toggle('hidden', !isLoading);
+      if (isLoading) {
+        document.getElementById('gridContainer').classList.add('hidden');
+        document.getElementById('tableContainer').classList.add('hidden');
+        document.getElementById('emptyState').classList.add('hidden');
+      }
+    }
+
+    // Render รายการสินค้าตาม View Mode (Grid หรือ List)
+    function renderProducts() {
+      const grid = document.getElementById('gridContainer');
+      const table = document.getElementById('tableContainer');
+      const empty = document.getElementById('emptyState');
+      const countEl = document.getElementById('productCount');
+      const tableBody = document.getElementById('tableBody');
+
+      countEl.textContent = products.length;
+
+      if (products.length === 0) {
+        grid.classList.add('hidden');
+        table.classList.add('hidden');
+        empty.classList.remove('hidden');
+        lucide.createIcons();
+        return;
+      }
+
+      empty.classList.add('hidden');
+
+      if (viewMode === 'grid') {
+        table.classList.add('hidden');
+        grid.classList.remove('hidden');
+        grid.innerHTML = products.map(renderCard).join('');
+      } else {
+        grid.classList.add('hidden');
+        table.classList.remove('hidden');
+        table.innerHTML = products.map(renderListItem).join('');
+      }
+
+      lucide.createIcons();
+    }
+
+    // HTML Template สำหรับ Card (Grid View)
+    function renderCard(p) {
+      const original = Number(p.original_price) || 0;
+      const sale = Number(p.sale_price) || original;
+      const hasDiscount = sale < original;
+      const discountPercent = hasDiscount ? Math.round(((original - sale) / original) * 100) : 0;
+      const img = p.image_url || DEFAULT_IMG;
+
+      return `
+        <div class="group bg-white rounded-2xl border border-slate-200/90 hover:border-pink-300 hover:shadow-lg hover:shadow-pink-500/5 transition-all duration-200 overflow-hidden flex flex-col">
+          
+          <!-- Image & Discount Badge -->
+          <div class="relative w-full aspect-square bg-slate-100 overflow-hidden">
+            <img 
+              src="${escapeHtml(img)}" 
+              alt="${escapeHtml(p.name)}" 
+              onerror="this.src='${DEFAULT_IMG}'" 
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            >
+            
+            <!-- Category Badge -->
+            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-lg text-xs font-medium bg-white/90 backdrop-blur-md text-slate-800 shadow-sm border border-slate-100">
+              ${escapeHtml(p.category || 'ทั่วไป')}
+            </span>
+
+            <!-- Discount Percent Badge -->
+            ${hasDiscount ? `
+              <span class="absolute top-3 right-3 px-2 py-1 rounded-lg text-xs font-bold bg-rose-500 text-white shadow-md shadow-rose-500/20 animate-pulse">
+                ลด ${discountPercent}%
+              </span>
+            ` : ''}
+
+            <!-- Quick Action Floating Overlay -->
+            <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+              <button 
+                onclick="promptEditProduct('${p.id}')" 
+                class="p-2.5 bg-white text-slate-700 hover:text-[#C98b6f] rounded-xl shadow-lg transform translate-y-2 group-hover:translate-y-0 transition"
+                title="แก้ไขข้อมูล"
+              >
+                <i data-lucide="edit-3" class="w-4 h-4"></i>
+              </button>
+              <button 
+                onclick="promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
+                class="p-2.5 bg-white text-rose-600 hover:bg-rose-50 rounded-xl shadow-lg transform translate-y-2 group-hover:translate-y-0 transition"
+                title="ลบรายการ"
+              >
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Product Details -->
+          <div class="p-4 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="text-[11px] font-mono text-slate-400 mb-0.5">ID: ${escapeHtml(p.id)}</div>
+              <h4 class="font-semibold text-slate-900 text-sm line-clamp-2 leading-snug" title="${escapeHtml(p.name)}">
+                ${escapeHtml(p.name)}
+              </h4>
+              ${p.description ? `
+                <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                  ${escapeHtml(p.description)}
+                </p>
+              ` : ''}
+            </div>
+
+            <!-- Price & Actions Bar -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-end justify-between">
+              <div>
+                ${hasDiscount ? `
+                  <div class="text-xs text-slate-400 line-through">
+                    ฿${original.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                  </div>
+                ` : ''}
+                <div class="text-lg font-bold ${hasDiscount ? 'text-[#C98b6f]' : 'text-slate-900'} leading-none">
+                  ฿${sale.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex items-center gap-1">
+                <button 
+                  onclick="promptEditProduct('${p.id}')" 
+                  class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+                  title="แก้ไข"
+                >
+                  <i data-lucide="edit" class="w-4 h-4"></i>
+                </button>
+                <button 
+                  onclick="promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
+                  class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                  title="ลบ"
+                >
+                  <i data-lucide="trash" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      `;
+    }
+
+    // HTML Template สำหรับ List View (Mobile First: ชื่อ + ราคา เด่นชัด 100% ไม่ต้องเลื่อนขวา)
+    function renderListItem(p) {
+      const original = Number(p.original_price) || 0;
+      const sale = Number(p.sale_price) || original;
+      const hasDiscount = sale < original;
+      const discountPercent = hasDiscount ? Math.round(((original - sale) / original) * 100) : 0;
+      const img = p.image_url || DEFAULT_IMG;
+
+      return `
+        <div class="bg-white border border-slate-200 hover:border-[#C98b6f] transition p-3.5 sm:p-4 shadow-xs">
+          <div class="flex items-start gap-3">
+            
+            <!-- Product Thumbnail -->
+            <img 
+              src="${escapeHtml(img)}" 
+              alt="${escapeHtml(p.name)}" 
+              onerror="this.src='${DEFAULT_IMG}'" 
+              class="w-16 h-16 sm:w-20 sm:h-20 object-cover bg-slate-100 shrink-0 border border-slate-200"
+            >
+
+            <!-- Product Details & Mobile-First Price -->
+            <div class="flex-1 min-w-0">
+              
+              <!-- Category & ID -->
+              <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                <span class="px-2 py-0.5 text-[11px] font-semibold bg-slate-100 text-slate-700">
+                  ${escapeHtml(p.category || 'ทั่วไป')}
+                </span>
+                <span class="text-[11px] text-slate-400 font-mono">${escapeHtml(p.id)}</span>
+              </div>
+
+              <!-- Product Name -->
+              <h4 class="font-bold text-slate-900 text-sm sm:text-base leading-snug line-clamp-2">
+                ${escapeHtml(p.name)}
+              </h4>
+
+              ${p.description ? `
+                <p class="text-xs text-slate-500 mt-1 line-clamp-1 hidden sm:block">
+                  ${escapeHtml(p.description)}
+                </p>
+              ` : ''}
+
+              <!-- PRICE & ACTIONS: ALWAYS VISIBLE ON MOBILE AND DESKTOP -->
+              <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
+                
+                <!-- Price Section -->
+                <div class="flex items-baseline gap-2">
+                  <span class="text-base sm:text-lg font-bold text-[#C98b6f] leading-none">
+                    ฿${sale.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                  </span>
+                  ${hasDiscount ? `
+                    <span class="text-xs text-slate-400 line-through">
+                      ฿${original.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                    </span>
+                    <span class="px-1.5 py-0.5 text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
+                      ลด ${discountPercent}%
+                    </span>
+                  ` : ''}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <button 
+                    onclick="promptEditProduct('${p.id}')" 
+                    class="px-2.5 py-1 text-xs font-medium border border-slate-200 hover:border-[#C98b6f] text-slate-700 hover:text-[#C98b6f] transition"
+                    title="แก้ไข"
+                  >
+                    แก้ไข
+                  </button>
+                  <button 
+                    onclick="promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
+                    class="px-2.5 py-1 text-xs font-medium border border-rose-200 text-rose-600 hover:bg-rose-50 transition"
+                    title="ลบ"
+                  >
+                    ลบ
+                  </button>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // อัปเดต Category Pills จากสินค้าจริง
+    function updateCategoriesFilter() {
+      const container = document.getElementById('categoryContainer');
+      const datalist = document.getElementById('categoryOptions');
+      
+      const cats = Array.from(new Set(products.map(p => p.category).filter(Boolean))).sort();
+
+      // Datalist สำหรับ autocomplete ใน Form
+      datalist.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}"></option>`).join('');
+
+      // Pills filter buttons
+      let html = `
+        <button onclick="selectCategory('ทั้งหมด')" class="category-btn ${currentCategory === 'ทั้งหมด' ? 'active bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} px-3 py-1 rounded-full text-xs font-medium transition">
+          ทั้งหมด
+        </button>
+      `;
+
+      cats.forEach(cat => {
+        const isActive = currentCategory === cat;
+        html += `
+          <button onclick="selectCategory('${escapeJs(cat)}')" class="category-btn ${isActive ? 'active bg-[#C98b6f] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} px-3 py-1 rounded-full text-xs font-medium transition">
+            ${escapeHtml(cat)}
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // กรองตามหมวดหมู่
+    function selectCategory(cat) {
+      currentCategory = cat;
+      const badge = document.getElementById('activeFilterBadge');
+      if (cat !== 'ทั้งหมด') {
+        badge.textContent = `หมวดหมู่: ${cat}`;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+      fetchProducts();
+    }
+
+    // การค้นหาแบบ Realtime พร้อม Debounce
+    let searchTimeout;
+    function handleSearch(val) {
+      clearTimeout(searchTimeout);
+      const clearBtn = document.getElementById('clearSearchBtn');
+      clearBtn.classList.toggle('hidden', !val);
+
+      searchTimeout = setTimeout(() => {
+        currentSearch = val;
+        fetchProducts();
+      }, 250);
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('searchInput');
+      input.value = '';
+      currentSearch = '';
+      document.getElementById('clearSearchBtn').classList.add('hidden');
+      fetchProducts();
+    }
+
+    // ==========================================
+    // Custom Sort Dropdown Handlers
+    // ==========================================
+    function toggleSortDropdown() {
+      const menu = document.getElementById('sortDropdownMenu');
+      const chevron = document.getElementById('sortChevronIcon');
+      const isHidden = menu.classList.contains('hidden');
+      menu.classList.toggle('hidden', !isHidden);
+      if (chevron) chevron.style.transform = isHidden ? 'rotate(180deg)' : '';
+    }
+
+    function selectCustomSort(val, label) {
+      currentSort = val;
+      document.getElementById('sortSelectedLabel').textContent = label;
+      
+      // Update checkmarks and active styling
+      document.querySelectorAll('#sortDropdownMenu .sort-option').forEach(btn => {
+        const check = btn.querySelector('.sort-check');
+        const isMatch = btn.getAttribute('data-value') === val;
+        if (check) check.classList.toggle('hidden', !isMatch);
+        if (isMatch) {
+          btn.classList.add('bg-[#faf6f3]', 'text-[#C98b6f]', 'font-semibold');
+        } else {
+          btn.classList.remove('bg-[#faf6f3]', 'text-[#C98b6f]', 'font-semibold');
+        }
+      });
+
+      // Close dropdown
+      const menu = document.getElementById('sortDropdownMenu');
+      const chevron = document.getElementById('sortChevronIcon');
+      menu.classList.add('hidden');
+      if (chevron) chevron.style.transform = '';
+
+      fetchProducts();
+    }
+
+    // Close sort dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const container = document.getElementById('sortDropdownContainer');
+      if (container && !container.contains(e.target)) {
+        const menu = document.getElementById('sortDropdownMenu');
+        const chevron = document.getElementById('sortChevronIcon');
+        if (menu) menu.classList.add('hidden');
+        if (chevron) chevron.style.transform = '';
+      }
+    });
+
+    // เปลี่ยนการเรียงลำดับ (Sort Price DESC & ASC)
+    function handleSortChange(sortVal) {
+      currentSort = sortVal;
+      fetchProducts();
+    }
+
+    // สลับ View Mode (Grid / List)
+    function setViewMode(mode) {
+      viewMode = mode;
+      const gridBtn = document.getElementById('viewGridBtn');
+      const listBtn = document.getElementById('viewListBtn');
+
+      if (mode === 'grid') {
+        gridBtn.className = 'p-1.5 rounded-lg text-slate-800 bg-white shadow-xs transition';
+        listBtn.className = 'p-1.5 rounded-lg text-slate-400 hover:text-slate-800 transition';
+      } else {
+        listBtn.className = 'p-1.5 rounded-lg text-slate-800 bg-white shadow-xs transition';
+        gridBtn.className = 'p-1.5 rounded-lg text-slate-400 hover:text-slate-800 transition';
+      }
+
+      renderProducts();
+    }
+
+    // เปิด Modal เพิ่มสินค้า
+    function openAddModal() {
+      editingProduct = null;
+      document.getElementById('productForm').reset();
+      document.getElementById('formProductId').value = '';
+      document.getElementById('modalTitle').textContent = 'เพิ่มรายการสินค้าใหม่';
+      document.getElementById('modalSubtitle').textContent = 'บันทึกลง Turso Database ทันที';
+      document.getElementById('submitBtnText').textContent = 'บันทึกสินค้า';
+      document.getElementById('modalIcon').setAttribute('data-lucide', 'plus');
+      document.getElementById('modalIconBox').className = 'w-8 h-8 rounded-lg bg-pink-100 text-[#C98b6f] flex items-center justify-center';
+      document.getElementById('pricePreviewDiscount').classList.add('hidden');
+
+      document.getElementById('productModal').classList.remove('hidden');
+      lucide.createIcons();
+      document.getElementById('formName').focus();
+    }
+
+    // คำนวณ % ส่วนลดแบบ Realtime ในฟอร์ม
+    function updatePricePreview() {
+      const orig = Number(document.getElementById('formOriginalPrice').value) || 0;
+      const sale = Number(document.getElementById('formSalePrice').value) || 0;
+      const discountEl = document.getElementById('pricePreviewDiscount');
+
+      if (orig > 0 && sale > 0 && sale < orig) {
+        const percent = Math.round(((orig - sale) / orig) * 100);
+        discountEl.textContent = `ลด ${percent}% (ประหยัด ฿${(orig - sale).toFixed(2)})`;
+        discountEl.classList.remove('hidden');
+      } else {
+        discountEl.classList.add('hidden');
+      }
+    }
+
+    // =========================================================================
+    // การแก้ไขสินค้า: ต้องมี Alert แจ้งเตือนก่อนเสมอ!
+    // =========================================================================
+    function promptEditProduct(id) {
+      const p = products.find(item => item.id === id);
+      if (!p) return;
+
+      editingProduct = p;
+      document.getElementById('formProductId').value = p.id;
+      document.getElementById('formName').value = p.name;
+      document.getElementById('formCategory').value = p.category || '';
+      document.getElementById('formOriginalPrice').value = p.original_price;
+      document.getElementById('formSalePrice').value = p.sale_price;
+      document.getElementById('formImage').value = p.image_url || '';
+      document.getElementById('formDescription').value = p.description || '';
+
+      document.getElementById('modalTitle').textContent = 'แก้ไขข้อมูลสินค้า';
+      document.getElementById('modalSubtitle').textContent = `รหัสสินค้า: ${p.id}`;
+      document.getElementById('submitBtnText').textContent = 'อัปเดตข้อมูล';
+      document.getElementById('modalIcon').setAttribute('data-lucide', 'edit-3');
+      document.getElementById('modalIconBox').className = 'w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center';
+
+      updatePricePreview();
+      document.getElementById('productModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    // Submit Form (มี Alert ตรวจสอบยืนยันเสมอ)
+    async function handleProductSubmit(e) {
+      e.preventDefault();
+
+      const id = document.getElementById('formProductId').value;
+      const name = document.getElementById('formName').value.trim();
+      const category = document.getElementById('formCategory').value.trim();
+      const original_price = Number(document.getElementById('formOriginalPrice').value);
+      const sale_price = Number(document.getElementById('formSalePrice').value);
+      const image_url = document.getElementById('formImage').value.trim();
+      const description = document.getElementById('formDescription').value.trim();
+
+      const payload = { id, name, category, original_price, sale_price, image_url, description };
+
+      // ถ้าเป็นการแก้ไข (Edit): แสดง Alert แจ้งเตือนยืนยันก่อนเสมอ!
+      if (id) {
+        const confirmResult = await Swal.fire({
+          title: 'ยืนยันการแก้ไขข้อมูล?',
+          html: `คุณต้องการบันทึกการเปลี่ยนแปลงของสินค้า <br><b class="text-[#C98b6f]">${escapeHtml(name)}</b> ใช่หรือไม่?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#C98b6f',
+          cancelButtonColor: '#64748b',
+          confirmButtonText: 'ยืนยันบันทึก',
+          cancelButtonText: 'ยกเลิก',
+          reverseButtons: true
+        });
+
+        if (!confirmResult.isConfirmed) {
+          return; // ผู้ใช้กดยกเลิก
+        }
+      }
+
+      // บันทึกข้อมูล (รองรับทั้ง Server Mode และ Direct Turso / Local Mode)
+      try {
+        if (isServerMode) {
+          const url = id ? `/api/products/${id}` : '/api/products';
+          const method = id ? 'PUT' : 'POST';
+
+          const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+          if (data.success) {
+            closeProductModal();
+            await fetchProducts();
+            showToast('success', id ? 'แก้ไขข้อมูลสำเร็จแล้ว' : 'เพิ่มสินค้าเรียบร้อยแล้ว');
+          } else {
+            showToast('error', data.error || 'เกิดข้อผิดพลาดในการบันทึก');
+          }
+        } else if (tursoUrl && tursoToken) {
+          // Direct Turso
+          const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+          if (id) {
+            await queryTursoDirect(
+              'UPDATE products SET name = ?, category = ?, original_price = ?, sale_price = ?, image_url = ?, description = ?, updated_at = ? WHERE id = ?',
+              [name, category, original_price, sale_price, image_url, description, now, id]
+            );
+          } else {
+            const newId = 'PRD-' + Date.now().toString().slice(-6);
+            await queryTursoDirect(
+              'INSERT INTO products (id, name, category, original_price, sale_price, image_url, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+              [newId, name, category, original_price, sale_price, image_url, description, now, now]
+            );
+          }
+          closeProductModal();
+          await fetchProducts();
+          showToast('success', id ? 'แก้ไขข้อมูลบน Turso สำเร็จแล้ว' : 'เพิ่มสินค้าบน Turso เรียบร้อยแล้ว');
+        } else {
+          // LocalStorage Mode
+          let stored = JSON.parse(localStorage.getItem('local_products') || '[]');
+          const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+          if (id) {
+            const idx = stored.findIndex(item => item.id === id);
+            if (idx !== -1) {
+              stored[idx] = { ...stored[idx], name, category, original_price, sale_price, image_url, description, updated_at: now };
+            }
+          } else {
+            const newId = 'PRD-' + Date.now().toString().slice(-6);
+            stored.unshift({ id: newId, name, category, original_price, sale_price, image_url, description, created_at: now, updated_at: now });
+          }
+          localStorage.setItem('local_products', JSON.stringify(stored));
+          closeProductModal();
+          await fetchProducts();
+          showToast('success', id ? 'แก้ไขข้อมูลสำเร็จแล้ว' : 'เพิ่มสินค้าเรียบร้อยแล้ว');
+        }
+      } catch (err) {
+        console.error('Submit error:', err);
+        showToast('error', 'บันทึกข้อมูลไม่สำเร็จ: ' + err.message);
+      }
+    }
+
+    // =========================================================================
+    // การลบสินค้า: ต้องมี Alert แจ้งเตือนก่อนเสมอ!
+    // =========================================================================
+    async function promptDeleteProduct(id, productName) {
+      const result = await Swal.fire({
+        title: 'ยืนยันการลบสินค้า?',
+        html: `คุณแน่ใจหรือไม่ว่าต้องการลบรายการ: <br><strong class="text-rose-600 text-base">"${escapeHtml(productName)}"</strong><br><span class="text-xs text-slate-400">รหัส: ${escapeHtml(id)}</span><br><br><span class="text-xs text-slate-500">ข้อมูลจะถูกลบออกจาก Turso Database ถาวร</span>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e11d48',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'ใช่, ต้องการลบ!',
+        cancelButtonText: 'ยกเลิก',
+        reverseButtons: true
+      });
+
+      if (result.isConfirmed) {
+        try {
+          if (isServerMode) {
+            const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.success) {
+              await fetchProducts();
+              showToast('success', `ลบสินค้า ${id} เรียบร้อยแล้ว`);
+            } else {
+              showToast('error', data.error || 'ลบสินค้าไม่สำเร็จ');
+            }
+          } else if (tursoUrl && tursoToken) {
+            await queryTursoDirect('DELETE FROM products WHERE id = ?', [id]);
+            await fetchProducts();
+            showToast('success', `ลบสินค้า ${id} บน Turso เรียบร้อยแล้ว`);
+          } else {
+            let stored = JSON.parse(localStorage.getItem('local_products') || '[]');
+            stored = stored.filter(item => item.id !== id);
+            localStorage.setItem('local_products', JSON.stringify(stored));
+            await fetchProducts();
+            showToast('success', `ลบสินค้า ${id} เรียบร้อยแล้ว`);
+          }
+        } catch (err) {
+          console.error('Delete error:', err);
+          showToast('error', 'ลบข้อมูลไม่สำเร็จ: ' + err.message);
+        }
+      }
+    }
+
+    // ปิด Modal สินค้า
+    function closeProductModal() {
+      document.getElementById('productModal').classList.add('hidden');
+    }
+
+    // Turso Config Modal Handlers
+    function openConfigModal() {
+      document.getElementById('configTursoUrl').value = tursoUrl;
+      document.getElementById('configTursoToken').value = tursoToken;
+      document.getElementById('configModal').classList.remove('hidden');
+    }
+    function closeConfigModal() {
+      document.getElementById('configModal').classList.add('hidden');
+    }
+
+    async function handleConfigSubmit(e) {
+      e.preventDefault();
+      const url = document.getElementById('configTursoUrl').value.trim();
+      const token = document.getElementById('configTursoToken').value.trim();
+
+      tursoUrl = url;
+      tursoToken = token;
+      localStorage.setItem('turso_db_url', url);
+      localStorage.setItem('turso_auth_token', token);
+
+      try {
+        if (isServerMode) {
+          const res = await fetch('/api/config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, token })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast('success', data.message);
+          }
+        } else {
+          showToast('success', 'บันทึกการตั้งค่า Turso Database เรียบร้อยแล้ว');
+        }
+        closeConfigModal();
+        await checkDatabaseStatus();
+        await fetchProducts();
+      } catch (e) {
+        showToast('error', 'บันทึกการตั้งค่าไม่สำเร็จ');
+      }
+    }
+
+    // Helper Toast Notification
+    function showToast(icon, title) {
+      Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      }).fire({ icon, title });
+    }
+
+    // Helpers ป้องกัน XSS
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+    function escapeJs(str) {
+      if (!str) return '';
+      return String(str).replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+  </script>
+
+</body>
+</html>
