@@ -719,8 +719,19 @@
     let tursoUrl = localStorage.getItem('turso_db_url') || 'libsql://kma-product-list-web-mstackhub.aws-ap-northeast-1.turso.io';
     let tursoToken = localStorage.getItem('turso_auth_token') || 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTIxMjk1MTMsImlkIjoiMDFhMTQzM2UtMWYwMS03ZWFmLThmOGEtMDk5ZDU4YTFiY2VkIiwia2lkIjoiU1ZYRTc1Vy1QcHV4aWQ2RXJ6WlRRTzVNLW5OeVBzX0RjSm5qa0ZycXZ0YyIsInJpZCI6Ijc5NmMwNmVlLWJkY2EtNDRlYy1iYzEwLWJmOWI5ZmIzZjE5NSJ9.GEqIZaQPTvA9pvVCR5FDoAcekwdU5ijeOJGz0BsdV5ZRmoOxoajodxwgF30gD5agw0416Uaz4lU-t9ZyCqNLCg';
 
+    // รายการหมวดหมู่ "เลือกด่วน" ที่กำหนด
+    const quickCategories = [
+      'รองพื้น',
+      'แป้ง',
+      'แต่งหน้า',
+      'สกินแคร์',
+      'คุชชั่น',
+      'อุปกรณ์แต่งหน้า',
+      'ราคาพิเศษ'
+    ];
+
     // Global Master Categories List (ไม่หายเมื่อกดกรอง)
-    let masterCategories = ['เครื่องสำอาง', 'แป้งพัฟ & แป้งฝุ่น', 'ลิปสติก', 'ที่เขียนคิ้ว', 'อายแชโดว์', 'กันน้ำ', 'บำรุงผิว'];
+    let masterCategories = [...quickCategories];
     let currentSelectedCategories = []; // สำหรับ Form Modal (เลือกได้สูงสุด 5 หมวดหมู่)
 
     // Favorites State (LocalStorage - แบบที่ 1)
@@ -1412,7 +1423,10 @@
       const container = document.getElementById('suggestedCategoriesList');
       if (!container) return;
       
-      const unselected = masterCategories.filter(c => !currentSelectedCategories.includes(c));
+      // แสดงหมวดหมู่เลือกด่วนตามลำดับที่กำหนด และตามด้วยหมวดหมู่อื่นๆ
+      const allList = Array.from(new Set([...quickCategories, ...masterCategories]));
+      const unselected = allList.filter(c => !currentSelectedCategories.includes(c));
+
       if (unselected.length === 0) {
         container.innerHTML = '<span class="text-[11px] text-slate-400 italic">เลือกครบทุกหมวดหมู่แล้ว หรือพิมพ์เพิ่มใหม่ได้</span>';
         return;
