@@ -61,41 +61,26 @@
   <!-- ========================================================================= -->
   <!-- Top Navigation Bar                                                        -->
   <!-- ========================================================================= -->
-  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
+  <!-- ========================================================================= -->
+  <!-- Top Navigation Bar (Clean & Elegant KMA Brand Header)                     -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-30 bg-white border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-4">
       
       <!-- Brand Logo & Title -->
-      <div class="flex items-center gap-2.5 sm:gap-4 min-w-0">
-        <img src="/kma-logo.png" alt="KMA Cosmetics" class="h-6 sm:h-8 object-contain shrink-0">
-        <div class="h-5 w-px bg-slate-200 shrink-0"></div>
+      <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+        <img src="/kma-logo.png" alt="KMA Cosmetics" class="h-6 sm:h-7 object-contain shrink-0">
+        <div class="h-4 w-px bg-slate-300 shrink-0"></div>
         <div class="min-w-0">
-          <div class="flex items-center gap-1.5 flex-wrap">
-            <h1 class="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">Product Catalog</h1>
-            <span class="text-[10px] sm:text-xs px-1.5 py-0.5 font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center gap-1 shrink-0">
-              <span class="w-1.5 h-1.5 bg-emerald-500 animate-pulse"></span>
-              Turso
-            </span>
-          </div>
-          <p class="text-[11px] text-slate-500 hidden sm:block">ระบบจัดการสินค้าประสิทธิภาพสูง</p>
+          <h1 class="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">Product Catalog</h1>
+          <p class="text-[11px] text-slate-400 hidden sm:block">KMA Cosmetics Collection</p>
         </div>
       </div>
 
-      <!-- Action Buttons & Database Status -->
-      <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
-        <!-- DB Mode Badge Button -->
-        <button onclick="openConfigModal()" id="dbStatusBadge" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition border border-slate-200">
-          <i data-lucide="database" class="w-3.5 h-3.5 text-slate-500"></i>
-          <span id="dbModeText">กำลังโหลด...</span>
-        </button>
-
-        <!-- Turso Config Button -->
-        <button onclick="openConfigModal()" title="ตั้งค่าเชื่อมต่อ Turso" class="p-1.5 sm:p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200">
-          <i data-lucide="settings" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-        </button>
-
-        <!-- Add Product Button -->
-        <button onclick="openAddModal()" class="inline-flex items-center gap-1.5 bg-[#C98b6f] hover:bg-[#b87556] text-white px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium shadow-sm shadow-[#C98b6f]/20 active:scale-95 transition shrink-0">
-          <i data-lucide="plus-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 shrink-0">
+        <button onclick="openAddModal()" class="inline-flex items-center gap-1.5 bg-[#C98b6f] hover:bg-[#b87556] active:scale-95 text-white px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition shrink-0 cursor-pointer shadow-xs">
+          <i data-lucide="plus" class="w-4 h-4"></i>
           <span>เพิ่มสินค้า</span>
         </button>
       </div>
@@ -105,25 +90,25 @@
   <!-- ========================================================================= -->
   <!-- Main Container                                                            -->
   <!-- ========================================================================= -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-5">
     
     <!-- Controls: Search, Sort, Categories & View Toggle -->
-    <section class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm mb-6 space-y-4">
+    <section class="bg-white p-3.5 sm:p-4 border border-slate-200 mb-4 space-y-3">
       
       <!-- Top Row: Search & Sort & View Switcher -->
-      <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+      <div class="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between">
         
         <!-- Search Input -->
         <div class="relative flex-1">
-          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
           <input 
             type="text" 
             id="searchInput" 
-            placeholder="ค้นหาชื่อสินค้า, หมวดหมู่, หรือรายละเอียด..." 
+            placeholder="ค้นหาชื่อสินค้า หรือหมวดหมู่..." 
             oninput="handleSearch(this.value)"
-            class="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C98b6f] focus:border-transparent transition"
+            class="w-full pl-9 pr-8 py-2 text-sm bg-white border border-slate-300 focus:outline-none focus:border-[#C98b6f] transition"
           >
-          <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+          <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
@@ -137,34 +122,34 @@
               type="button" 
               id="sortDropdownBtn" 
               onclick="toggleSortDropdown()"
-              class="w-full sm:w-56 px-3.5 py-2 text-sm bg-white border border-slate-300 hover:border-[#C98b6f] focus:outline-none focus:border-[#C98b6f] flex items-center justify-between gap-2 text-slate-800 font-medium transition cursor-pointer"
+              class="w-full sm:w-52 px-3.5 py-2 text-sm bg-white border border-slate-300 hover:border-[#C98b6f] focus:outline-none focus:border-[#C98b6f] flex items-center justify-between gap-2 text-slate-800 font-medium transition cursor-pointer"
             >
-              <span id="sortSelectedLabel" class="truncate font-medium">วันที่สร้าง: ล่าสุด</span>
+              <span id="sortSelectedLabel" class="truncate font-medium text-xs sm:text-sm">วันที่สร้าง: ล่าสุด</span>
               <i data-lucide="chevron-down" id="sortChevronIcon" class="w-4 h-4 text-slate-400 shrink-0 transform transition-transform"></i>
             </button>
 
             <!-- Custom Dropdown Menu -->
             <div 
               id="sortDropdownMenu" 
-              class="hidden absolute right-0 mt-1 w-full sm:w-60 bg-white border border-slate-300 shadow-2xl z-50 py-1"
+              class="hidden absolute right-0 mt-1 w-full sm:w-56 bg-white border border-slate-300 shadow-xl z-50 py-1"
             >
-              <button type="button" onclick="selectCustomSort('newest', 'วันที่สร้าง: ล่าสุด')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] bg-[#faf6f3] text-[#C98b6f] font-semibold transition" data-value="newest">
+              <button type="button" onclick="selectCustomSort('newest', 'วันที่สร้าง: ล่าสุด')" class="sort-option w-full px-4 py-2 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] bg-[#faf6f3] text-[#C98b6f] font-semibold transition cursor-pointer" data-value="newest">
                 <span>วันที่สร้าง: ล่าสุด</span>
                 <span class="sort-check text-[#C98b6f] font-bold">✓</span>
               </button>
-              <button type="button" onclick="selectCustomSort('price_asc', 'ราคา: น้อยไปมาก (ASC)')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="price_asc">
+              <button type="button" onclick="selectCustomSort('price_asc', 'ราคา: น้อยไปมาก (ASC)')" class="sort-option w-full px-4 py-2 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition cursor-pointer" data-value="price_asc">
                 <span>ราคา: น้อยไปมาก (ASC)</span>
                 <span class="sort-check text-[#C98b6f] font-bold hidden">✓</span>
               </button>
-              <button type="button" onclick="selectCustomSort('price_desc', 'ราคา: มากไปน้อย (DESC)')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="price_desc">
+              <button type="button" onclick="selectCustomSort('price_desc', 'ราคา: มากไปน้อย (DESC)')" class="sort-option w-full px-4 py-2 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition cursor-pointer" data-value="price_desc">
                 <span>ราคา: มากไปน้อย (DESC)</span>
                 <span class="sort-check text-[#C98b6f] font-bold hidden">✓</span>
               </button>
-              <button type="button" onclick="selectCustomSort('discount_desc', 'ส่วนลด: มากไปน้อย')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="discount_desc">
+              <button type="button" onclick="selectCustomSort('discount_desc', 'ส่วนลด: มากไปน้อย')" class="sort-option w-full px-4 py-2 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition cursor-pointer" data-value="discount_desc">
                 <span>ส่วนลด: มากไปน้อย</span>
                 <span class="sort-check text-[#C98b6f] font-bold hidden">✓</span>
               </button>
-              <button type="button" onclick="selectCustomSort('name', 'ชื่อสินค้า: ก-ฮ (A-Z)')" class="sort-option w-full px-4 py-2.5 text-left text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition" data-value="name">
+              <button type="button" onclick="selectCustomSort('name', 'ชื่อสินค้า: ก-ฮ (A-Z)')" class="sort-option w-full px-4 py-2 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#C98b6f] transition cursor-pointer" data-value="name">
                 <span>ชื่อสินค้า: ก-ฮ (A-Z)</span>
                 <span class="sort-check text-[#C98b6f] font-bold hidden">✓</span>
               </button>
@@ -172,27 +157,27 @@
           </div>
 
           <!-- View Toggle (List / Grid) -->
-          <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-            <button id="viewListBtn" onclick="setViewMode('list')" title="แสดงแบบรายการ (List)" class="p-1.5 rounded-lg text-slate-700 bg-white shadow-xs transition">
+          <div class="flex bg-slate-100 p-0.5 border border-slate-200">
+            <button id="viewListBtn" onclick="setViewMode('list')" title="แสดงแบบรายการ (List)" class="p-1.5 text-slate-800 bg-white border border-slate-200 shadow-xs transition cursor-pointer">
               <i data-lucide="list" class="w-4 h-4"></i>
             </button>
-            <button id="viewGridBtn" onclick="setViewMode('grid')" title="แสดงแบบการ์ด (Grid)" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">
+            <button id="viewGridBtn" onclick="setViewMode('grid')" title="แสดงแบบการ์ด (Grid)" class="p-1.5 text-slate-400 hover:text-slate-800 transition cursor-pointer">
               <i data-lucide="layout-grid" class="w-4 h-4"></i>
             </button>
           </div>
 
           <!-- Refresh Button -->
-          <button onclick="fetchProducts()" title="รีเฟรชข้อมูล" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition border border-slate-200">
+          <button onclick="fetchProducts()" title="รีเฟรชข้อมูล" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition border border-slate-300 cursor-pointer">
             <i data-lucide="refresh-cw" id="refreshIcon" class="w-4 h-4"></i>
           </button>
         </div>
       </div>
 
       <!-- Category Filter Pills -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar">
+      <div class="flex items-center gap-2 overflow-x-auto pb-0.5 pt-0.5 no-scrollbar">
         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider shrink-0 mr-1">หมวดหมู่:</span>
         <div id="categoryContainer" class="flex items-center gap-1.5 shrink-0">
-          <button onclick="selectCategory('ทั้งหมด')" class="category-btn active px-3 py-1 rounded-full text-xs font-medium bg-slate-900 text-white transition">
+          <button onclick="selectCategory('ทั้งหมด')" class="category-btn active px-3 py-1 text-xs font-medium bg-[#C98b6f] text-white border border-[#C98b6f] transition cursor-pointer">
             ทั้งหมด
           </button>
         </div>
@@ -200,13 +185,15 @@
     </section>
 
     <!-- Stats summary bar -->
-    <div class="flex items-center justify-between text-xs text-slate-500 mb-3 px-1">
+    <div class="flex items-center justify-between text-xs text-slate-500 mb-3 px-0.5">
       <div>
         แสดง <span id="productCount" class="font-bold text-slate-800">0</span> รายการ
-        <span id="activeFilterBadge" class="hidden ml-2 px-2 py-0.5 rounded-md bg-pink-50 text-pink-700 font-medium"></span>
+        <span id="activeFilterBadge" class="hidden ml-2 px-2 py-0.5 text-xs bg-[#C98b6f]/10 text-[#C98b6f] font-semibold border border-[#C98b6f]/20"></span>
       </div>
-      <div class="flex items-center gap-3">
-        <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> ข้อมูลสดจาก Turso</span>
+      <div>
+        <button onclick="openConfigModal()" title="ตั้งค่าฐานข้อมูล" class="text-slate-300 hover:text-slate-600 transition p-1">
+          <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+        </button>
       </div>
     </div>
 
@@ -569,22 +556,26 @@
         const data = await res.json();
         
         isServerMode = true;
-        if (data.mode === 'turso_cloud') {
-          text.innerHTML = '<span class="text-emerald-600 font-semibold">Turso Cloud ⚡</span>';
-          badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 transition border border-emerald-200';
-        } else {
-          text.innerHTML = 'Local SQLite (Server)';
-          badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 transition border border-slate-200';
+        if (text) {
+          if (data.mode === 'turso_cloud') {
+            text.innerHTML = '<span class="text-emerald-600 font-semibold">Turso Cloud ⚡</span>';
+            if (badge) badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-800 transition border border-emerald-200';
+          } else {
+            text.innerHTML = 'Local SQLite (Server)';
+            if (badge) badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-100 text-slate-700 transition border border-slate-200';
+          }
         }
       } catch (e) {
         // Standalone Mode (เปิดไฟล์ตรง หรือไม่มี Node server)
         isServerMode = false;
-        if (tursoUrl && tursoToken) {
-          text.innerHTML = '<span class="text-emerald-600 font-semibold">Turso Direct ⚡</span>';
-          badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 transition border border-emerald-200';
-        } else {
-          text.innerHTML = 'Local Browser Mode';
-          badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 transition border border-amber-200';
+        if (text) {
+          if (tursoUrl && tursoToken) {
+            text.innerHTML = '<span class="text-emerald-600 font-semibold">Turso Direct ⚡</span>';
+            if (badge) badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-800 transition border border-emerald-200';
+          } else {
+            text.innerHTML = 'Local Browser Mode';
+            if (badge) badge.className = 'hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-800 transition border border-amber-200';
+          }
         }
       }
     }
@@ -786,10 +777,10 @@
       const img = p.image_url || DEFAULT_IMG;
 
       return `
-        <div class="group bg-white rounded-2xl border border-slate-200/90 hover:border-pink-300 hover:shadow-lg hover:shadow-pink-500/5 transition-all duration-200 overflow-hidden flex flex-col">
+        <div class="group bg-white border border-slate-200 hover:border-[#C98b6f] transition flex flex-col">
           
-          <!-- Image & Discount Badge -->
-          <div class="relative w-full aspect-square bg-slate-100 overflow-hidden">
+          <!-- Image & Category Badge -->
+          <div class="relative w-full aspect-square bg-slate-50 overflow-hidden border-b border-slate-100">
             <img 
               src="${escapeHtml(img)}" 
               alt="${escapeHtml(p.name)}" 
@@ -797,79 +788,58 @@
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             >
             
-            <!-- Category Badge -->
-            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-lg text-xs font-medium bg-white/90 backdrop-blur-md text-slate-800 shadow-sm border border-slate-100">
+            <span class="absolute top-2.5 left-2.5 px-2 py-0.5 text-[11px] font-semibold bg-white text-[#C98b6f] border border-slate-200">
               ${escapeHtml(p.category || 'ทั่วไป')}
             </span>
 
-            <!-- Discount Percent Badge -->
             ${hasDiscount ? `
-              <span class="absolute top-3 right-3 px-2 py-1 rounded-lg text-xs font-bold bg-rose-500 text-white shadow-md shadow-rose-500/20 animate-pulse">
+              <span class="absolute top-2.5 right-2.5 px-2 py-0.5 text-[11px] font-bold bg-[#C98b6f] text-white">
                 ลด ${discountPercent}%
               </span>
             ` : ''}
-
-            <!-- Quick Action Floating Overlay -->
-            <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-              <button 
-                onclick="promptEditProduct('${p.id}')" 
-                class="p-2.5 bg-white text-slate-700 hover:text-[#C98b6f] rounded-xl shadow-lg transform translate-y-2 group-hover:translate-y-0 transition"
-                title="แก้ไขข้อมูล"
-              >
-                <i data-lucide="edit-3" class="w-4 h-4"></i>
-              </button>
-              <button 
-                onclick="promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
-                class="p-2.5 bg-white text-rose-600 hover:bg-rose-50 rounded-xl shadow-lg transform translate-y-2 group-hover:translate-y-0 transition"
-                title="ลบรายการ"
-              >
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            </div>
           </div>
 
           <!-- Product Details -->
-          <div class="p-4 flex-1 flex flex-col justify-between">
+          <div class="p-3.5 sm:p-4 flex-1 flex flex-col justify-between">
             <div>
-              <div class="text-[11px] font-mono text-slate-400 mb-0.5">ID: ${escapeHtml(p.id)}</div>
-              <h4 class="font-semibold text-slate-900 text-sm line-clamp-2 leading-snug" title="${escapeHtml(p.name)}">
+              <h4 class="font-bold text-slate-900 text-sm line-clamp-2 leading-snug" title="${escapeHtml(p.name)}">
                 ${escapeHtml(p.name)}
               </h4>
               ${p.description ? `
-                <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                   ${escapeHtml(p.description)}
                 </p>
               ` : ''}
             </div>
 
             <!-- Price & Actions Bar -->
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-end justify-between">
+            <div class="mt-3.5 pt-2.5 border-t border-slate-100 flex items-center justify-between">
               <div>
+                <div class="text-base font-bold text-slate-900 leading-none">
+                  ฿${sale.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                </div>
                 ${hasDiscount ? `
-                  <div class="text-xs text-slate-400 line-through">
+                  <div class="text-[11px] text-slate-400 line-through mt-0.5">
                     ฿${original.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                   </div>
                 ` : ''}
-                <div class="text-lg font-bold ${hasDiscount ? 'text-[#C98b6f]' : 'text-slate-900'} leading-none">
-                  ฿${sale.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
-                </div>
               </div>
 
               <!-- Action Buttons -->
               <div class="flex items-center gap-1">
                 <button 
                   onclick="promptEditProduct('${p.id}')" 
-                  class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+                  class="px-2 py-1 text-xs text-slate-600 hover:text-[#C98b6f] bg-slate-50 hover:bg-white border border-slate-200 hover:border-[#C98b6f] transition font-medium cursor-pointer"
                   title="แก้ไข"
                 >
-                  <i data-lucide="edit" class="w-4 h-4"></i>
+                  แก้ไข
                 </button>
                 <button 
                   onclick="promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
-                  class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                  class="px-2 py-1 text-xs text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition font-medium cursor-pointer"
                   title="ลบ"
                 >
-                  <i data-lucide="trash" class="w-4 h-4"></i>
+                  ลบ
                 </button>
               </div>
             </div>
@@ -880,7 +850,7 @@
       `;
     }
 
-    // HTML Template สำหรับ List View (Mobile First: ชื่อ + ราคา เด่นชัด 100% ไม่ต้องเลื่อนขวา)
+    // HTML Template สำหรับ List View (Mobile First: สะอาดตา ไม่เบียดเสียด ชื่อ+ราคาเด่นชัด)
     function renderListItem(p) {
       const original = Number(p.original_price) || 0;
       const sale = Number(p.sale_price) || original;
@@ -889,75 +859,73 @@
       const img = p.image_url || DEFAULT_IMG;
 
       return `
-        <div class="bg-white border border-slate-200 hover:border-[#C98b6f] transition p-3.5 sm:p-4 shadow-xs">
-          <div class="flex items-start gap-3">
+        <div class="bg-white border border-slate-200 hover:border-[#C98b6f] transition p-3 sm:p-4 group">
+          <div class="flex items-start gap-3 sm:gap-4">
             
             <!-- Product Thumbnail -->
-            <img 
-              src="${escapeHtml(img)}" 
-              alt="${escapeHtml(p.name)}" 
-              onerror="this.src='${DEFAULT_IMG}'" 
-              class="w-16 h-16 sm:w-20 sm:h-20 object-cover bg-slate-100 shrink-0 border border-slate-200"
-            >
+            <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-slate-50 border border-slate-200 overflow-hidden relative">
+              <img 
+                src="${escapeHtml(img)}" 
+                alt="${escapeHtml(p.name)}" 
+                onerror="this.src='${DEFAULT_IMG}'" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              >
+            </div>
 
-            <!-- Product Details & Mobile-First Price -->
-            <div class="flex-1 min-w-0">
+            <!-- Product Details -->
+            <div class="flex-1 min-w-0 flex flex-col justify-between self-stretch">
               
-              <!-- Category & ID -->
-              <div class="flex items-center gap-1.5 flex-wrap mb-1">
-                <span class="px-2 py-0.5 text-[11px] font-semibold bg-slate-100 text-slate-700">
-                  ${escapeHtml(p.category || 'ทั่วไป')}
-                </span>
-                <span class="text-[11px] text-slate-400 font-mono">${escapeHtml(p.id)}</span>
+              <!-- Top Row: Category on left, Actions on right -->
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <span class="text-[11px] font-semibold text-[#C98b6f] tracking-wider uppercase truncate">
+                    ${escapeHtml(p.category || 'ทั่วไป')}
+                  </span>
+                  
+                  <!-- Action Buttons -->
+                  <div class="flex items-center gap-1 shrink-0">
+                    <button 
+                      onclick="promptEditProduct('${p.id}')" 
+                      class="px-2 py-0.5 text-xs text-slate-600 hover:text-[#C98b6f] bg-slate-50 hover:bg-white border border-slate-200 hover:border-[#C98b6f] transition font-medium cursor-pointer"
+                      title="แก้ไข"
+                    >
+                      แก้ไข
+                    </button>
+                    <button 
+                      onclick="promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
+                      class="px-2 py-0.5 text-xs text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition font-medium cursor-pointer"
+                      title="ลบ"
+                    >
+                      ลบ
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Product Name -->
+                <h4 class="font-bold text-slate-900 text-sm sm:text-base leading-snug line-clamp-2">
+                  ${escapeHtml(p.name)}
+                </h4>
+
+                ${p.description ? `
+                  <p class="text-xs text-slate-400 mt-0.5 line-clamp-1 hidden sm:block">
+                    ${escapeHtml(p.description)}
+                  </p>
+                ` : ''}
               </div>
 
-              <!-- Product Name -->
-              <h4 class="font-bold text-slate-900 text-sm sm:text-base leading-snug line-clamp-2">
-                ${escapeHtml(p.name)}
-              </h4>
-
-              ${p.description ? `
-                <p class="text-xs text-slate-500 mt-1 line-clamp-1 hidden sm:block">
-                  ${escapeHtml(p.description)}
-                </p>
-              ` : ''}
-
-              <!-- PRICE & ACTIONS: ALWAYS VISIBLE ON MOBILE AND DESKTOP -->
-              <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
-                
-                <!-- Price Section -->
-                <div class="flex items-baseline gap-2">
-                  <span class="text-base sm:text-lg font-bold text-[#C98b6f] leading-none">
-                    ฿${sale.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+              <!-- Price Section: Clean & Bold -->
+              <div class="mt-2 flex items-baseline gap-2 flex-wrap">
+                <span class="text-base sm:text-lg font-bold text-slate-900 leading-none">
+                  ฿${sale.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                </span>
+                ${hasDiscount ? `
+                  <span class="text-xs text-slate-400 line-through">
+                    ฿${original.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                   </span>
-                  ${hasDiscount ? `
-                    <span class="text-xs text-slate-400 line-through">
-                      ฿${original.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
-                    </span>
-                    <span class="px-1.5 py-0.5 text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
-                      ลด ${discountPercent}%
-                    </span>
-                  ` : ''}
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex items-center gap-1.5 shrink-0">
-                  <button 
-                    onclick="promptEditProduct('${p.id}')" 
-                    class="px-2.5 py-1 text-xs font-medium border border-slate-200 hover:border-[#C98b6f] text-slate-700 hover:text-[#C98b6f] transition"
-                    title="แก้ไข"
-                  >
-                    แก้ไข
-                  </button>
-                  <button 
-                    onclick="promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
-                    class="px-2.5 py-1 text-xs font-medium border border-rose-200 text-rose-600 hover:bg-rose-50 transition"
-                    title="ลบ"
-                  >
-                    ลบ
-                  </button>
-                </div>
-
+                  <span class="px-1.5 py-0.5 text-[10px] font-bold bg-[#C98b6f]/10 text-[#C98b6f] border border-[#C98b6f]/20">
+                    ลด ${discountPercent}%
+                  </span>
+                ` : ''}
               </div>
 
             </div>
@@ -978,7 +946,7 @@
 
       // Pills filter buttons
       let html = `
-        <button onclick="selectCategory('ทั้งหมด')" class="category-btn ${currentCategory === 'ทั้งหมด' ? 'active bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} px-3 py-1 rounded-full text-xs font-medium transition">
+        <button onclick="selectCategory('ทั้งหมด')" class="category-btn ${currentCategory === 'ทั้งหมด' ? 'active bg-[#C98b6f] text-white border-[#C98b6f]' : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300'} px-3 py-1 text-xs font-medium border transition cursor-pointer">
           ทั้งหมด
         </button>
       `;
@@ -986,7 +954,7 @@
       cats.forEach(cat => {
         const isActive = currentCategory === cat;
         html += `
-          <button onclick="selectCategory('${escapeJs(cat)}')" class="category-btn ${isActive ? 'active bg-[#C98b6f] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} px-3 py-1 rounded-full text-xs font-medium transition">
+          <button onclick="selectCategory('${escapeJs(cat)}')" class="category-btn ${isActive ? 'active bg-[#C98b6f] text-white border-[#C98b6f]' : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300'} px-3 py-1 text-xs font-medium border transition cursor-pointer">
             ${escapeHtml(cat)}
           </button>
         `;
