@@ -934,13 +934,41 @@
 
     const DEFAULT_IMG = getCategoryPlaceholder('ทั่วไป');
 
+    // โหลดข้อมูลแคชจากเครื่องขึ้นมาแสดงผลทันที (Instant Render < 0.01 วินาที ไม่ต้องรอเน็ต)
+    function loadCachedData() {
+      try {
+        const cached = localStorage.getItem('kma_cached_products');
+        if (cached) {
+          const list = JSON.parse(cached);
+          if (Array.isArray(list) && list.length > 0) {
+            extractCategoriesFromProducts(list);
+            products = filterAndSortLocal(list);
+            if (showFavoritesOnly) {
+              products = products.filter(p => favorites.includes(p.id));
+            }
+            renderProducts();
+            updateCategoriesFilter();
+            showLoading(false);
+          }
+        }
+      } catch (e) {
+        console.warn('Cache load error:', e);
+      }
+    }
+
     // On Document Ready
-    document.addEventListener('DOMContentLoaded', async () => {
-      await checkDatabaseStatus();
-      await loadAllCategories();
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. เรนเดอร์ข้อมูลสินค้าทันทีจากแคชในเครื่อง (< 0.01 วินาที จอไม่ขาว ไม่ต้องรอเน็ต)
+      loadCachedData();
       updateFavoritesBadges();
-      await fetchProducts();
       lucide.createIcons();
+
+      // 2. ซิงค์ข้อมูลล่าสุดกับ Turso Cloud พร้อมกันในเบื้องหลังแบบคู่ขนาน (Parallel Background Sync)
+      Promise.all([
+        fetchProducts(true),
+        checkDatabaseStatus(),
+        loadAllCategories()
+      ]).catch(e => console.warn('Background sync error:', e));
     });
 
     // โหลดหมวดหมู่ทั้งหมดจาก API เพื่อคงปุ่มหมวดหมู่ไว้เสมอ
@@ -1062,12 +1090,15 @@
       });
     }
 
-    // ดึงข้อมูลสินค้า
-    async function fetchProducts() {
+    // ดึงข้อมูลสินค้า (รองรับ Background Sync โดยไม่ทำลายหน้าจอ)
+    async function fetchProducts(isBackground = false) {
       const refreshIcon = document.getElementById('refreshIcon');
       if (refreshIcon) refreshIcon.classList.add('animate-spin');
 
-      showLoading(true);
+      // แสดง Loading State หน้าจอขาวเฉพาะตอนที่ยังไม่มีสินค้าในหน่วยความจำเลยเท่านั้น
+      if (!isBackground && products.length === 0) {
+        showLoading(true);
+      }
 
       try {
         if (isServerMode) {
@@ -1079,8 +1110,15 @@
           const res = await fetch(`/api/products?${params.toString()}`);
           const result = await res.json();
           if (result.success) {
-            products = result.data || [];
-            extractCategoriesFromProducts(products);
+            const rawList = result.data || [];
+            // บันทึกแคชเมื่อดึงรายการทั้งหมด (ไม่ติด Filter เฉพาะ)
+            if (!currentCategory || currentCategory === 'ทั้งหมด') {
+              try {
+                localStorage.setItem('kma_cached_products', JSON.stringify(rawList));
+              } catch (e) {}
+            }
+            extractCategoriesFromProducts(rawList);
+            products = rawList;
           } else {
             throw new Error(result.error);
           }
@@ -1093,6 +1131,9 @@
           );`);
           let sql = 'SELECT * FROM products';
           let rows = await queryTursoDirect(sql);
+          try {
+            localStorage.setItem('kma_cached_products', JSON.stringify(rows));
+          } catch (e) {}
           extractCategoriesFromProducts(rows);
           products = filterAndSortLocal(rows);
         } else {
@@ -1113,7 +1154,7 @@
       } catch (err) {
         console.warn('Fetch error:', err);
         // Fallback to local memory if anything fails
-        let stored = localStorage.getItem('local_products');
+        let stored = localStorage.getItem('kma_cached_products') || localStorage.getItem('local_products');
         const fallbackList = stored ? JSON.parse(stored) : [];
         extractCategoriesFromProducts(fallbackList);
         products = filterAndSortLocal(fallbackList);

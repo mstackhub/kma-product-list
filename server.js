@@ -222,13 +222,14 @@ function parseBody(req) {
   });
 }
 
-// Helper ส่ง JSON Response
-function sendJson(res, statusCode, data) {
+// Helper ส่ง JSON Response พร้อม HTTP Headers เพิ่มเติม (เช่น Cache-Control)
+function sendJson(res, statusCode, data, extraHeaders = {}) {
   res.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    ...extraHeaders
   });
   res.end(JSON.stringify(data));
 }
@@ -275,6 +276,8 @@ async function requestHandler(req, res) {
         mode: isTurso ? 'turso_cloud' : 'local_sqlite',
         database_url: TURSO_URL ? TURSO_URL.replace(/:[^:@]*@/, ':****@') : 'local: products.db',
         has_token: Boolean(TURSO_TOKEN)
+      }, {
+        'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600'
       });
     }
 
@@ -390,6 +393,8 @@ async function requestHandler(req, res) {
         success: true,
         count: products.length,
         data: products
+      }, {
+        'Cache-Control': 'public, max-age=3, s-maxage=8, stale-while-revalidate=30'
       });
     }
 
@@ -409,6 +414,8 @@ async function requestHandler(req, res) {
       return sendJson(res, 200, {
         success: true,
         data: Array.from(catSet).sort()
+      }, {
+        'Cache-Control': 'public, max-age=15, s-maxage=30, stale-while-revalidate=120'
       });
     }
 
