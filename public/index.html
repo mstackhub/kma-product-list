@@ -347,11 +347,10 @@
       <!-- Category Filter Section (Header on Top + 4 Organized Rows) -->
       <div class="pt-2.5 pb-1 border-t border-[#f0eae4]">
         <!-- Header Row (ไว้ด้านบน) -->
-        <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#f0eae4]/70">
+        <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-[#f0eae4]/70">
           <div class="flex items-center gap-2">
-            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-              <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-[#C98b6f]"></i>
-              <span>หมวดหมู่สินค้า</span>
+            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              หมวดหมู่สินค้า
             </span>
             <span class="text-[11px] text-slate-400 hidden sm:inline">| แตะเลือกหมวดหมู่เพื่อกรองสินค้า</span>
           </div>
@@ -360,16 +359,15 @@
             type="button" 
             onclick="openCategoryManagerModal()" 
             title="จัดการหมวดหมู่ (ลบ / เปลี่ยนชื่อ / เพิ่ม)"
-            class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-[#C98b6f] hover:text-[#b87556] bg-white hover:bg-[#FAF6F2] border border-[#C98b6f]/40 hover:border-[#C98b6f] transition cursor-pointer shadow-2xs"
+            class="px-2.5 py-1 text-xs font-bold text-[#C98b6f] hover:text-[#b87556] bg-white hover:bg-[#FAF6F2] border border-[#C98b6f]/40 hover:border-[#C98b6f] transition cursor-pointer shadow-2xs"
           >
-            <i data-lucide="settings-2" class="w-3.5 h-3.5"></i>
-            <span>จัดการหมวดหมู่</span>
+            จัดการหมวดหมู่
           </button>
         </div>
 
-        <!-- Category Rows Container (4 แถวตามที่กำหนด) -->
-        <div id="categoryContainer" class="space-y-1.5 py-0.5">
-          <!-- Dynamically populated 4 rows -->
+        <!-- Category Groups Container (Desktop 2 คอลัมน์สมมาตรสวยงาม / Mobile 1 คอลัมน์) -->
+        <div id="categoryContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-x-8 md:gap-y-3.5 py-0.5">
+          <!-- Dynamically populated 4 groups in 2x2 grid on desktop -->
         </div>
       </div>
     </section>
@@ -2210,40 +2208,40 @@
       const row4Items = [...row4Preset.filter(c => !excludedCategories.includes(c)), ...otherItems];
 
       let html = `
-        <!-- แถวแรก: งานผิว & แป้ง -->
+        <!-- กลุ่ม 1: งานผิว & แป้ง -->
         <div class="space-y-1">
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-            <span>✨ งานผิว & แป้ง:</span>
+          <div class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+            งานผิว & แป้ง
           </div>
           <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 py-0.5">
             ${row1Items.map(renderCategoryRowPill).join('')}
           </div>
         </div>
 
-        <!-- แถวสอง: แต่งหน้า & ตา & ปาก -->
-        <div class="space-y-1 pt-1 border-t border-[#f0eae4]/60">
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-            <span>💄 แต่งแต้มสีสัน (ตา/ปาก/แก้ม):</span>
+        <!-- กลุ่ม 2: แต่งแต้มสีสัน (ตา/ปาก/แก้ม) -->
+        <div class="space-y-1">
+          <div class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+            แต่งแต้มสีสัน (ตา/ปาก/แก้ม)
           </div>
           <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 py-0.5">
             ${row2Items.map(renderCategoryRowPill).join('')}
           </div>
         </div>
 
-        <!-- แถวสาม: สกินแคร์ & บำรุง -->
-        <div class="space-y-1 pt-1 border-t border-[#f0eae4]/60">
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-            <span>🧴 สกินแคร์ & บำรุงผิว:</span>
+        <!-- กลุ่ม 3: สกินแคร์ & บำรุงผิว -->
+        <div class="space-y-1">
+          <div class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+            สกินแคร์ & บำรุงผิว
           </div>
           <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 py-0.5">
             ${row3Items.map(renderCategoryRowPill).join('')}
           </div>
         </div>
 
-        <!-- แถวสี่: โปรพิเศษ & อื่นๆ -->
-        <div class="space-y-1 pt-1 border-t border-[#f0eae4]/60">
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-            <span>⭐ พิเศษ & อื่นๆ:</span>
+        <!-- กลุ่ม 4: พิเศษ & อื่นๆ -->
+        <div class="space-y-1">
+          <div class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+            พิเศษ & อื่นๆ
           </div>
           <div class="flex flex-wrap items-center gap-1 sm:gap-1.5 py-0.5">
             ${row4Items.map(renderCategoryRowPill).join('')}
