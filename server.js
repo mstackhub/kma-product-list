@@ -252,6 +252,39 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
+// Cache Shopify Token in memory
+let cachedShopifyToken = null;
+let tokenExpiresAt = 0;
+
+async function getShopifyAccessToken(shopDomain) {
+  if (cachedShopifyToken && Date.now() < tokenExpiresAt - 60000) {
+    return cachedShopifyToken;
+  }
+  const clientId = process.env.SHOPIFY_CLIENT_ID || '';
+  const clientSecret = process.env.SHOPIFY_CLIENT_SECRET || '';
+
+  try {
+    const res = await fetch(`https://${shopDomain}/admin/oauth/access_token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'client_credentials'
+      })
+    });
+    const data = await res.json();
+    if (data.access_token) {
+      cachedShopifyToken = data.access_token;
+      tokenExpiresAt = Date.now() + ((data.expires_in || 86400) * 1000);
+      return cachedShopifyToken;
+    }
+  } catch (e) {
+    console.error('Error getting shopify token:', e);
+  }
+  return cachedShopifyToken || '';
+}
+
 async function requestHandler(req, res) {
   // จัดการ CORS Preflight
   if (req.method === 'OPTIONS') {
@@ -265,7 +298,7 @@ async function requestHandler(req, res) {
 
   const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   let pathname = urlObj.pathname;
-  if (!pathname.startsWith('/api') && (pathname === '/products' || pathname.startsWith('/products/') || pathname === '/status' || pathname === '/categories' || pathname === '/config' || pathname === '/upload' || pathname === '/stats' || pathname === '/health')) {
+  if (!pathname.startsWith('/api') && (pathname === '/products' || pathname.startsWith('/products/') || pathname === '/status' || pathname === '/categories' || pathname === '/config' || pathname === '/upload' || pathname === '/stats' || pathname === '/health' || pathname === '/track-order')) {
     pathname = '/api' + pathname;
   }
 
@@ -646,6 +679,273 @@ async function requestHandler(req, res) {
         message: `ลบสินค้า ${id} เรียบร้อยแล้ว`,
         deleted_id: id
       });
+    }
+
+    // ---------------------------------------------------------
+    // API: GET /api/track-order - ค้นหาเลขพัสดุและรายการสินค้าด้วยเบอร์โทรศัพท์ (Realtime จาก Shopify Admin API)
+    // ---------------------------------------------------------
+    if (pathname === '/api/track-order' && req.method === 'GET') {
+      const rawPhone = (urlObj.searchParams.get('phone') || '').trim();
+      const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+
+      if (!cleanPhone || cleanPhone.length < 9) {
+        return sendJson(res, 400, { success: false, message: 'กรุณากรอกเบอร์โทรศัพท์ที่ถูกต้อง (9 - 10 หลัก)' });
+      }
+
+      // ตรวจสอบ Mock Data สำหรับเบอร์ทดสอบ
+      const mockOrders = {
+        '0812345678': [
+          {
+            orderNumber: '#KMA1203',
+            name: '#KMA1203',
+            financialStatus: 'Paid',
+            fulfillmentStatus: 'Fulfilled',
+            createdAtFormatted: 'October 15, 2026 at 4:35 pm from Online Store',
+            customerNameMasked: 'คุณ ภาวินี รั*******',
+            fulfillment: {
+              status: 'Fulfilled',
+              subCode: '#KMA1203-F1',
+              date: 'October 16, 2026',
+              carrier: 'Thailand Post EMS',
+              trackingNumber: 'EQ495061825TH',
+              trackingUrl: 'https://track.thailandpost.co.th/?trackNumber=EQ495061825TH'
+            },
+            items: [
+              {
+                title: 'KMA Sunshield Bright HYA Gel SPF50+ PA++++ 30ml กันแดดเนื้อเจลหน้ากระจ่างใส เบาสบายผิว',
+                sku: 'KBCUHU',
+                tag: '</> _free_gift: true',
+                image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=120&auto=format&fit=crop&q=80',
+                price: 0,
+                quantity: 1
+              },
+              {
+                title: 'KMA Make Me Matte Cushion SPF50 PA+++ 12g คุชชั่นแมทท์ไม่ต้องเซ็ตแป้ง',
+                sku: '01N KBCUTUXX01',
+                image: 'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=120&auto=format&fit=crop&q=80',
+                price: 195,
+                quantity: 2
+              },
+              {
+                title: 'KMA Cloudy Blush 5.5g บลัชออนเนื้อฟุ้งละมุน',
+                sku: '03 Soft Peach KAPFCUXX03',
+                image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=120&auto=format&fit=crop&q=80',
+                price: 145,
+                quantity: 1
+              },
+              {
+                title: 'KMA Light Setting Powder 8g แป้งนางฟ้าผิวมีออร่ากระจ่างใส',
+                sku: 'KAPQLUXXY1',
+                image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=120&auto=format&fit=crop&q=80',
+                price: 245,
+                quantity: 1
+              }
+            ]
+          },
+          {
+            orderNumber: '#KMA1185',
+            name: '#KMA1185',
+            financialStatus: 'Paid',
+            fulfillmentStatus: 'Fulfilled',
+            createdAtFormatted: 'September 28, 2026 at 11:20 am from Online Store',
+            customerNameMasked: 'คุณ ภาวินี รั*******',
+            fulfillment: {
+              status: 'Delivered (จัดส่งสำเร็จ)',
+              subCode: '#KMA1185-F1',
+              date: 'September 30, 2026',
+              carrier: 'Flash Express',
+              trackingNumber: 'TH0128495028F',
+              trackingUrl: 'https://www.flashexpress.co.th/tracking/?se=TH0128495028F'
+            },
+            items: [
+              {
+                title: 'KMA Water Resist Liquid Foundation รองพื้นคุมมัน กันน้ำ 30ml',
+                sku: '02 Natural Beige',
+                image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=120&auto=format&fit=crop&q=80',
+                price: 399,
+                quantity: 1
+              }
+            ]
+          }
+        ]
+      };
+
+      if (mockOrders[cleanPhone]) {
+        return sendJson(res, 200, { success: true, orders: mockOrders[cleanPhone] });
+      }
+
+      // ดึงข้อมูลจริงจาก Shopify Admin API
+      const shopDomain = process.env.SHOPIFY_SHOP_DOMAIN || 'kmacosmetics.myshopify.com';
+      let accessToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
+      if (!accessToken) {
+        accessToken = await getShopifyAccessToken(shopDomain);
+      }
+
+      try {
+        // ค้นหาลูกค้าด้วยเบอร์โทรศัพท์ (รองรับทั้ง 0812345678, +66812345678 หรือ 8 ตัวท้าย)
+        const last8 = cleanPhone.slice(-8);
+        const searchQueries = [
+          `phone:*${cleanPhone}*`,
+          `phone:*${last8}*`,
+          `phone:+66${cleanPhone.startsWith('0') ? cleanPhone.slice(1) : cleanPhone}`
+        ];
+
+        const graphqlQuery = `
+          query searchCustomerByPhone($query: String!) {
+            customers(first: 3, query: $query) {
+              edges {
+                node {
+                  id
+                  firstName
+                  lastName
+                  phone
+                  orders(first: 5, sortKey: CREATED_AT, reverse: true) {
+                    edges {
+                      node {
+                        id
+                        name
+                        createdAt
+                        displayFinancialStatus
+                        displayFulfillmentStatus
+                        shippingAddress {
+                          name
+                          phone
+                        }
+                        fulfillments {
+                          status
+                          createdAt
+                          trackingInfo {
+                            number
+                            company
+                            url
+                          }
+                        }
+                        lineItems(first: 10) {
+                          edges {
+                            node {
+                              title
+                              quantity
+                              originalUnitPriceSet {
+                                shopMoney {
+                                  amount
+                                }
+                              }
+                              image {
+                                url
+                              }
+                              customAttributes {
+                                key
+                                value
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `;
+
+        let customerNodes = [];
+
+        // ลองค้นหาตาม query รูปแบบต่างๆ
+        for (const q of searchQueries) {
+          const shopifyRes = await fetch(`https://${shopDomain}/admin/api/2024-01/graphql.json`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Shopify-Access-Token': accessToken
+            },
+            body: JSON.stringify({ query: graphqlQuery, variables: { query: q } })
+          });
+
+          const json = await shopifyRes.json();
+          const edges = json.data?.customers?.edges || [];
+          if (edges.length > 0) {
+            customerNodes = edges.map(e => e.node);
+            break;
+          }
+        }
+
+        // รวบรวมคำสั่งซื้อทั้งหมดที่พบ
+        let allOrders = [];
+        for (const cust of customerNodes) {
+          const orderEdges = cust.orders?.edges || [];
+          const custName = [cust.firstName, cust.lastName].filter(Boolean).join(' ') || 'ลูกค้าคนสำคัญ';
+
+          for (const oe of orderEdges) {
+            const onode = oe.node;
+            const rawReceiver = onode.shippingAddress?.name || custName;
+            
+            // Mask ชื่อผู้รับ
+            const nameParts = rawReceiver.trim().split(/\s+/);
+            const maskedReceiver = nameParts.length > 1 
+              ? `คุณ ${nameParts[0][0]}***** ${nameParts[nameParts.length - 1][0]}*****`
+              : `คุณ ${nameParts[0][0]}*****`;
+
+            const fulfillment = onode.fulfillments?.[0];
+            const tracking = fulfillment?.trackingInfo?.[0];
+
+            // ฟอร์แมตวันที่
+            const orderDate = new Date(onode.createdAt).toLocaleDateString('en-US', {
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric'
+            });
+
+            allOrders.push({
+              orderNumber: onode.name,
+              name: onode.name,
+              financialStatus: onode.displayFinancialStatus || 'Paid',
+              fulfillmentStatus: onode.displayFulfillmentStatus || 'Fulfilled',
+              createdAtFormatted: orderDate,
+              customerNameMasked: maskedReceiver,
+              fulfillment: {
+                status: fulfillment?.status === 'SUCCESS' ? 'Fulfilled (จัดส่งแล้ว)' : (onode.displayFulfillmentStatus || 'กำลังจัดเตรียม'),
+                subCode: `${onode.name}-F1`,
+                date: orderDate,
+                carrier: tracking?.company || 'Other tracking',
+                trackingNumber: tracking?.number || 'อยู่ระหว่างจัดเตรียมพัสดุ',
+                trackingUrl: tracking?.url || (tracking?.number ? `https://track.thailandpost.co.th/?trackNumber=${tracking.number}` : '#')
+              },
+              items: (onode.lineItems?.edges || []).map(ie => {
+                const item = ie.node;
+                const freeGift = item.customAttributes?.find(a => a.key === '_free_gift');
+                return {
+                  title: item.title,
+                  quantity: item.quantity,
+                  price: parseFloat(item.originalUnitPriceSet?.shopMoney?.amount || 0),
+                  tag: freeGift ? '</> _free_gift: true' : '',
+                  image: item.image?.url || 'https://via.placeholder.com/60'
+                };
+              })
+            });
+          }
+        }
+
+        if (allOrders.length > 0) {
+          return sendJson(res, 200, {
+            success: true,
+            source: 'shopify_live',
+            orders: allOrders.slice(0, 5)
+          });
+        }
+
+        return sendJson(res, 404, {
+          success: false,
+          message: `ไม่พบข้อมูลคำสั่งซื้อที่ตรงกับเบอร์ ${cleanPhone}`
+        });
+
+      } catch (err) {
+        console.error('Shopify Track Order Error:', err);
+        return sendJson(res, 500, {
+          success: false,
+          message: 'เกิดข้อผิดพลาดในการเชื่อมต่อ Shopify: ' + err.message
+        });
+      }
     }
 
     // ---------------------------------------------------------
