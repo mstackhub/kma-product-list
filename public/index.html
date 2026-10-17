@@ -1707,7 +1707,7 @@
               } catch (e) {}
             }
             extractCategoriesFromProducts(rawList);
-            products = rawList;
+            products = showFavoritesOnly ? rawList.filter(p => favorites.includes(p.id)) : rawList;
           } else {
             throw new Error(result.error);
           }
@@ -1724,18 +1724,16 @@
             localStorage.setItem('kma_cached_products', JSON.stringify(rows));
           } catch (e) {}
           extractCategoriesFromProducts(rows);
-          products = filterAndSortLocal(rows);
+          const filtered = filterAndSortLocal(rows);
+          products = showFavoritesOnly ? filtered.filter(p => favorites.includes(p.id)) : filtered;
         } else {
           // Standalone LocalStorage Mode
           let stored = localStorage.getItem('local_products');
           let list = stored ? JSON.parse(stored) : [];
           if (!stored) localStorage.setItem('local_products', JSON.stringify([]));
           extractCategoriesFromProducts(list);
-          products = filterAndSortLocal(list);
-        }
-
-        if (showFavoritesOnly) {
-          products = products.filter(p => favorites.includes(p.id));
+          const filtered = filterAndSortLocal(list);
+          products = showFavoritesOnly ? filtered.filter(p => favorites.includes(p.id)) : filtered;
         }
 
         renderProducts();
@@ -3500,6 +3498,12 @@
         if (navFavInd) navFavInd.classList.remove('hidden');
         if (navProdBtn) navProdBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative';
         if (navProdInd) navProdInd.classList.add('hidden');
+
+        // กรองและแสดงผลสินค้าที่ถูกใจทันที (0ms) ป้องกันการแสดงสินค้าหน้าหลักแว็บๆ
+        const rawStored = localStorage.getItem('kma_cached_products');
+        const allItems = rawStored ? JSON.parse(rawStored) : (products || []);
+        products = allItems.filter(p => favorites.includes(p.id));
+        renderProducts();
       } else {
         if (filterBox) filterBox.classList.remove('hidden');
         if (favHeader) favHeader.classList.add('hidden');
@@ -3514,9 +3518,16 @@
         if (navProdInd) navProdInd.classList.remove('hidden');
         if (navFavBtn) navFavBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative border-l border-slate-100';
         if (navFavInd) navFavInd.classList.add('hidden');
+
+        // คืนค่ารายการสินค้าทั้งหมดทันที (0ms)
+        const rawStored = localStorage.getItem('kma_cached_products');
+        if (rawStored) {
+          products = filterAndSortLocal(JSON.parse(rawStored));
+          renderProducts();
+        }
       }
 
-      fetchProducts();
+      fetchProducts(true);
       lucide.createIcons();
     }
 
