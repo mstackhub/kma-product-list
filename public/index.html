@@ -745,122 +745,150 @@
           <p class="text-[11px] text-slate-500 mt-0.5">แตะปุ่ม "+ ใส่ตะกร้า" ที่หน้ารายการสินค้าเพื่อเริ่มรวมยอดเงิน</p>
         </div>
 
-        <!-- Summary & Cash Calculation Box -->
-        <div id="cartCalculationBox" class="bg-[#FAF6F2]/60 border border-[#f0eae4] p-3.5 space-y-3">
+        <!-- Summary & Cash Calculation Sections -->
+        <div id="cartCalculationBox" class="space-y-3.5">
           
-          <!-- Subtotal Row -->
-          <div class="flex items-center justify-between text-xs pb-2 border-b border-[#f0eae4]">
-            <span class="text-slate-600 font-medium">ยอดรวมสินค้า (<span id="cartTotalItemsCount" class="font-bold">0</span> ชิ้น)</span>
-            <span class="font-bold text-slate-900">฿<span id="cartSubtotalText">0.00</span></span>
-          </div>
+          <!-- Section 1: สรุปยอดเงิน & ส่วนลด (Order Summary & Discounts) -->
+          <div class="bg-white border border-[#E8DFD8] shadow-xs">
+            <!-- Section 1 Header (เด่นชัด สไตล์ KMA) -->
+            <div class="bg-[#FAF6F2] px-3.5 py-2.5 border-b border-[#E8DFD8] flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 bg-[#C98b6f] inline-block shrink-0"></span>
+                <h3 class="text-xs font-extrabold text-slate-800 tracking-wide uppercase">1. สรุปยอดเงิน &amp; ส่วนลด</h3>
+              </div>
+              <span class="text-[10px] font-bold text-[#C98b6f] bg-white px-2 py-0.5 border border-[#E8DFD8]">ยอดรวมบิล</span>
+            </div>
 
-          <!-- Discount Section -->
-          <div class="space-y-1.5 pb-2 border-b border-[#f0eae4]">
-            <div class="flex items-center justify-between">
-              <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
-                <i data-lucide="badge-percent" class="w-3.5 h-3.5 text-rose-500"></i>
-                <span>ส่วนลดรวม (Discount)</span>
-              </label>
-              <!-- Discount Unit Toggle (฿ / %) -->
-              <div class="inline-flex border border-slate-200 bg-white p-0.5 text-[10px]">
-                <button 
-                  type="button" 
-                  id="discountTypeBahtBtn"
-                  onclick="setDiscountType('baht')" 
-                  class="px-2 py-0.5 font-bold transition cursor-pointer bg-[#C98b6f] text-white"
-                >
-                  ฿ บาท
-                </button>
-                <button 
-                  type="button" 
-                  id="discountTypePercentBtn"
-                  onclick="setDiscountType('percent')" 
-                  class="px-2 py-0.5 font-bold transition cursor-pointer text-slate-600 hover:text-slate-900"
-                >
-                  % เปอร์เซ็นต์
-                </button>
+            <div class="p-3.5 space-y-3">
+              <!-- Subtotal Row -->
+              <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-100">
+                <span class="text-slate-600 font-medium">ยอดรวมสินค้า (<span id="cartTotalItemsCount" class="font-bold text-slate-800">0</span> ชิ้น)</span>
+                <span class="font-bold text-slate-900 text-sm">฿<span id="cartSubtotalText">0.00</span></span>
+              </div>
+
+              <!-- Discount Section -->
+              <div class="space-y-1.5 pb-2 border-b border-slate-100">
+                <div class="flex items-center justify-between">
+                  <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="badge-percent" class="w-3.5 h-3.5 text-rose-500"></i>
+                    <span>ส่วนลด (Discount)</span>
+                  </label>
+                  <!-- Discount Unit Toggle (฿ / %) -->
+                  <div class="inline-flex border border-slate-200 bg-slate-50 p-0.5 text-[10px]">
+                    <button 
+                      type="button" 
+                      id="discountTypeBahtBtn"
+                      onclick="setDiscountType('baht')" 
+                      class="px-2 py-0.5 font-bold transition cursor-pointer bg-[#C98b6f] text-white"
+                    >
+                      ฿ บาท
+                    </button>
+                    <button 
+                      type="button" 
+                      id="discountTypePercentBtn"
+                      onclick="setDiscountType('percent')" 
+                      class="px-2 py-0.5 font-bold transition cursor-pointer text-slate-600 hover:text-slate-900"
+                    >
+                      % เปอร์เซ็นต์
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Discount Input with Prefix & Clear button -->
+                <div class="relative">
+                  <span id="discountPrefixIcon" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-rose-500 font-bold text-xs">฿</span>
+                  <input 
+                    type="number" 
+                    id="cartDiscountInput" 
+                    placeholder="0.00" 
+                    step="any"
+                    min="0"
+                    oninput="calculateCartTotals()"
+                    class="w-full pl-7 pr-14 py-1.5 text-xs font-bold bg-white border border-slate-300 focus:outline-none focus:border-[#C98b6f] transition text-rose-600"
+                  >
+                  <button 
+                    type="button" 
+                    onclick="clearDiscount()" 
+                    id="clearDiscountBtn"
+                    class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 hover:text-rose-600 cursor-pointer px-1 py-0.5 font-medium"
+                    title="ล้างส่วนลด"
+                  >
+                    ✕ ล้าง
+                  </button>
+                </div>
+
+                <!-- Discount Calculated Summary (Show when discount > 0) -->
+                <div id="discountSummaryRow" class="hidden flex items-center justify-between text-xs text-rose-600 font-semibold pt-0.5">
+                  <span>ส่วนลดที่ได้รับ:</span>
+                  <span>-฿<span id="discountAmountText">0.00</span></span>
+                </div>
+              </div>
+
+              <!-- Net Total Row (ยอดชำระสุทธิ) -->
+              <div class="p-3 bg-[#FAF6F2] border border-[#E8DFD8] flex items-baseline justify-between">
+                <div>
+                  <span class="text-xs font-extrabold text-slate-900 uppercase tracking-wider block">ยอดชำระสุทธิ</span>
+                  <span class="text-[10px] text-slate-500 font-medium">ราคาสุดท้ายหลังหักส่วนลด</span>
+                </div>
+                <div class="text-xl sm:text-2xl font-extrabold text-[#C98b6f] tracking-tight">
+                  ฿<span id="cartGrandTotalText">0.00</span>
+                </div>
               </div>
             </div>
-
-            <!-- Discount Input with Prefix & Clear button -->
-            <div class="relative">
-              <span id="discountPrefixIcon" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-rose-500 font-bold text-xs">฿</span>
-              <input 
-                type="number" 
-                id="cartDiscountInput" 
-                placeholder="0.00" 
-                step="any"
-                min="0"
-                oninput="calculateCartTotals()"
-                class="w-full pl-7 pr-14 py-1.5 text-xs font-bold bg-white border border-slate-300 focus:outline-none focus:border-[#C98b6f] transition text-rose-600"
-              >
-              <button 
-                type="button" 
-                onclick="clearDiscount()" 
-                id="clearDiscountBtn"
-                class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 hover:text-rose-600 cursor-pointer px-1 py-0.5 font-medium"
-                title="ล้างส่วนลด"
-              >
-                ✕ ล้าง
-              </button>
-            </div>
-
-            <!-- Discount Calculated Summary (Show when discount > 0) -->
-            <div id="discountSummaryRow" class="hidden flex items-center justify-between text-xs text-rose-600 font-semibold pt-0.5">
-              <span>ส่วนลดที่ได้รับ:</span>
-              <span>-฿<span id="discountAmountText">0.00</span></span>
-            </div>
           </div>
 
-          <!-- Net Total Row (ยอดชำระสุทธิ) -->
-          <div class="flex items-baseline justify-between pb-2 border-b border-[#f0eae4]">
-            <div>
-              <span class="text-xs font-bold text-slate-800 uppercase tracking-wider block">ยอดชำระสุทธิ</span>
-              <span class="text-[10px] text-slate-400">ราคาสุดท้ายหลังหักส่วนลด</span>
+          <!-- Section 2: การชำระเงินสด & ทอนเงิน (Payment & Change) -->
+          <div class="bg-white border border-slate-200 shadow-xs">
+            <!-- Section 2 Header (เด่นชัด) -->
+            <div class="bg-slate-50 px-3.5 py-2.5 border-b border-slate-200 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 bg-emerald-600 inline-block shrink-0"></span>
+                <h3 class="text-xs font-extrabold text-slate-800 tracking-wide uppercase">2. รับเงินสด &amp; คำนวณเงินทอน</h3>
+              </div>
+              <span class="text-[10px] font-bold text-emerald-700 bg-white px-2 py-0.5 border border-emerald-200">ชำระเงิน</span>
             </div>
-            <div class="text-xl sm:text-2xl font-extrabold text-[#C98b6f] tracking-tight">
-              ฿<span id="cartGrandTotalText">0.00</span>
-            </div>
-          </div>
 
-          <!-- Cash Received Input (ภาพที่ 2 นำออกแล้ว ให้พิมพ์จำนวนเงินสดโดยตรง พร้อมปุ่มจ่ายพอดี) -->
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between">
-              <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
-                <i data-lucide="banknote" class="w-3.5 h-3.5 text-slate-500"></i>
-                <span>รับเงินสดจากลูกค้า</span>
-              </label>
-              <button 
-                type="button" 
-                onclick="setQuickCash('exact')" 
-                class="text-[11px] font-semibold text-[#C98b6f] hover:text-[#b87556] hover:underline cursor-pointer transition"
-                title="ใส่จำนวนเงินสดเท่ากับยอดชำระสุทธิพอดี"
-              >
-                [พอดีเงิน]
-              </button>
-            </div>
-            <div class="relative">
-              <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">฿</span>
-              <input 
-                type="number" 
-                id="cashReceivedInput" 
-                placeholder="0.00" 
-                step="any"
-                min="0"
-                oninput="calculateChange()"
-                class="w-full pl-7 pr-3 py-1.5 text-sm font-bold bg-white border border-slate-300 focus:outline-none focus:border-[#C98b6f] transition"
-              >
-            </div>
-          </div>
+            <div class="p-3.5 space-y-3">
+              <!-- Cash Received Input -->
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <i data-lucide="banknote" class="w-3.5 h-3.5 text-slate-500"></i>
+                    <span>รับเงินสดจากลูกค้า</span>
+                  </label>
+                  <button 
+                    type="button" 
+                    onclick="setQuickCash('exact')" 
+                    class="text-[11px] font-bold text-[#C98b6f] hover:text-[#b87556] hover:underline cursor-pointer transition flex items-center gap-0.5"
+                    title="ใส่จำนวนเงินสดเท่ากับยอดชำระสุทธิพอดี"
+                  >
+                    <span>[รับพอดีเงิน]</span>
+                  </button>
+                </div>
+                <div class="relative">
+                  <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">฿</span>
+                  <input 
+                    type="number" 
+                    id="cashReceivedInput" 
+                    placeholder="0.00" 
+                    step="any"
+                    min="0"
+                    oninput="calculateChange()"
+                    class="w-full pl-7 pr-3 py-1.5 text-sm font-bold bg-white border border-slate-300 focus:outline-none focus:border-[#C98b6f] transition"
+                  >
+                </div>
+              </div>
 
-          <!-- Change Result Box (เงินทอน) -->
-          <div id="changeDueBox" class="p-2.5 border flex items-center justify-between bg-emerald-50 border-emerald-200 transition-colors">
-            <div>
-              <div id="changeStatusLabel" class="text-xs font-bold text-emerald-800 uppercase tracking-wider">เงินทอน (Change)</div>
-              <div id="changeStatusSub" class="text-[10px] text-emerald-600">คำนวณอัตโนมัติ</div>
-            </div>
-            <div class="text-lg sm:text-xl font-extrabold text-emerald-700">
-              ฿<span id="changeDueText">0.00</span>
+              <!-- Change Result Box (เงินทอน) -->
+              <div id="changeDueBox" class="p-2.5 border flex items-center justify-between bg-slate-100 border-slate-300 transition-colors">
+                <div>
+                  <div id="changeStatusLabel" class="text-xs font-bold text-slate-700 uppercase tracking-wider">เงินทอน (Change Due)</div>
+                  <div id="changeStatusSub" class="text-[10px] text-slate-500">ระบุจำนวนเงินสดที่ได้รับ</div>
+                </div>
+                <div class="text-lg sm:text-xl font-extrabold text-slate-700">
+                  ฿<span id="changeDueText">0.00</span>
+                </div>
+              </div>
             </div>
           </div>
 
