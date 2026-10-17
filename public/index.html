@@ -369,6 +369,19 @@
         <div id="categoryContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-x-8 md:gap-y-3.5 py-0.5">
           <!-- Dynamically populated 4 groups in 2x2 grid on desktop -->
         </div>
+
+        <!-- Mobile Expand / Collapse Button (เฉพาะ Mobile Mode) -->
+        <div id="categoryExpandWrapper" class="md:hidden pt-2">
+          <button 
+            type="button" 
+            onclick="toggleCategoryExpand()" 
+            id="categoryExpandBtn"
+            class="w-full py-1.5 px-3 text-[11px] font-bold text-[#C98b6f] hover:text-[#b87556] bg-[#FAF6F2]/80 hover:bg-[#FAF6F2] border border-[#eadfd7] flex items-center justify-center gap-1.5 transition cursor-pointer active:bg-[#f0e4dc]"
+          >
+            <span id="categoryExpandText">ดูหมวดหมู่เพิ่มเติม (อีก 3 กลุ่ม)</span>
+            <i id="categoryExpandIcon" data-lucide="chevron-down" class="w-3.5 h-3.5 text-[#C98b6f]"></i>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -1412,6 +1425,7 @@
     let currentSort = 'newest';
     let currentSearch = '';
     let viewMode = 'list'; // 'list' | 'grid' (Default เป็นแบบ List รายการ)
+    let isCategoryExpanded = false; // เฉพาะ Mobile Mode: ยุบ/ขยายกลุ่มหมวดหมู่ (แสดงแถวแรกก่อน)
     let editingProduct = null;
     let isServerMode = true; // true = call /api/..., false = direct Turso / local
     let tursoUrl = localStorage.getItem('turso_db_url') || 'libsql://kma-product-list-web-mstackhub.aws-ap-northeast-1.turso.io';
@@ -2233,8 +2247,17 @@
       const otherItems = allActiveCats.filter(c => !definedInFirstThree.has(c) && !row4Preset.includes(c));
       const row4Items = [...row4Preset.filter(c => !excludedCategories.includes(c)), ...otherItems];
 
+      // หากมีการเลือกหมวดหมู่ที่อยู่ในกลุ่ม 2, 3 หรือ 4 ให้ขยายอัตโนมัติเพื่อให้เห็นปุ่มที่เลือก
+      if (row2Items.includes(currentCategory) || row3Items.includes(currentCategory) || row4Items.includes(currentCategory)) {
+        isCategoryExpanded = true;
+      }
+
+      const extraGroupClass = isCategoryExpanded 
+        ? 'category-extra-group space-y-1 block' 
+        : 'category-extra-group space-y-1 hidden md:block';
+
       let html = `
-        <!-- กลุ่ม 1: งานผิว & แป้ง -->
+        <!-- กลุ่ม 1: งานผิว & แป้ง (แถวแรก แสดงเสมอทั้ง Mobile & Desktop) -->
         <div class="space-y-1">
           <div class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
             งานผิว & แป้ง
@@ -2245,7 +2268,7 @@
         </div>
 
         <!-- กลุ่ม 2: แต่งแต้มสีสัน (ตา/ปาก/แก้ม) -->
-        <div class="space-y-1">
+        <div class="${extraGroupClass}">
           <div class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
             แต่งแต้มสีสัน (ตา/ปาก/แก้ม)
           </div>
@@ -2255,7 +2278,7 @@
         </div>
 
         <!-- กลุ่ม 3: สกินแคร์ & บำรุงผิว -->
-        <div class="space-y-1">
+        <div class="${extraGroupClass}">
           <div class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
             สกินแคร์ & บำรุงผิว
           </div>
@@ -2265,7 +2288,7 @@
         </div>
 
         <!-- กลุ่ม 4: พิเศษ & อื่นๆ -->
-        <div class="space-y-1">
+        <div class="${extraGroupClass}">
           <div class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
             พิเศษ & อื่นๆ
           </div>
@@ -2276,7 +2299,25 @@
       `;
 
       container.innerHTML = html;
+
+      // อัปเดตข้อความและไอคอนของปุ่ม Expand บน Mobile
+      const textEl = document.getElementById('categoryExpandText');
+      const iconEl = document.getElementById('categoryExpandIcon');
+      if (textEl) {
+        textEl.textContent = isCategoryExpanded ? 'ย่อหมวดหมู่' : 'ดูหมวดหมู่เพิ่มเติม (อีก 3 กลุ่ม)';
+      }
+      if (iconEl) {
+        iconEl.setAttribute('data-lucide', isCategoryExpanded ? 'chevron-up' : 'chevron-down');
+      }
+
       renderSuggestedCategories();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // ฟังก์ชันสลับแสดง/ซ่อนหมวดหมู่เพิ่มเติมเฉพาะ Mobile
+    function toggleCategoryExpand() {
+      isCategoryExpanded = !isCategoryExpanded;
+      updateCategoriesFilter();
     }
 
     // กรองตามหมวดหมู่ (คงปุ่มหมวดหมู่อื่นๆ ไว้ครบถ้วนเสมอ)
