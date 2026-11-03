@@ -718,51 +718,50 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: Quick Booth Cart & Calculator (คิดเงินด่วนหน้าบูธ & เงินทอน)        -->
+  <!-- MODAL: Quick Booth Cart & Calculator (คิดเงินด่วนหน้าบูธ & เงินทอน High Contrast) -->
   <!-- ========================================================================= -->
-  <div id="cartModal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-hidden">
+  <div id="cartModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-hidden">
     <div class="fixed inset-0" onclick="closeCartModal()"></div>
 
-    <div class="relative bg-white max-w-md w-full max-h-[88vh] flex flex-col shadow-2xl border border-slate-200 z-10 animate-in fade-in zoom-in-95 duration-150">
+    <div class="relative bg-white max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-300 z-10 animate-in fade-in zoom-in-95 duration-150">
       
-      <!-- Modal Header (Sleek KMA Brand) -->
-      <div class="px-4 py-3 border-b border-[#f0eae4] flex items-center justify-between bg-[#FAF6F2] shrink-0 sticky top-0 z-20">
+      <!-- Modal Header (High Contrast Dark Slate: ชัดเจน สะอาดตา ไม่กลืนกับสีเบจ) -->
+      <div class="px-4 py-3 bg-slate-900 text-white flex items-center justify-between shrink-0 sticky top-0 z-20 shadow-xs">
         <div class="flex items-center gap-2.5">
-          <div class="w-7 h-7 bg-[#C98b6f] text-white flex items-center justify-center shrink-0 shadow-2xs">
-            <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+          <div class="w-7 h-7 bg-[#C98b6f] text-white flex items-center justify-center shrink-0 shadow-xs">
+            <i data-lucide="calculator" class="w-4 h-4"></i>
           </div>
           <div>
-            <h3 class="text-sm font-bold text-slate-900 leading-tight">คิดเงินด่วนหน้าบูธ</h3>
-            <p class="text-[11px] text-slate-500">คำนวณยอดรวมและเงินทอนอัตโนมัติ</p>
+            <h3 class="text-sm font-bold text-white leading-tight">คิดเงินด่วนหน้าบูธ</h3>
+            <p class="text-[11px] text-slate-300">สรุปยอดชำระ & คำนวณเงินทอนอัตโนมัติ</p>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          <!-- Quick Header Total Badge (เด่นชัดเมื่อมีสินค้า) -->
-          <div id="cartHeaderTotalBadge" class="hidden text-right bg-white px-2.5 py-0.5 border border-[#E8DFD8]">
-            <span class="text-[9px] text-slate-400 block uppercase font-bold leading-none">ยอดสุทธิ</span>
-            <span class="text-xs sm:text-sm font-extrabold text-[#C98b6f] leading-tight">฿<span id="cartHeaderGrandTotalText">0.00</span></span>
-          </div>
-          <button 
-            type="button" 
-            onclick="closeCartModal()" 
-            class="text-slate-400 hover:text-slate-700 hover:bg-white p-1 border border-transparent hover:border-slate-200 transition cursor-pointer"
-            title="ปิดหน้าต่าง"
-          >
-            <i data-lucide="x" class="w-4 h-4"></i>
-          </button>
-        </div>
+        <button 
+          type="button" 
+          onclick="closeCartModal()" 
+          class="text-slate-400 hover:text-white p-1 transition cursor-pointer"
+          title="ปิดหน้าต่าง"
+        >
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
       </div>
 
-      <!-- Modal Body (Scrollable with clean padding) -->
-      <div class="overflow-y-auto p-3.5 sm:p-4 space-y-3 flex-1">
+      <!-- Modal Body (Scrollable with high-contrast distinct sections) -->
+      <div class="overflow-y-auto p-3.5 sm:p-4 space-y-4 flex-1 bg-[#FAF8F5]">
         
         <!-- Cart Items List Container -->
-        <div id="cartItemsContainer" class="space-y-2">
-          <!-- Rendered dynamically -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs text-slate-500 font-semibold px-0.5">
+            <span>รายการสินค้าในตะกร้า (<span id="cartTotalItemsCount" class="font-bold text-slate-800">0</span> ชิ้น)</span>
+            <span class="text-[11px] text-slate-400">ราคา/ชิ้น</span>
+          </div>
+          <div id="cartItemsContainer" class="space-y-2">
+            <!-- Rendered dynamically -->
+          </div>
         </div>
 
         <!-- Empty Cart Notice -->
-        <div id="cartEmptyState" class="hidden py-8 text-center border border-dashed border-slate-200 p-6 bg-slate-50/50">
+        <div id="cartEmptyState" class="hidden py-8 text-center border-2 border-dashed border-slate-200 p-6 bg-white">
           <div class="w-10 h-10 bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2">
             <i data-lucide="shopping-bag" class="w-5 h-5"></i>
           </div>
@@ -771,40 +770,41 @@
         </div>
 
         <!-- Summary & Cash Calculation Sections -->
-        <div id="cartCalculationBox" class="space-y-3.5">
+        <div id="cartCalculationBox" class="space-y-4">
           
-          <!-- Section 1: สรุปยอดเงิน & ส่วนลด (Order Summary & Discounts) -->
-          <div class="bg-white border border-[#E8DFD8] shadow-xs">
-            <!-- Section 1 Header (เด่นชัด สไตล์ KMA) -->
-            <div class="bg-[#FAF6F2] px-3.5 py-2.5 border-b border-[#E8DFD8] flex items-center justify-between">
+          <!-- SECTION 1: สรุปยอดเงิน & ส่วนลด (ธีม Warm Terracotta: ชัดเจน โดดเด่น เป็นเอกเทศ) -->
+          <div class="bg-white border-2 border-[#995c41]/30 shadow-xs overflow-hidden">
+            
+            <!-- Section 1 Header (สีน้ำตาลหรู KMA ชัดเจน 100%) -->
+            <div class="bg-[#995c41] text-white px-3.5 py-2.5 flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-2 h-2 bg-[#C98b6f] inline-block shrink-0"></span>
-                <h3 class="text-xs font-extrabold text-slate-800 tracking-wide uppercase">1. สรุปยอดเงิน &amp; ส่วนลด</h3>
+                <i data-lucide="receipt" class="w-4 h-4 text-[#FAF0E6]"></i>
+                <h4 class="text-xs font-black tracking-wide uppercase">1. สรุปยอดเงิน &amp; ส่วนลด</h4>
               </div>
-              <span class="text-[10px] font-bold text-[#C98b6f] bg-white px-2 py-0.5 border border-[#E8DFD8]">ยอดรวมบิล</span>
+              <span class="text-[10px] font-bold bg-white/20 px-2 py-0.5 tracking-wider">ORDER SUMMARY</span>
             </div>
 
             <div class="p-3.5 space-y-3">
               <!-- Subtotal Row -->
-              <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-100">
-                <span class="text-slate-600 font-medium">ยอดรวมสินค้า (<span id="cartTotalItemsCount" class="font-bold text-slate-800">0</span> ชิ้น)</span>
+              <div class="flex items-center justify-between text-xs text-slate-600 pb-2 border-b border-slate-100">
+                <span>ยอดรวมสินค้าทั้งหมด</span>
                 <span class="font-bold text-slate-900 text-sm">฿<span id="cartSubtotalText">0.00</span></span>
               </div>
 
               <!-- Discount Section -->
-              <div class="space-y-1.5 pb-2 border-b border-slate-100">
+              <div class="space-y-1.5 pb-2.5 border-b border-slate-100">
                 <div class="flex items-center justify-between">
-                  <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <i data-lucide="badge-percent" class="w-3.5 h-3.5 text-rose-500"></i>
+                  <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1.5 uppercase">
+                    <i data-lucide="percent" class="w-3.5 h-3.5 text-rose-500"></i>
                     <span>ส่วนลด (Discount)</span>
                   </label>
                   <!-- Discount Unit Toggle (฿ / %) -->
-                  <div class="inline-flex border border-slate-200 bg-slate-50 p-0.5 text-[10px]">
+                  <div class="inline-flex border border-slate-300 bg-slate-50 p-0.5 text-[10px]">
                     <button 
                       type="button" 
                       id="discountTypeBahtBtn"
                       onclick="setDiscountType('baht')" 
-                      class="px-2 py-0.5 font-bold transition cursor-pointer bg-[#C98b6f] text-white"
+                      class="px-2 py-0.5 font-bold transition cursor-pointer bg-[#995c41] text-white"
                     >
                       ฿ บาท
                     </button>
@@ -829,7 +829,7 @@
                     step="any"
                     min="0"
                     oninput="calculateCartTotals()"
-                    class="w-full pl-7 pr-14 py-1.5 text-xs font-bold bg-white border border-slate-300 focus:outline-none focus:border-[#C98b6f] transition text-rose-600"
+                    class="w-full pl-7 pr-14 py-1.5 text-xs font-bold bg-slate-50/50 border border-slate-300 focus:outline-none focus:bg-white focus:border-[#995c41] transition text-rose-600"
                   >
                   <button 
                     type="button" 
@@ -849,49 +849,42 @@
                 </div>
               </div>
 
-              <!-- Net Total Row (ยอดชำระสุทธิ) -->
-              <div class="p-3 bg-[#FAF6F2] border border-[#E8DFD8] flex items-baseline justify-between">
+              <!-- Grand Total Banner (ยอดชำระสุทธิ: ไฮไลท์แบบ High Contrast มองเห็นชัดเจน 100% ไม่กลืนกับสีอื่น) -->
+              <div class="p-3.5 bg-slate-900 text-white flex items-baseline justify-between shadow-xs">
                 <div>
-                  <span class="text-xs font-extrabold text-slate-900 uppercase tracking-wider block">ยอดชำระสุทธิ</span>
-                  <span class="text-[10px] text-slate-500 font-medium">ราคาสุดท้ายหลังหักส่วนลด</span>
+                  <span class="text-[11px] uppercase font-black text-amber-300 block tracking-wider">ยอดชำระสุทธิ (NET TOTAL)</span>
+                  <span class="text-[11px] text-slate-300">ราคาสุดท้ายหลังหักส่วนลด</span>
                 </div>
-                <div class="text-xl sm:text-2xl font-extrabold text-[#C98b6f] tracking-tight">
+                <div class="text-2xl sm:text-3xl font-black text-amber-400 tracking-tight">
                   ฿<span id="cartGrandTotalText">0.00</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Section 2: การชำระเงินสด & ทอนเงิน (Payment & Change) -->
-          <div class="bg-white border border-slate-200 shadow-xs">
-            <!-- Section 2 Header (เด่นชัด) -->
-            <div class="bg-slate-50 px-3.5 py-2.5 border-b border-slate-200 flex items-center justify-between">
+          <!-- SECTION 2: การชำระเงินสด & ทอนเงิน (ธีม EMERALD GREEN ชัดเจน แตกต่างจาก Section 1 ทันที!) -->
+          <div class="bg-white border-2 border-emerald-600/30 shadow-xs overflow-hidden">
+            
+            <!-- Section 2 Header (สีเขียวมรกต สัญลักษณ์เงินสด ชัดเจนตาแตก!) -->
+            <div class="bg-emerald-700 text-white px-3.5 py-2.5 flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-2 h-2 bg-emerald-600 inline-block shrink-0"></span>
-                <h3 class="text-xs font-extrabold text-slate-800 tracking-wide uppercase">2. รับเงินสด &amp; คำนวณเงินทอน</h3>
+                <i data-lucide="banknote" class="w-4 h-4 text-emerald-100"></i>
+                <h4 class="text-xs font-black tracking-wide uppercase">2. รับเงินสด &amp; คำนวณเงินทอน</h4>
               </div>
-              <span class="text-[10px] font-bold text-emerald-700 bg-white px-2 py-0.5 border border-emerald-200">ชำระเงิน</span>
+              <span class="text-[10px] font-bold bg-white/20 px-2 py-0.5 tracking-wider">CASH PAYMENT</span>
             </div>
 
             <div class="p-3.5 space-y-3">
               <!-- Cash Received Input -->
               <div class="space-y-1.5">
                 <div class="flex items-center justify-between">
-                  <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <i data-lucide="banknote" class="w-3.5 h-3.5 text-slate-500"></i>
+                  <label class="text-[11px] font-bold text-slate-800 flex items-center gap-1.5">
+                    <i data-lucide="hand-coins" class="w-3.5 h-3.5 text-emerald-600"></i>
                     <span>รับเงินสดจากลูกค้า</span>
                   </label>
-                  <button 
-                    type="button" 
-                    onclick="setQuickCash('exact')" 
-                    class="text-[11px] font-bold text-[#C98b6f] hover:text-[#b87556] hover:underline cursor-pointer transition flex items-center gap-0.5"
-                    title="ใส่จำนวนเงินสดเท่ากับยอดชำระสุทธิพอดี"
-                  >
-                    <span>[รับพอดีเงิน]</span>
-                  </button>
                 </div>
                 <div class="relative">
-                  <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">฿</span>
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">฿</span>
                   <input 
                     type="number" 
                     id="cashReceivedInput" 
@@ -899,19 +892,31 @@
                     step="any"
                     min="0"
                     oninput="calculateChange()"
-                    class="w-full pl-7 pr-3 py-1.5 text-sm font-bold bg-white border border-slate-300 focus:outline-none focus:border-[#C98b6f] transition"
+                    class="w-full pl-8 pr-3 py-2 text-base font-black bg-white border-2 border-slate-300 focus:border-emerald-600 focus:outline-none transition"
                   >
+                </div>
+
+                <!-- Quick Cash Buttons (ปุ่มลัดธนบัตรด่วนหน้าบูธ แตะครั้งเดียวจบ) -->
+                <div class="flex items-center gap-1.5 pt-1 flex-wrap">
+                  <span class="text-[10px] text-slate-400 font-bold shrink-0">ปุ่มลัด:</span>
+                  <button type="button" onclick="setQuickCash('exact')" class="flex-1 py-1 px-1.5 text-[11px] font-bold bg-slate-100 hover:bg-emerald-50 text-slate-700 border border-slate-300 hover:border-emerald-500 transition cursor-pointer text-center whitespace-nowrap">พอดี <span id="quickCashExactText">฿0.00</span></button>
+                  <button type="button" onclick="setQuickCash(100)" class="flex-1 py-1 px-1.5 text-[11px] font-bold bg-slate-100 hover:bg-emerald-50 text-slate-700 border border-slate-300 hover:border-emerald-500 transition cursor-pointer text-center whitespace-nowrap">฿100</button>
+                  <button type="button" onclick="setQuickCash(500)" class="flex-1 py-1 px-1.5 text-[11px] font-bold bg-slate-100 hover:bg-emerald-50 text-slate-700 border border-slate-300 hover:border-emerald-500 transition cursor-pointer text-center whitespace-nowrap">฿500</button>
+                  <button type="button" onclick="setQuickCash(1000)" class="flex-1 py-1 px-1.5 text-[11px] font-bold bg-slate-100 hover:bg-emerald-50 text-slate-700 border border-slate-300 hover:border-emerald-500 transition cursor-pointer text-center whitespace-nowrap">฿1,000</button>
                 </div>
               </div>
 
-              <!-- Change Result Box (เงินทอน) -->
-              <div id="changeDueBox" class="p-2.5 border flex items-center justify-between bg-slate-100 border-slate-300 transition-colors">
+              <!-- Change Result Box (เงินทอน เด่นชัดสุดๆ) -->
+              <div id="changeDueBox" class="p-3 border-2 border-slate-200 bg-slate-50 flex items-center justify-between transition-colors">
                 <div>
-                  <div id="changeStatusLabel" class="text-xs font-bold text-slate-700 uppercase tracking-wider">เงินทอน (Change Due)</div>
-                  <div id="changeStatusSub" class="text-[10px] text-slate-500">ระบุจำนวนเงินสดที่ได้รับ</div>
+                  <div id="changeStatusLabel" class="text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1.5">
+                    <i data-lucide="coins" class="w-4 h-4 text-emerald-600"></i>
+                    <span>เงินทอน (Change Due)</span>
+                  </div>
+                  <div id="changeStatusSub" class="text-[11px] text-slate-400 mt-0.5">กรอกจำนวนเงินสดที่ได้รับด้านบน</div>
                 </div>
-                <div class="text-lg sm:text-xl font-extrabold text-slate-700">
-                  ฿<span id="changeDueText">0.00</span>
+                <div class="text-2xl sm:text-3xl font-black text-slate-400 tracking-tight">
+                  <span id="changeDueText">฿0.00</span>
                 </div>
               </div>
             </div>
@@ -921,37 +926,34 @@
 
       </div>
 
-      <!-- Sticky Quick Total Bar (Always Visible อยู่ติดกับ Footer ทันที ไม่ต้องเลื่อนหา) -->
-      <div id="cartStickySummaryBar" class="hidden px-3.5 sm:px-4 py-2 bg-[#FAF6F2] border-t border-[#E8DFD8] flex items-center justify-between shrink-0 z-10 transition">
+      <!-- Sticky Quick Total Dock (Always Visible อยู่ติดกับ Footer คอนทราสต์สูง ไม่กลืนเป็นเบจ) -->
+      <div id="cartStickySummaryBar" class="hidden px-4 py-2 bg-slate-900 text-white border-t border-slate-800 flex items-center justify-between shrink-0 z-10 transition">
         <div class="flex items-center gap-2">
-          <div class="flex items-center gap-1.5">
-            <span class="w-2 h-2 bg-[#C98b6f] shrink-0"></span>
-            <span class="text-xs text-slate-700 font-bold">รวม <span id="cartStickyTotalItemsCount" class="text-[#C98b6f]">0</span> ชิ้น</span>
-          </div>
+          <span class="text-xs text-slate-300">รวม <span id="cartStickyTotalItemsCount" class="font-bold text-amber-400">0</span> ชิ้น</span>
           <button 
             type="button" 
             onclick="scrollToCartPayment()" 
-            class="text-[10px] text-slate-600 hover:text-[#C98b6f] font-semibold flex items-center gap-1 bg-white px-2 py-0.5 border border-[#E8DFD8] hover:border-[#C98b6f] cursor-pointer transition ml-1 shadow-2xs"
+            class="text-[10px] text-slate-300 hover:text-white font-semibold flex items-center gap-1 bg-slate-800 hover:bg-slate-700 px-2 py-0.5 border border-slate-700 cursor-pointer transition ml-1"
             title="เลื่อนลงไปกรอกส่วนลดและรับเงินสด"
           >
             <span>คิดเงิน/ทอน</span>
-            <i data-lucide="arrow-down" class="w-2.5 h-2.5 text-[#C98b6f]"></i>
+            <i data-lucide="arrow-down" class="w-2.5 h-2.5 text-amber-400"></i>
           </button>
         </div>
         <div class="flex items-baseline gap-1.5 text-right cursor-pointer" onclick="scrollToCartPayment()" title="แตะเพื่อดูส่วนลด/คิดเงินสด">
-          <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">ยอดสุทธิ</span>
-          <span class="text-lg sm:text-xl font-black text-[#C98b6f] tracking-tight">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ยอดสุทธิ:</span>
+          <span class="text-lg sm:text-xl font-black text-amber-400 tracking-tight">
             ฿<span id="cartStickyGrandTotalText">0.00</span>
           </span>
         </div>
       </div>
 
       <!-- Modal Footer -->
-      <div class="p-3 border-t border-slate-200 bg-white flex items-center justify-between gap-2 shrink-0">
+      <div class="p-3 border-t border-slate-200 bg-white flex items-center justify-between gap-3 shrink-0">
         <button 
           type="button" 
           onclick="confirmClearCart()" 
-          class="px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-300 transition cursor-pointer"
+          class="px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-300 transition cursor-pointer"
         >
           ล้างตะกร้า
         </button>
@@ -959,9 +961,9 @@
         <button 
           type="button" 
           onclick="finishCartTransaction()" 
-          class="inline-flex items-center gap-1.5 bg-[#C98b6f] hover:bg-[#b87556] active:scale-95 text-white px-4 py-1.5 text-xs font-semibold transition cursor-pointer shadow-2xs"
+          class="flex-1 inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-5 py-2 text-xs font-bold transition cursor-pointer shadow-sm"
         >
-          <i data-lucide="check" class="w-3.5 h-3.5"></i>
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
           <span>เสร็จสิ้นการขาย</span>
         </button>
       </div>
@@ -1635,7 +1637,7 @@
 
       // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=4').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=5').then(reg => {
           console.log('KMA PWA Service Worker active:', reg.scope);
           // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
           reg.update();
@@ -4082,6 +4084,9 @@
       if (stickyTotalEl) stickyTotalEl.textContent = formattedNet;
       if (headerTotalEl) headerTotalEl.textContent = formattedNet;
 
+      const quickExactEl = document.getElementById('quickCashExactText');
+      if (quickExactEl) quickExactEl.textContent = '฿' + formattedNet;
+
       if (discountRow && discountEl) {
         if (discountAmount > 0) {
           discountRow.classList.remove('hidden');
@@ -4221,30 +4226,31 @@
       const change = cash - netTotal;
 
       if (cash === 0 && netTotal > 0) {
-        dueBox.className = 'p-3 border flex items-center justify-between bg-slate-100 border-slate-300';
-        labelEl.className = 'text-xs font-bold text-slate-700 uppercase tracking-wider';
-        labelEl.textContent = 'เงินทอน (Change Due)';
-        subEl.className = 'text-[11px] text-slate-500';
-        subEl.textContent = 'ระบุจำนวนเงินสดที่ได้รับ';
-        textEl.className = 'text-xl sm:text-2xl font-extrabold text-slate-700';
-        textEl.textContent = '0.00';
+        dueBox.className = 'p-3 border-2 border-slate-200 bg-slate-50 flex items-center justify-between';
+        labelEl.className = 'text-xs font-bold text-slate-600 uppercase tracking-wide flex items-center gap-1.5';
+        labelEl.innerHTML = '<i data-lucide="coins" class="w-4 h-4 text-slate-400"></i><span>เงินทอน (Change Due)</span>';
+        subEl.className = 'text-[11px] text-slate-400 mt-0.5';
+        subEl.textContent = 'กรอกจำนวนเงินสดที่ได้รับด้านบน';
+        textEl.className = 'text-2xl sm:text-3xl font-black text-slate-400 tracking-tight';
+        textEl.textContent = '฿0.00';
       } else if (change >= 0) {
-        dueBox.className = 'p-3 border flex items-center justify-between bg-emerald-50 border-emerald-300';
-        labelEl.className = 'text-xs font-bold text-emerald-800 uppercase tracking-wider';
-        labelEl.textContent = 'เงินทอน (Change Due)';
-        subEl.className = 'text-[11px] text-emerald-600';
-        subEl.textContent = 'ทอนให้ลูกค้า';
-        textEl.className = 'text-xl sm:text-2xl font-extrabold text-emerald-700';
-        textEl.textContent = change.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        dueBox.className = 'p-3 border-2 border-emerald-500 bg-emerald-50 flex items-center justify-between shadow-2xs';
+        labelEl.className = 'text-xs font-black text-emerald-900 uppercase tracking-wide flex items-center gap-1.5';
+        labelEl.innerHTML = '<i data-lucide="coins" class="w-4 h-4 text-emerald-600"></i><span>เงินทอน (Change Due)</span>';
+        subEl.className = 'text-[11px] text-emerald-700 font-semibold mt-0.5';
+        subEl.textContent = 'ทอนเงินสดให้ลูกค้า';
+        textEl.className = 'text-2xl sm:text-3xl font-black text-emerald-700 tracking-tight';
+        textEl.textContent = '฿' + change.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       } else {
-        dueBox.className = 'p-3 border flex items-center justify-between bg-amber-50 border-amber-300';
-        labelEl.className = 'text-xs font-bold text-amber-800 uppercase tracking-wider';
-        labelEl.textContent = 'ยังขาดอีก (Amount Due)';
-        subEl.className = 'text-[11px] text-amber-700';
+        dueBox.className = 'p-3 border-2 border-rose-400 bg-rose-50 flex items-center justify-between shadow-2xs';
+        labelEl.className = 'text-xs font-black text-rose-900 uppercase tracking-wide flex items-center gap-1.5';
+        labelEl.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4 text-rose-600"></i><span>ยังขาดอีก (Amount Due)</span>';
+        subEl.className = 'text-[11px] text-rose-700 font-semibold mt-0.5';
         subEl.textContent = 'ลูกค้ายังจ่ายไม่ครบ';
-        textEl.className = 'text-xl sm:text-2xl font-extrabold text-amber-700';
-        textEl.textContent = Math.abs(change).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        textEl.className = 'text-2xl sm:text-3xl font-black text-rose-600 tracking-tight';
+        textEl.textContent = '฿' + Math.abs(change).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       }
+      lucide.createIcons();
     }
 
     async function confirmClearCart() {
