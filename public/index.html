@@ -2116,30 +2116,30 @@
                 </div>
 
                 <!-- Clean Utility Icons: Copy, Edit, Delete -->
-                <div class="flex items-center gap-1 shrink-0">
+                <div class="flex items-center gap-0.5 shrink-0">
                   <button 
                     type="button"
                     onclick="event.stopPropagation(); duplicateProduct('${p.id}')" 
-                    class="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-slate-400 hover:text-[#C98b6f] hover:bg-[#faf6f3] border border-slate-200 hover:border-[#C98b6f]/50 transition cursor-pointer"
+                    class="p-1.5 text-slate-400 hover:text-[#C98b6f] hover:bg-[#FAF6F2] transition cursor-pointer"
                     title="คัดลอกสินค้านี้"
                   >
-                    <i data-lucide="copy" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
                   </button>
                   <button 
                     type="button"
                     onclick="event.stopPropagation(); promptEditProduct('${p.id}')" 
-                    class="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-slate-400 hover:text-[#C98b6f] hover:bg-[#faf6f3] border border-slate-200 hover:border-[#C98b6f]/50 transition cursor-pointer"
+                    class="p-1.5 text-slate-400 hover:text-[#C98b6f] hover:bg-[#FAF6F2] transition cursor-pointer"
                     title="แก้ไข"
                   >
-                    <i data-lucide="edit-3" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                   </button>
                   <button 
                     type="button"
                     onclick="event.stopPropagation(); promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
-                    class="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-300 transition cursor-pointer"
+                    class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                     title="ลบ"
                   >
-                    <i data-lucide="trash-2" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                   </button>
                 </div>
               </div>
@@ -2167,7 +2167,7 @@
       `;
     }
 
-    // HTML Template สำหรับ List View (Mobile First: สะอาดตา ชื่อ+ราคาเด่นชัด)
+    // HTML Template สำหรับ List View (Mobile First: สะอาดตา หรูหรา สัดส่วนชัดเจน แก้ปัญหาปุ่มติดกัน)
     function renderListItem(p) {
       const original = Number(p.original_price) || 0;
       const sale = Number(p.sale_price) || original;
@@ -2182,10 +2182,10 @@
 
       return `
         <div class="bg-white border border-[#E7E0D8] hover:border-[#C98b6f] hover:shadow-xs transition p-3 sm:p-3.5 group">
-          <div class="flex items-center gap-3 sm:gap-4">
+          <div class="flex items-stretch gap-3 sm:gap-4">
             
             <!-- Product Thumbnail with Badges -->
-            <div class="w-20 h-20 sm:w-22 sm:h-22 shrink-0 bg-white border border-[#E7E0D8] p-1.5 overflow-hidden relative flex items-center justify-center">
+            <div class="w-20 h-20 sm:w-22 sm:h-22 shrink-0 bg-[#FAF6F2]/40 border border-[#eadfd7] p-1.5 overflow-hidden relative flex items-center justify-center self-center">
               <img 
                 src="${escapeHtml(img)}" 
                 alt="${escapeHtml(p.name)}" 
@@ -2194,29 +2194,20 @@
               >
               <!-- In-Cart Quantity Badge on Thumbnail -->
               <div data-cart-thumb-id="${p.id}" class="absolute top-1 left-1 z-10 ${inCartQty > 0 ? '' : 'hidden'}">
-                <span class="px-1.5 py-0.2 text-[9px] font-extrabold bg-slate-900/90 text-white border border-white/30 shadow-xs flex items-center gap-0.5 leading-tight">
+                <span class="px-1.5 py-0.5 text-[9px] font-extrabold bg-slate-900 text-white flex items-center gap-0.5 leading-none shadow-xs">
                   <span class="text-[#C98b6f] font-bold">+</span><span class="cart-thumb-qty">${inCartQty}</span>
                 </span>
               </div>
-              <!-- Mobile Heart Button -->
-              <button 
-                type="button" 
-                onclick="event.stopPropagation(); toggleFavorite('${p.id}')" 
-                class="sm:hidden absolute top-1 right-1 z-10 w-6 h-6 flex items-center justify-center bg-white/95 border border-slate-200 shadow-xs transition cursor-pointer ${isFav ? 'text-rose-500' : 'text-slate-400'}"
-                title="${isFav ? 'นำออกจากสินค้าที่ถูกใจ' : 'บันทึกเป็นสินค้าที่ถูกใจ'}"
-              >
-                <i data-lucide="heart" class="w-3 h-3 ${isFav ? 'fill-rose-500 text-rose-500' : ''}"></i>
-              </button>
             </div>
 
             <!-- Product Details -->
-            <div class="flex-1 min-w-0">
+            <div class="flex-1 min-w-0 flex flex-col justify-between">
               
-              <!-- Top Row: Tags & Desktop Heart -->
-              <div class="flex items-center justify-between gap-2 mb-1">
+              <!-- Top Row: Tags (Left) + Management Toolbar (Top-Right: ปลอดภัย ไม่ชนนิ้วเวลาขาย) -->
+              <div class="flex items-start justify-between gap-2">
                 <div class="flex flex-wrap items-center gap-1.5">
                   ${cats.map(c => `
-                    <button type="button" onclick="event.stopPropagation(); selectCategory('${escapeJs(c)}')" class="px-2 py-0.5 text-[10px] font-semibold bg-[#faf6f3] hover:bg-[#C98b6f] text-[#995c41] hover:text-white border border-[#eadfd7] transition cursor-pointer">
+                    <button type="button" onclick="event.stopPropagation(); selectCategory('${escapeJs(c)}')" class="px-2 py-0.5 text-[10px] font-semibold bg-[#FAF6F2] hover:bg-[#C98b6f] text-[#995c41] hover:text-white border border-[#eadfd7] transition cursor-pointer">
                       ${escapeHtml(c)}
                     </button>
                   `).join('')}
@@ -2227,20 +2218,45 @@
                   ` : ''}
                 </div>
 
-                <!-- Desktop Heart Button -->
-                <button 
-                  type="button"
-                  onclick="event.stopPropagation(); toggleFavorite('${p.id}')" 
-                  class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-xs ${isFav ? 'text-rose-600 bg-rose-50 border-rose-200' : 'text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-white border-slate-200'} border transition font-medium cursor-pointer"
-                  title="${isFav ? 'นำออกจากสินค้าที่ถูกใจ' : 'บันทึกเป็นสินค้าที่ถูกใจ'}"
-                >
-                  <i data-lucide="heart" class="w-3 h-3 ${isFav ? 'fill-rose-500 text-rose-500' : ''}"></i>
-                  <span class="text-[11px]">${isFav ? 'ถูกใจแล้ว' : 'ถูกใจ'}</span>
-                </button>
+                <!-- Admin Action Icons (Copy, Edit, Trash, Heart) แยกขึ้นบนขวา ปลอดภัย ไม่ปนกับปุ่มใส่ตะกร้า -->
+                <div class="flex items-center gap-0.5 shrink-0 -mt-0.5">
+                  <button 
+                    type="button"
+                    onclick="event.stopPropagation(); duplicateProduct('${p.id}')" 
+                    class="p-1.5 text-slate-400 hover:text-[#C98b6f] hover:bg-[#FAF6F2] transition cursor-pointer"
+                    title="คัดลอกสินค้านี้"
+                  >
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button 
+                    type="button"
+                    onclick="event.stopPropagation(); promptEditProduct('${p.id}')" 
+                    class="p-1.5 text-slate-400 hover:text-[#C98b6f] hover:bg-[#FAF6F2] transition cursor-pointer"
+                    title="แก้ไขข้อมูลสินค้า"
+                  >
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button 
+                    type="button"
+                    onclick="event.stopPropagation(); promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
+                    class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                    title="ลบสินค้านี้"
+                  >
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button 
+                    type="button"
+                    onclick="event.stopPropagation(); toggleFavorite('${p.id}')" 
+                    class="p-1.5 ${isFav ? 'text-rose-500' : 'text-slate-300 hover:text-rose-500'} hover:bg-rose-50 transition cursor-pointer ml-0.5"
+                    title="${isFav ? 'นำออกจากสินค้าที่ถูกใจ' : 'บันทึกเป็นสินค้าที่ถูกใจ'}"
+                  >
+                    <i data-lucide="heart" class="w-3.5 h-3.5 ${isFav ? 'fill-rose-500' : ''}"></i>
+                  </button>
+                </div>
               </div>
 
               <!-- Product Name -->
-              <h4 class="font-bold text-slate-900 text-xs sm:text-sm leading-snug line-clamp-1 group-hover:text-[#C98b6f] transition-colors" title="${escapeHtml(p.name)}">
+              <h4 class="font-bold text-slate-900 text-xs sm:text-sm leading-snug line-clamp-1 group-hover:text-[#C98b6f] transition-colors mt-1" title="${escapeHtml(p.name)}">
                 ${escapeHtml(p.name)}
               </h4>
 
@@ -2250,64 +2266,36 @@
                 </p>
               ` : ''}
 
-              <!-- Bottom Row: Price & Actions -->
-              <div class="mt-2 flex items-center justify-between gap-2 flex-wrap">
-                <div class="flex items-baseline gap-2">
-                  <span class="text-base sm:text-lg font-extrabold text-slate-900 leading-none">
+              <!-- Bottom Row: Price (Left) & Dedicated Add to Cart Button (Right: ปุ่มใหญ่ แตะง่าย ไม่ติดปุ่มอื่น) -->
+              <div class="mt-2.5 pt-2 border-t border-[#F5EFEB] flex items-center justify-between gap-2.5">
+                <div class="flex items-baseline gap-1.5 sm:gap-2">
+                  <span class="text-base sm:text-lg font-black text-slate-900 leading-none tracking-tight">
                     ฿${sale.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                   </span>
                   ${hasDiscount ? `
-                    <span class="text-xs text-slate-400 line-through">
+                    <span class="text-[11px] sm:text-xs text-slate-400 line-through">
                       ฿${original.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                     </span>
-                    <span class="px-1.5 py-0.2 text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
+                    <span class="px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200 leading-none">
                       ลด ${discountPercent}%
                     </span>
                   ` : ''}
                 </div>
 
-                <!-- Action Toolbar: Utility Icons + Add to Cart -->
-                <div class="flex items-center gap-1.5 shrink-0">
-                  <button 
-                    type="button"
-                    onclick="event.stopPropagation(); duplicateProduct('${p.id}')" 
-                    class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-[#C98b6f] hover:bg-[#faf6f3] border border-slate-200 hover:border-[#C98b6f]/50 transition cursor-pointer"
-                    title="คัดลอกสินค้านี้"
-                  >
-                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                  </button>
-                  <button 
-                    type="button"
-                    onclick="event.stopPropagation(); promptEditProduct('${p.id}')" 
-                    class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-[#C98b6f] hover:bg-[#faf6f3] border border-slate-200 hover:border-[#C98b6f]/50 transition cursor-pointer"
-                    title="แก้ไข"
-                  >
-                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                  </button>
-                  <button 
-                    type="button"
-                    onclick="event.stopPropagation(); promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
-                    class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-300 transition cursor-pointer"
-                    title="ลบ"
-                  >
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                  </button>
-
-                  <button 
-                    type="button" 
-                    data-cart-btn-id="${p.id}"
-                    onclick="event.stopPropagation(); addToCart('${p.id}')" 
-                    class="px-3 py-1.5 text-xs ${inCartQty > 0 ? 'bg-[#b87556] ring-1 ring-[#b87556]' : 'bg-[#C98b6f] hover:bg-[#b87556]'} active:scale-95 text-white font-semibold flex items-center gap-1 transition cursor-pointer shadow-xs ml-1" 
-                    title="${inCartQty > 0 ? `อยู่ในตะกร้าแล้ว ${inCartQty} ชิ้น (กดเพื่อเพิ่มอีก)` : 'ใส่ตะกร้าคิดเงินด่วน'}"
-                  >
-                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                    <span>ใส่ตะกร้า</span>
-                    <span class="cart-pill-count ${inCartQty > 0 ? '' : 'hidden'} ml-1 px-1.5 py-0.2 text-[10px] font-extrabold bg-white text-[#b87556] border border-white/40 shadow-2xs leading-none">
-                      +${inCartQty}
-                    </span>
-                  </button>
-                </div>
-
+                <!-- Dedicated Add to Cart Button (สัมผัสนิ้วโป้งแม่นยำ 100%) -->
+                <button 
+                  type="button" 
+                  data-cart-btn-id="${p.id}"
+                  onclick="event.stopPropagation(); addToCart('${p.id}')" 
+                  class="h-8 sm:h-8.5 px-3.5 sm:px-4 text-xs ${inCartQty > 0 ? 'bg-[#b87556] ring-1 ring-[#b87556]' : 'bg-[#C98b6f] hover:bg-[#b87556]'} active:scale-95 text-white font-bold flex items-center gap-1.5 transition cursor-pointer shadow-xs shrink-0" 
+                  title="${inCartQty > 0 ? `อยู่ในตะกร้าแล้ว ${inCartQty} ชิ้น (กดเพื่อเพิ่มอีก)` : 'ใส่ตะกร้าคิดเงินด่วน'}"
+                >
+                  <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+                  <span>ใส่ตะกร้า</span>
+                  <span class="cart-pill-count ${inCartQty > 0 ? '' : 'hidden'} ml-0.5 px-1.5 py-0.5 text-[10px] font-black bg-white text-[#b87556] leading-none">
+                    +${inCartQty}
+                  </span>
+                </button>
               </div>
 
             </div>
