@@ -1859,6 +1859,24 @@
       return filtered;
     }
 
+    // ⚡ ฟังก์ชันกรองและเรนเดอร์ทันที 0ms จากหน่วยความจำ/แคชในเครื่อง ไม่ต้องรอเน็ต
+    function applyLocalFilterAndRender() {
+      const rawCached = localStorage.getItem('kma_cached_products');
+      if (rawCached) {
+        try {
+          const allItems = JSON.parse(rawCached);
+          let filtered = filterAndSortLocal(allItems);
+          if (showFavoritesOnly) {
+            filtered = filtered.filter(p => favorites.includes(p.id));
+          }
+          products = filtered;
+          renderProducts();
+        } catch (e) {
+          console.warn('Local filter error:', e);
+        }
+      }
+    }
+
     // แสดงสถานะ Loading
     function showLoading(isLoading) {
       document.getElementById('loadingState').classList.toggle('hidden', !isLoading);
@@ -2375,7 +2393,11 @@
       // ปรับแต่งปุ่มหมวดหมู่ให้ active ตามที่เลือกทันที
       updateCategoryButtonsUI();
 
-      fetchProducts();
+      // ⚡ กรองและแสดงผลทันที 0ms จิ้มปุ๊บเปลี่ยนปั๊บ ไม่ต้องรอเน็ต!
+      applyLocalFilterAndRender();
+
+      // ซิงค์เบื้องหลังแบบเงียบๆ เพื่ออัปเดตราคา/สต็อกล่าสุด
+      fetchProducts(true);
     }
 
     function updateCategoryButtonsUI() {
@@ -2892,8 +2914,9 @@
 
       searchTimeout = setTimeout(() => {
         currentSearch = val;
-        fetchProducts();
-      }, 250);
+        applyLocalFilterAndRender();
+        fetchProducts(true);
+      }, 100);
     }
 
     function clearSearch() {
@@ -2901,7 +2924,8 @@
       input.value = '';
       currentSearch = '';
       document.getElementById('clearSearchBtn').classList.add('hidden');
-      fetchProducts();
+      applyLocalFilterAndRender();
+      fetchProducts(true);
     }
 
     // ==========================================
@@ -2937,7 +2961,8 @@
       menu.classList.add('hidden');
       if (chevron) chevron.style.transform = '';
 
-      fetchProducts();
+      applyLocalFilterAndRender();
+      fetchProducts(true);
     }
 
     // Close sort dropdown when clicking outside
@@ -2954,7 +2979,8 @@
     // เปลี่ยนการเรียงลำดับ (Sort Price DESC & ASC)
     function handleSortChange(sortVal) {
       currentSort = sortVal;
-      fetchProducts();
+      applyLocalFilterAndRender();
+      fetchProducts(true);
     }
 
     // สลับ View Mode (Grid / List)
