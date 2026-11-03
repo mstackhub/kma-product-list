@@ -736,14 +736,21 @@
             <p class="text-[11px] text-slate-500">คำนวณยอดรวมและเงินทอนอัตโนมัติ</p>
           </div>
         </div>
-        <button 
-          type="button" 
-          onclick="closeCartModal()" 
-          class="text-slate-400 hover:text-slate-700 hover:bg-white p-1 border border-transparent hover:border-slate-200 transition cursor-pointer"
-          title="ปิดหน้าต่าง"
-        >
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
+        <div class="flex items-center gap-2">
+          <!-- Quick Header Total Badge (เด่นชัดเมื่อมีสินค้า) -->
+          <div id="cartHeaderTotalBadge" class="hidden text-right bg-white px-2.5 py-0.5 border border-[#E8DFD8]">
+            <span class="text-[9px] text-slate-400 block uppercase font-bold leading-none">ยอดสุทธิ</span>
+            <span class="text-xs sm:text-sm font-extrabold text-[#C98b6f] leading-tight">฿<span id="cartHeaderGrandTotalText">0.00</span></span>
+          </div>
+          <button 
+            type="button" 
+            onclick="closeCartModal()" 
+            class="text-slate-400 hover:text-slate-700 hover:bg-white p-1 border border-transparent hover:border-slate-200 transition cursor-pointer"
+            title="ปิดหน้าต่าง"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
       </div>
 
       <!-- Modal Body (Scrollable with clean padding) -->
@@ -912,6 +919,31 @@
 
         </div>
 
+      </div>
+
+      <!-- Sticky Quick Total Bar (Always Visible อยู่ติดกับ Footer ทันที ไม่ต้องเลื่อนหา) -->
+      <div id="cartStickySummaryBar" class="hidden px-3.5 sm:px-4 py-2 bg-[#FAF6F2] border-t border-[#E8DFD8] flex items-center justify-between shrink-0 z-10 transition">
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 bg-[#C98b6f] shrink-0"></span>
+            <span class="text-xs text-slate-700 font-bold">รวม <span id="cartStickyTotalItemsCount" class="text-[#C98b6f]">0</span> ชิ้น</span>
+          </div>
+          <button 
+            type="button" 
+            onclick="scrollToCartPayment()" 
+            class="text-[10px] text-slate-600 hover:text-[#C98b6f] font-semibold flex items-center gap-1 bg-white px-2 py-0.5 border border-[#E8DFD8] hover:border-[#C98b6f] cursor-pointer transition ml-1 shadow-2xs"
+            title="เลื่อนลงไปกรอกส่วนลดและรับเงินสด"
+          >
+            <span>คิดเงิน/ทอน</span>
+            <i data-lucide="arrow-down" class="w-2.5 h-2.5 text-[#C98b6f]"></i>
+          </button>
+        </div>
+        <div class="flex items-baseline gap-1.5 text-right cursor-pointer" onclick="scrollToCartPayment()" title="แตะเพื่อดูส่วนลด/คิดเงินสด">
+          <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">ยอดสุทธิ</span>
+          <span class="text-lg sm:text-xl font-black text-[#C98b6f] tracking-tight">
+            ฿<span id="cartStickyGrandTotalText">0.00</span>
+          </span>
+        </div>
       </div>
 
       <!-- Modal Footer -->
@@ -4018,10 +4050,17 @@
       const discountRow = document.getElementById('discountSummaryRow');
       const discountEl = document.getElementById('discountAmountText');
       const totalEl = document.getElementById('cartGrandTotalText');
+      const stickyTotalEl = document.getElementById('cartStickyGrandTotalText');
+      const headerTotalEl = document.getElementById('cartHeaderGrandTotalText');
       const clearBtn = document.getElementById('clearDiscountBtn');
 
-      if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      if (totalEl) totalEl.textContent = netTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const formattedSubtotal = subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const formattedNet = netTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      if (subtotalEl) subtotalEl.textContent = formattedSubtotal;
+      if (totalEl) totalEl.textContent = formattedNet;
+      if (stickyTotalEl) stickyTotalEl.textContent = formattedNet;
+      if (headerTotalEl) headerTotalEl.textContent = formattedNet;
 
       if (discountRow && discountEl) {
         if (discountAmount > 0) {
@@ -4040,26 +4079,48 @@
       calculateChange();
     }
 
+    function scrollToCartPayment() {
+      const calcBox = document.getElementById('cartCalculationBox');
+      if (calcBox) {
+        calcBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const cashInput = document.getElementById('cashReceivedInput');
+        if (cashInput) {
+          setTimeout(() => {
+            cashInput.focus();
+            if (typeof cashInput.select === 'function') cashInput.select();
+          }, 350);
+        }
+      }
+    }
+
     function renderCart() {
       const container = document.getElementById('cartItemsContainer');
       const emptyState = document.getElementById('cartEmptyState');
       const calcBox = document.getElementById('cartCalculationBox');
       const countEl = document.getElementById('cartTotalItemsCount');
+      const stickyCountEl = document.getElementById('cartStickyTotalItemsCount');
+      const stickyBar = document.getElementById('cartStickySummaryBar');
+      const headerBadge = document.getElementById('cartHeaderTotalBadge');
 
       if (!container) return;
 
       const totalCount = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
       if (countEl) countEl.textContent = totalCount;
+      if (stickyCountEl) stickyCountEl.textContent = totalCount;
 
       if (cart.length === 0) {
         container.innerHTML = '';
         if (emptyState) emptyState.classList.remove('hidden');
         if (calcBox) calcBox.classList.add('hidden');
+        if (stickyBar) stickyBar.classList.add('hidden');
+        if (headerBadge) headerBadge.classList.add('hidden');
         return;
       }
 
       if (emptyState) emptyState.classList.add('hidden');
       if (calcBox) calcBox.classList.remove('hidden');
+      if (stickyBar) stickyBar.classList.remove('hidden');
+      if (headerBadge) headerBadge.classList.remove('hidden');
 
       container.innerHTML = cart.map(item => {
         const itemTotal = (Number(item.sale_price) || 0) * (item.qty || 1);
