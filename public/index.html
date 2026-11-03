@@ -1299,7 +1299,6 @@
         <div class="bg-amber-50/60 p-3.5 border border-amber-200 space-y-2">
           <label class="block text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center justify-between">
             <span class="flex items-center gap-1.5">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-600"></i>
               <span>ป้ายโปรโมชั่นออกบูธ (ไม่บังคับ)</span>
             </span>
             <span class="text-[11px] font-normal text-amber-700">แสดงเด่นบนรูปสินค้า</span>
@@ -1969,8 +1968,7 @@
             <!-- Promo Badge (Bottom-Left) -->
             ${(p.promotion && p.promotion.trim()) ? `
               <div class="absolute bottom-2 left-2 z-10 max-w-[70%]">
-                <span class="px-2 py-0.5 text-[10px] font-bold bg-[#C98b6f] text-white shadow-xs inline-flex items-center gap-1 truncate" title="${escapeHtml(p.promotion)}">
-                  <i data-lucide="sparkles" class="w-2.5 h-2.5 shrink-0"></i>
+                <span class="px-2 py-0.5 text-[10px] font-bold bg-[#C98b6f] text-white shadow-xs inline-flex items-center truncate" title="${escapeHtml(p.promotion)}">
                   <span class="truncate">${escapeHtml(p.promotion)}</span>
                 </span>
               </div>
@@ -2110,8 +2108,7 @@
                     </button>
                   `).join('')}
                   ${(p.promotion && p.promotion.trim()) ? `
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-[#C98b6f] text-white shadow-2xs">
-                      <i data-lucide="sparkles" class="w-2.5 h-2.5"></i>
+                    <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-bold bg-[#C98b6f] text-white shadow-2xs">
                       <span>${escapeHtml(p.promotion.trim())}</span>
                     </span>
                   ` : ''}
