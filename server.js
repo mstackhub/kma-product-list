@@ -980,7 +980,14 @@ async function requestHandler(req, res) {
     if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
       const ext = path.extname(filePath);
       const mime = MIME_TYPES[ext] || 'application/octet-stream';
-      res.writeHead(200, { 'Content-Type': mime });
+      const isHtmlOrSw = ext === '.html' || ext === '' || pathname === '/sw.js';
+      const headers = {
+        'Content-Type': mime,
+        'Cache-Control': isHtmlOrSw ? 'no-cache, no-store, must-revalidate' : 'public, max-age=3600',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      };
+      res.writeHead(200, headers);
       fs.createReadStream(filePath).pipe(res);
       return;
     }
@@ -988,7 +995,12 @@ async function requestHandler(req, res) {
     // Fallback ไป index.html (SPA routing)
     const indexPath = path.join(__dirname, 'public', 'index.html');
     if (fs.existsSync(indexPath)) {
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.writeHead(200, { 
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
       fs.createReadStream(indexPath).pipe(res);
       return;
     }

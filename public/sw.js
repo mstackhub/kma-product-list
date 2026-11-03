@@ -1,49 +1,53 @@
-const CACHE_NAME = 'kma-booth-v1';
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/kma-logo.png',
-  '/line-qr.png'
-];
+const CACHE_NAME = 'kma-booth-v3';
 
-// Install: Cache core static assets
+// Install: บังคับให้อัปเดตและข้ามการรอทันที
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(STATIC_ASSETS).catch(e => console.warn('Cache addAll error:', e));
-    })
-  );
   self.skipWaiting();
 });
 
-// Activate: Clean old caches
+// Activate: ล้าง Cache เก่าทั้งหมดทันที เพื่อไม่ให้ค้าง UI รุ่นเก่า
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+        keys.map(key => caches.delete(key))
       );
     })
   );
   self.clients.claim();
 });
 
-// Fetch: Stale-While-Revalidate for app shell, Network-First for API
+// Fetch: HTML ใช้ Network-First เสมอ เพื่อให้ได้เวอร์ชันล่าสุด 100%
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // For API calls: Network first, fall back to offline cache if offline
+  // สำหรับ API: Network-First (ถ้าออฟไลน์ถึงดึงแคช)
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match(event.request);
-      })
+      fetch(event.request).catch(() => caches.match(event.request))
     );
     return;
   }
 
-  // For static assets: Stale While Revalidate
+  // สำหรับหน้าเว็บ HTML และ Navigation: บังคับ Network-First เสมอ ป้องกันแคชเก่าใน LINE
+  if (event.request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(networkResponse => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // สำหรับ Assets ทั่วไป: Stale-While-Revalidate
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       const fetchPromise = fetch(event.request).then(networkResponse => {

@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KMA Cosmetics | แคตตาล็อกและคิดเงินหน้าบูธ</title>
   
+  <!-- Anti-Cache Headers for LINE WebView & Mobile Browsers -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
   <!-- PWA Meta & Manifest -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#C98b6f">
@@ -1593,10 +1598,12 @@
         loadAllCategories()
       ]).catch(e => console.warn('Background sync error:', e));
 
-      // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์
+      // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=3').then(reg => {
           console.log('KMA PWA Service Worker active:', reg.scope);
+          // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
+          reg.update();
         }).catch(err => {
           console.warn('PWA SW register error:', err);
         });
