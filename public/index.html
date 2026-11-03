@@ -1073,10 +1073,10 @@
               type="button" 
               id="confirmImportBtn"
               onclick="executeBulkImport()" 
-              class="w-full mt-2 inline-flex items-center justify-center gap-2 bg-[#C98b6f] hover:bg-[#b87556] active:scale-95 text-white py-2.5 px-4 text-sm font-bold transition cursor-pointer shadow-sm"
+              class="w-full mt-2 inline-flex items-center justify-center gap-2 bg-[#C98b6f] hover:bg-[#b87556] active:scale-95 text-white py-2.5 px-4 text-sm font-bold transition cursor-pointer shadow-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
             >
               <i data-lucide="check" class="w-4 h-4"></i>
-              <span>ยืนยันนำเข้าข้อมูลเข้าสู่ระบบ</span>
+              <span id="confirmImportBtnText">ยืนยันนำเข้าข้อมูลเข้าสู่ระบบ</span>
             </button>
           </div>
 
@@ -1341,7 +1341,7 @@
           <button 
             type="submit" 
             id="submitBtn"
-            class="inline-flex items-center gap-1.5 bg-[#C98b6f] hover:bg-[#b87556] active:scale-95 text-white px-5 py-2 text-xs sm:text-sm font-semibold transition cursor-pointer shadow-xs"
+            class="inline-flex items-center gap-1.5 bg-[#C98b6f] hover:bg-[#b87556] active:scale-95 text-white px-5 py-2 text-xs sm:text-sm font-semibold transition cursor-pointer shadow-xs disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none"
           >
             <i data-lucide="check" class="w-4 h-4"></i>
             <span id="submitBtnText">บันทึกสินค้า</span>
@@ -1427,6 +1427,8 @@
     let viewMode = 'list'; // 'list' | 'grid' (Default เป็นแบบ List รายการ)
     let isCategoryExpanded = false; // เฉพาะ Mobile Mode: ยุบ/ขยายกลุ่มหมวดหมู่ (แสดงแถวแรกก่อน)
     let editingProduct = null;
+    let isSubmittingProduct = false; // ป้องกัน Double Click / บันทึกสินค้าซ้ำซ้อน
+    let isSubmittingBulk = false; // ป้องกันกดยืนยันนำเข้า CSV ซ้ำซ้อน
     let isServerMode = true; // true = call /api/..., false = direct Turso / local
     let tursoUrl = localStorage.getItem('turso_db_url') || 'libsql://kma-product-list-web-mstackhub.aws-ap-northeast-1.turso.io';
     let tursoToken = localStorage.getItem('turso_auth_token') || 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTIxMjk1MTMsImlkIjoiMDFhMTQzM2UtMWYwMS03ZWFmLThmOGEtMDk5ZDU4YTFiY2VkIiwia2lkIjoiU1ZYRTc1Vy1QcHV4aWQ2RXJ6WlRRTzVNLW5OeVBzX0RjSm5qa0ZycXZ0YyIsInJpZCI6Ijc5NmMwNmVlLWJkY2EtNDRlYy1iYzEwLWJmOWI5ZmIzZjE5NSJ9.GEqIZaQPTvA9pvVCR5FDoAcekwdU5ijeOJGz0BsdV5ZRmoOxoajodxwgF30gD5agw0416Uaz4lU-t9ZyCqNLCg';
@@ -3064,8 +3066,17 @@
       reader.readAsDataURL(file);
     }
 
+    function resetSubmitBtnState() {
+      isSubmittingProduct = false;
+      const submitBtn = document.getElementById('submitBtn');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+      }
+    }
+
     // เปิด Modal เพิ่มสินค้า
     function openAddModal() {
+      resetSubmitBtnState();
       editingProduct = null;
       document.getElementById('productForm').reset();
       document.getElementById('formProductId').value = '';
@@ -3115,6 +3126,7 @@
     // การแก้ไขสินค้า: ต้องมี Alert แจ้งเตือนก่อนเสมอ!
     // =========================================================================
     function promptEditProduct(id) {
+      resetSubmitBtnState();
       const p = products.find(item => item.id === id);
       if (!p) return;
 
@@ -3160,6 +3172,7 @@
     // การคัดลอกสินค้า (Duplicate Product)
     // =========================================================================
     function duplicateProduct(id) {
+      resetSubmitBtnState();
       const p = products.find(item => item.id === id);
       if (!p) return;
 
@@ -3208,9 +3221,14 @@
       }, 60);
     }
 
-    // Submit Form (มี Alert ตรวจสอบยืนยันเสมอ)
+    // Submit Form (มี Alert ตรวจสอบยืนยันเสมอ + ป้องกันการกดย้ำ Double-Click)
     async function handleProductSubmit(e) {
       e.preventDefault();
+
+      if (isSubmittingProduct) {
+        console.warn('⚠️ Product submission already in progress, ignoring duplicate submit');
+        return;
+      }
 
       if (currentSelectedCategories.length === 0) {
         Swal.fire({
@@ -3252,6 +3270,19 @@
         }
       }
 
+      // ล็อกปุ่มทันทีเพื่อป้องกัน Double Click / กดย้ำบนมือถือ
+      const submitBtn = document.getElementById('submitBtn');
+      const submitBtnText = document.getElementById('submitBtnText');
+      const originalBtnText = submitBtnText ? submitBtnText.textContent : (id ? 'อัปเดตข้อมูล' : 'บันทึกสินค้า');
+
+      isSubmittingProduct = true;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+      }
+      if (submitBtnText) {
+        submitBtnText.textContent = id ? 'กำลังอัปเดต...' : 'กำลังบันทึก...';
+      }
+
       // บันทึกข้อมูล (รองรับทั้ง Server Mode และ Direct Turso / Local Mode)
       try {
         if (isServerMode) {
@@ -3273,7 +3304,10 @@
                 const idx = products.findIndex(p => p.id === id);
                 if (idx !== -1) products[idx] = { ...products[idx], ...data.data };
               } else {
-                products.unshift(data.data);
+                const exists = products.some(p => p.id === data.data.id);
+                if (!exists) {
+                  products.unshift(data.data);
+                }
               }
               try {
                 localStorage.setItem('kma_cached_products', JSON.stringify(products));
@@ -3339,6 +3373,14 @@
       } catch (err) {
         console.error('Submit error:', err);
         showToast('error', 'บันทึกข้อมูลไม่สำเร็จ: ' + err.message);
+      } finally {
+        isSubmittingProduct = false;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+        }
+        if (submitBtnText) {
+          submitBtnText.textContent = originalBtnText;
+        }
       }
     }
 
@@ -3406,6 +3448,7 @@
     // ปิด Modal สินค้า
     function closeProductModal() {
       document.getElementById('productModal').classList.add('hidden');
+      resetSubmitBtnState();
     }
 
     // Turso Config Modal Handlers
@@ -4301,6 +4344,10 @@
     }
 
     async function executeBulkImport() {
+      if (isSubmittingBulk) {
+        console.warn('⚠️ Bulk import already in progress, ignoring duplicate click');
+        return;
+      }
       if (parsedCsvProducts.length === 0) return;
 
       const confirmResult = await Swal.fire({
@@ -4315,6 +4362,18 @@
       });
 
       if (!confirmResult.isConfirmed) return;
+
+      const confirmBtn = document.getElementById('confirmImportBtn');
+      const confirmBtnText = document.getElementById('confirmImportBtnText');
+      const originalText = confirmBtnText ? confirmBtnText.textContent : 'ยืนยันนำเข้าข้อมูลเข้าสู่ระบบ';
+
+      isSubmittingBulk = true;
+      if (confirmBtn) {
+        confirmBtn.disabled = true;
+      }
+      if (confirmBtnText) {
+        confirmBtnText.textContent = 'กำลังนำเข้าข้อมูล...';
+      }
 
       try {
         if (isServerMode) {
@@ -4371,6 +4430,14 @@
           text: err.message,
           confirmButtonColor: '#C98b6f'
         });
+      } finally {
+        isSubmittingBulk = false;
+        if (confirmBtn) {
+          confirmBtn.disabled = false;
+        }
+        if (confirmBtnText) {
+          confirmBtnText.textContent = originalText;
+        }
       }
     }
 

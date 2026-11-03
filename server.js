@@ -552,7 +552,6 @@ async function requestHandler(req, res) {
         return sendJson(res, 400, { success: false, error: 'กรุณากรอกชื่อสินค้า' });
       }
 
-      const id = 'PRD-' + Date.now().toString().slice(-6);
       const name = body.name.trim();
       const category = body.category ? body.category.trim() : 'ทั่วไป';
       const originalPrice = Number(body.original_price) || 0;
@@ -563,6 +562,31 @@ async function requestHandler(req, res) {
       const description = body.description ? body.description.trim() : '';
       const promotion = body.promotion ? body.promotion.trim() : '';
 
+      // ป้องกัน Double Submit / Request ซ้ำซ้อนภายใน 4 วินาที
+      try {
+        const recentRows = await executeDb(
+          'SELECT id, name, category, original_price, sale_price, image_url, description, promotion, created_at, updated_at FROM products WHERE name = ? AND category = ? AND sale_price = ? ORDER BY created_at DESC LIMIT 1',
+          [name, category, salePrice]
+        );
+        if (recentRows && recentRows.length > 0) {
+          const lastItem = recentRows[0];
+          const lastTime = new Date(lastItem.created_at).getTime();
+          const timeDiff = Date.now() - lastTime;
+          // ถ้าถูกสร้างไปเมื่อไม่เกิน 4 วินาทีที่แล้ว ให้ถือเป็น duplicate request จากการกดย้ำ
+          if (timeDiff >= 0 && timeDiff < 4000) {
+            console.log(`⚠️ Prevented duplicate product creation: "${name}" created ${timeDiff}ms ago`);
+            return sendJson(res, 200, {
+              success: true,
+              message: 'สินค้าถูกเพิ่มเรียบร้อยแล้ว (ป้องกันการบันทึกซ้ำ)',
+              data: lastItem
+            });
+          }
+        }
+      } catch (checkErr) {
+        console.warn('Duplicate check warning:', checkErr.message);
+      }
+
+      const id = 'PRD-' + Date.now().toString().slice(-6);
       const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
 
       await executeDb(
