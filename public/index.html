@@ -1426,6 +1426,7 @@
     // App State
     let products = [];
     let currentCategory = 'ทั้งหมด';
+    let selectedCategories = []; // หมวดหมู่ที่เลือก (รองรับการเลือกพร้อมกันหลายหมวดหมู่, ว่าง = ทั้งหมด)
     let currentSort = 'newest';
     let currentSearch = '';
     let viewMode = 'list'; // 'list' | 'grid' (Default เป็นแบบ List รายการ)
@@ -1741,7 +1742,9 @@
       try {
         if (isServerMode) {
           const params = new URLSearchParams();
-          if (currentCategory && currentCategory !== 'ทั้งหมด') params.append('category', currentCategory);
+          if (selectedCategories.length > 0) {
+            params.append('category', selectedCategories.join(','));
+          }
           if (currentSort) params.append('sort', currentSort);
           if (currentSearch) params.append('q', currentSearch);
           params.append('_t', Date.now());
@@ -1751,7 +1754,7 @@
           if (result.success) {
             const rawList = result.data || [];
             // บันทึกแคชเมื่อดึงรายการทั้งหมด (ไม่ติด Filter เฉพาะ)
-            if (!currentCategory || currentCategory === 'ทั้งหมด') {
+            if (selectedCategories.length === 0) {
               try {
                 localStorage.setItem('kma_cached_products', JSON.stringify(rawList));
               } catch (e) {}
@@ -1810,13 +1813,13 @@
     function filterAndSortLocal(list) {
       let filtered = [...list];
 
-      // Filter category (supports comma-separated multi-categories)
-      if (currentCategory && currentCategory !== 'ทั้งหมด') {
-        const target = currentCategory.toLowerCase().trim();
+      // Filter category (รองรับการเลือกพร้อมกันหลายหมวดหมู่ Multi-Select)
+      if (selectedCategories.length > 0) {
+        const lowerSelected = selectedCategories.map(c => c.toLowerCase().trim());
         filtered = filtered.filter(p => {
           if (!p.category) return false;
           const cats = p.category.split(',').map(c => c.trim().toLowerCase());
-          return cats.some(c => c === target || (target.length >= 2 && (c.includes(target) || target.includes(c))));
+          return cats.some(c => lowerSelected.some(target => c === target || (target.length >= 2 && (c.includes(target) || target.includes(c)))));
         });
       }
 
@@ -2202,8 +2205,8 @@
     function renderCategoryRowPill(cat) {
       const isAll = cat === 'ทั้งหมด';
       const isActive = isAll 
-        ? (currentCategory === 'ทั้งหมด' && !showFavoritesOnly)
-        : (currentCategory === cat && !showFavoritesOnly);
+        ? (selectedCategories.length === 0 && !showFavoritesOnly)
+        : (selectedCategories.includes(cat) && !showFavoritesOnly);
 
       const activeCls = 'active bg-[#C98b6f] text-white border-[#C98b6f] shadow-2xs font-bold';
       const inactiveCls = 'bg-[#FAF6F2] hover:bg-white text-slate-700 hover:text-[#C98b6f] border-[#eadfd7] hover:border-[#C98b6f]/50 font-medium';
@@ -2254,7 +2257,7 @@
       const row4Items = [...row4Preset.filter(c => !excludedCategories.includes(c)), ...otherItems];
 
       // หากมีการเลือกหมวดหมู่ที่อยู่ในกลุ่ม 2, 3 หรือ 4 ให้ขยายอัตโนมัติเพื่อให้เห็นปุ่มที่เลือก
-      if (row2Items.includes(currentCategory) || row3Items.includes(currentCategory) || row4Items.includes(currentCategory)) {
+      if (selectedCategories.some(c => row2Items.includes(c) || row3Items.includes(c) || row4Items.includes(c))) {
         isCategoryExpanded = true;
       }
 
@@ -2326,7 +2329,7 @@
       updateCategoriesFilter();
     }
 
-    // กรองตามหมวดหมู่ (คงปุ่มหมวดหมู่อื่นๆ ไว้ครบถ้วนเสมอ)
+    // กรองตามหมวดหมู่ (รองรับ Multi-select และปุ่ม "ทั้งหมด" จะเคลียร์ทั้งหมด)
     function selectCategory(cat) {
       if (showFavoritesOnly) {
         showFavoritesOnly = false;
@@ -2345,28 +2348,50 @@
         if (navProdBtn) navProdBtn.className = 'flex flex-col items-center justify-center h-full text-[#C98b6f] font-semibold transition cursor-pointer hover:bg-[#faf6f3] relative';
       }
 
-      currentCategory = cat;
+      if (cat === 'ทั้งหมด') {
+        // เมื่อกด "ทั้งหมด" ให้ล้างหมวดหมู่ที่เลือกทั้งหมดทันที!
+        selectedCategories = [];
+        currentCategory = 'ทั้งหมด';
+      } else {
+        // เลือกหมวดหมู่: ถ้ามีอยู่แล้วให้เอาออก (Toggle unselect) ถ้ายังไม่มีให้เพิ่มเข้าไป
+        const idx = selectedCategories.indexOf(cat);
+        if (idx !== -1) {
+          selectedCategories.splice(idx, 1);
+        } else {
+          selectedCategories.push(cat);
+        }
+        currentCategory = selectedCategories.length > 0 ? selectedCategories.join(', ') : 'ทั้งหมด';
+      }
+
       const badge = document.getElementById('activeFilterBadge');
       const nameEl = document.getElementById('activeFilterName');
-      if (cat !== 'ทั้งหมด') {
-        if (nameEl) nameEl.textContent = `หมวดหมู่: ${cat}`;
+      if (selectedCategories.length > 0) {
+        if (nameEl) nameEl.textContent = `หมวดหมู่ (${selectedCategories.length}): ${selectedCategories.join(', ')}`;
         if (badge) badge.classList.remove('hidden');
       } else {
         if (badge) badge.classList.add('hidden');
       }
 
       // ปรับแต่งปุ่มหมวดหมู่ให้ active ตามที่เลือกทันที
+      updateCategoryButtonsUI();
+
+      fetchProducts();
+    }
+
+    function updateCategoryButtonsUI() {
+      const isAll = selectedCategories.length === 0;
       document.querySelectorAll('#categoryContainer .category-btn').forEach(btn => {
         const btnCat = btn.getAttribute('data-cat') || 'ทั้งหมด';
-        const isActive = btnCat === currentCategory;
+        const isActive = btnCat === 'ทั้งหมด' 
+          ? (isAll && !showFavoritesOnly)
+          : (selectedCategories.includes(btnCat) && !showFavoritesOnly);
+
         if (isActive) {
           btn.className = 'category-btn active px-2.5 py-1 text-[11px] sm:text-xs font-bold bg-[#C98b6f] text-white border border-[#C98b6f] shadow-2xs transition cursor-pointer shrink-0 whitespace-nowrap';
         } else {
           btn.className = 'category-btn px-2.5 py-1 text-[11px] sm:text-xs font-medium bg-[#FAF6F2] hover:bg-white text-slate-700 hover:text-[#C98b6f] border border-[#eadfd7] hover:border-[#C98b6f]/50 transition cursor-pointer shrink-0 whitespace-nowrap';
         }
       });
-
-      fetchProducts();
     }
 
     // ==========================================
@@ -2672,11 +2697,10 @@
           localStorage.setItem('kma_excluded_categories', JSON.stringify(excludedCategories));
         }
 
-        if (currentCategory === catName) {
-          currentCategory = 'ทั้งหมด';
-          const badge = document.getElementById('activeFilterBadge');
-          if (badge) badge.classList.add('hidden');
-        }
+        selectedCategories = selectedCategories.filter(c => c !== catName);
+        currentCategory = selectedCategories.length > 0 ? selectedCategories.join(', ') : 'ทั้งหมด';
+        const badge = document.getElementById('activeFilterBadge');
+        if (selectedCategories.length === 0 && badge) badge.classList.add('hidden');
 
         updateCategoriesFilter();
         renderProducts();
@@ -2768,10 +2792,11 @@
 
         // อัปเดต masterCategories
         masterCategories = masterCategories.map(c => c === oldName ? cleanNew : c).sort();
-        if (currentCategory === oldName) {
-          currentCategory = cleanNew;
-          const nameEl = document.getElementById('activeFilterName');
-          if (nameEl) nameEl.textContent = `หมวดหมู่: ${cleanNew}`;
+        selectedCategories = selectedCategories.map(c => c === oldName ? cleanNew : c);
+        currentCategory = selectedCategories.length > 0 ? selectedCategories.join(', ') : 'ทั้งหมด';
+        const nameEl = document.getElementById('activeFilterName');
+        if (nameEl && selectedCategories.length > 0) {
+          nameEl.textContent = `หมวดหมู่ (${selectedCategories.length}): ${selectedCategories.join(', ')}`;
         }
 
         updateCategoriesFilter();
@@ -3624,10 +3649,10 @@
         if (filterBox) filterBox.classList.remove('hidden');
         if (favHeader) favHeader.classList.add('hidden');
 
-        if (currentCategory === 'ทั้งหมด') {
+        if (selectedCategories.length === 0) {
           if (badge) badge.classList.add('hidden');
         } else {
-          if (nameEl) nameEl.textContent = `หมวดหมู่: ${currentCategory}`;
+          if (nameEl) nameEl.textContent = `หมวดหมู่ (${selectedCategories.length}): ${selectedCategories.join(', ')}`;
           if (badge) badge.classList.remove('hidden');
         }
         if (navProdBtn) navProdBtn.className = 'flex flex-col items-center justify-center h-full text-[#C98b6f] font-semibold transition cursor-pointer hover:bg-[#faf6f3] relative';

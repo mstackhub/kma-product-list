@@ -394,16 +394,22 @@ async function requestHandler(req, res) {
       const args = [];
 
       if (category && category !== 'ทั้งหมด') {
-        const cleanCat = category.trim();
-        sql += ' AND (category = ? OR category LIKE ? OR category LIKE ? OR category LIKE ? OR category LIKE ? OR category LIKE ?)';
-        args.push(
-          cleanCat,
-          `${cleanCat},%`,
-          `%, ${cleanCat},%`,
-          `%,${cleanCat},%`,
-          `%, ${cleanCat}`,
-          `%,${cleanCat}`
-        );
+        const catList = category.split(',').map(c => c.trim()).filter(Boolean);
+        if (catList.length > 0) {
+          const conditions = [];
+          for (const cleanCat of catList) {
+            conditions.push('(category = ? OR category LIKE ? OR category LIKE ? OR category LIKE ? OR category LIKE ? OR category LIKE ?)');
+            args.push(
+              cleanCat,
+              `${cleanCat},%`,
+              `%, ${cleanCat},%`,
+              `%,${cleanCat},%`,
+              `%, ${cleanCat}`,
+              `%,${cleanCat}`
+            );
+          }
+          sql += ` AND (${conditions.join(' OR ')})`;
+        }
       }
 
       if (search && search.trim() !== '') {
