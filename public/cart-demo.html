@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KMA Quick Booth Checkout - 5 Design Concepts Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+    .font-serif-luxury { font-family: 'Playfair Display', serif; }
+    /* Hide scrollbar for tabs */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 antialiased flex flex-col">
+
+  <!-- ========================================================================= -->
+  <!-- Top Navigation & Design Switcher Bar -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-50 bg-[#4A3228] text-white shadow-md border-b border-[#3a261e]">
+    <div class="max-w-4xl mx-auto px-3 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-sm tracking-wide text-[#EAD8CF]">KMA Booth POS</span>
+        <span class="text-xs px-2 py-0.5 bg-[#6e483b] text-amber-100 font-semibold border border-amber-300/30">
+          5 Design Concepts
+        </span>
+      </div>
+
+      <!-- Design Switcher Tabs (Scrollable on Mobile) -->
+      <nav class="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto no-scrollbar py-0.5">
+        <button onclick="switchDesign(1)" id="tabBtn1" class="tab-btn px-3 py-1.5 text-xs font-bold transition whitespace-nowrap bg-white text-[#4A3228] shadow-sm">
+          1. Modern Beauty POS
+        </button>
+        <button onclick="switchDesign(2)" id="tabBtn2" class="tab-btn px-3 py-1.5 text-xs font-medium transition whitespace-nowrap bg-[#5c4034] text-slate-200 hover:text-white">
+          2. Bottom Sheet Drawer
+        </button>
+        <button onclick="switchDesign(3)" id="tabBtn3" class="tab-btn px-3 py-1.5 text-xs font-medium transition whitespace-nowrap bg-[#5c4034] text-slate-200 hover:text-white">
+          3. Smart Boutique Receipt
+        </button>
+        <button onclick="switchDesign(4)" id="tabBtn4" class="tab-btn px-3 py-1.5 text-xs font-medium transition whitespace-nowrap bg-[#5c4034] text-slate-200 hover:text-white">
+          4. Minimalist Zen Luxury
+        </button>
+        <button onclick="switchDesign(5)" id="tabBtn5" class="tab-btn px-3 py-1.5 text-xs font-medium transition whitespace-nowrap bg-[#5c4034] text-slate-200 hover:text-white">
+          5. Speed Booth (No-Scroll)
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- Main Stage: Mobile Preview Frame -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 max-w-4xl mx-auto w-full p-3 sm:p-6 flex flex-col items-center justify-center">
+    
+    <!-- Design Concept Explanation Header -->
+    <div id="conceptInfoBox" class="w-full max-w-md mb-3 bg-white p-3 border border-slate-200 shadow-2xs">
+      <div class="flex items-center justify-between">
+        <h3 id="conceptTitle" class="text-sm font-bold text-[#6e483b]">ดีไซน์ 1: Modern Beauty POS (Clean & Airy)</h3>
+        <span id="conceptTag" class="text-[10px] font-semibold bg-[#FAF6F2] text-[#6e483b] px-2 py-0.5 border border-[#E8DCD5]">โปร่งโล่ง สบายตา</span>
+      </div>
+      <p id="conceptDesc" class="text-xs text-slate-500 mt-1 leading-relaxed">
+        ตัดกรอบซ้อนกรอบและหมายเลข 1, 2 ที่ดูเทอะทะออกทั้งหมด ใช้ความขาวสะอาดตา แบ่งสัดส่วนด้วยความโปร่งของพื้นที่ (Whitespace) ยอดชำระสุทธิและเงินทอนโดดเด่นด้วยโทนสีน้ำตาลพรีเมียม #6e483b
+      </p>
+    </div>
+
+    <!-- Phone Simulator Frame -->
+    <div class="relative w-full max-w-md bg-slate-900/10 p-2 sm:p-4 rounded-3xl shadow-xl border border-slate-300/80 backdrop-blur-xs">
+      <div class="relative bg-[#F9F7F5] w-full min-h-[580px] max-h-[85vh] overflow-hidden flex flex-col shadow-inner">
+        
+        <!-- ================================================================= -->
+        <!-- DESIGN 1: Modern Beauty POS (Clean & Airy - ไร้กรอบซ้อน ไม่อึดอัด) -->
+        <!-- ================================================================= -->
+        <div id="designView1" class="design-view flex-1 flex flex-col bg-white overflow-hidden">
+          <!-- Header -->
+          <div class="px-4 py-3 bg-[#FAF6F2] border-b border-[#EAE2DC] flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#6e483b]"></span>
+              <h3 class="text-sm font-bold text-slate-800">สรุปการขาย &amp; คิดเงิน</h3>
+            </div>
+            <span class="text-xs font-bold text-[#6e483b] bg-white px-2.5 py-1 border border-[#EAE2DC] shadow-2xs">
+              3 รายการ
+            </span>
+          </div>
+
+          <!-- Body -->
+          <div class="overflow-y-auto p-4 space-y-4 flex-1 bg-[#FAF8F6]">
+            <!-- Items Card -->
+            <div class="bg-white p-3 border border-[#EAE2DC] shadow-2xs space-y-2.5">
+              <div class="flex items-center justify-between text-xs font-bold text-slate-600 border-b border-slate-100 pb-2">
+                <span>สินค้าในตะกร้า</span>
+                <span class="text-[11px] text-slate-400">ราคา/ชิ้น</span>
+              </div>
+              <!-- Sample Item -->
+              <div class="flex items-center justify-between gap-2 text-xs">
+                <div class="flex-1 min-w-0">
+                  <div class="font-bold text-slate-800 truncate">KMA เบลอริ่ง ริงเคิบ คอนซีลเลอร์</div>
+                  <div class="text-[11px] text-slate-400">฿99.00 / ชิ้น</div>
+                </div>
+                <!-- Stepper -->
+                <div class="inline-flex items-stretch h-6 border border-[#6e483b] bg-white shrink-0">
+                  <button onclick="adjustDemoQty(-1)" class="w-6 bg-[#6e483b] text-white flex items-center justify-center font-bold text-xs">-</button>
+                  <span class="demo-qty-text px-2 bg-[#FAF6F2] text-xs font-black text-[#6e483b] flex items-center justify-center">3</span>
+                  <button onclick="adjustDemoQty(1)" class="w-6 bg-[#6e483b] text-white flex items-center justify-center font-bold text-xs">+</button>
+                </div>
+                <div class="w-16 text-right font-black text-slate-900 text-xs demo-item-total">฿297.00</div>
+              </div>
+            </div>
+
+            <!-- Discount & Totals -->
+            <div class="bg-white p-3 border border-[#EAE2DC] shadow-2xs space-y-2.5">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-500">ยอดรวมสินค้า:</span>
+                <span class="font-bold text-slate-800 demo-subtotal-text">฿297.00</span>
+              </div>
+              <div class="flex items-center justify-between gap-2 text-xs pt-1 border-t border-slate-100">
+                <span class="text-slate-500 flex items-center gap-1">
+                  <i data-lucide="tag" class="w-3 h-3 text-rose-500"></i> ส่วนลด:
+                </span>
+                <div class="inline-flex items-center border border-slate-200 px-2 py-0.5 bg-slate-50">
+                  <span class="text-rose-500 font-bold mr-1 text-[11px]">฿</span>
+                  <input type="number" placeholder="0" oninput="updateDemoDiscount(this.value)" class="w-14 text-right text-xs font-bold text-rose-600 bg-transparent focus:outline-none">
+                </div>
+              </div>
+              <!-- Net Total Hero -->
+              <div class="p-3 bg-[#FAF4F0] border-l-4 border-[#6e483b] flex items-center justify-between mt-2">
+                <div>
+                  <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">ยอดชำระสุทธิ</span>
+                  <span class="text-[11px] text-[#8C5E4F]">ราคารวมหลังหักส่วนลด</span>
+                </div>
+                <div class="text-2xl font-black text-[#6e483b] tracking-tight demo-net-text">฿297.00</div>
+              </div>
+            </div>
+
+            <!-- Cash & Change -->
+            <div class="bg-white p-3 border border-[#EAE2DC] shadow-2xs space-y-2.5">
+              <label class="text-xs font-bold text-slate-700 block">รับเงินสดจากลูกค้า (บาท)</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">฿</span>
+                <input type="number" id="demoCashInput1" oninput="updateDemoCash(this.value)" placeholder="0.00" class="w-full pl-8 pr-3 py-1.5 text-base font-black border border-slate-300 focus:border-[#6e483b] focus:outline-none bg-white">
+              </div>
+              <!-- Quick Cash Buttons -->
+              <div class="grid grid-cols-4 gap-1.5 pt-1">
+                <button onclick="setDemoCash('exact')" class="py-1 text-xs font-bold bg-[#FAF6F2] hover:bg-[#F0E6DE] text-[#6e483b] border border-[#E0D0C5] transition">พอดี</button>
+                <button onclick="setDemoCash(300)" class="py-1 text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition">฿300</button>
+                <button onclick="setDemoCash(500)" class="py-1 text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition">฿500</button>
+                <button onclick="setDemoCash(1000)" class="py-1 text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition">฿1,000</button>
+              </div>
+              <!-- Change Box -->
+              <div class="p-2.5 bg-[#FAF6F2] border border-[#E8DCD5] flex items-center justify-between">
+                <div>
+                  <div class="text-xs font-bold text-[#6e483b]">เงินทอนให้ลูกค้า</div>
+                  <div class="text-[10px] text-slate-400">คำนวณอัตโนมัติ</div>
+                </div>
+                <div class="text-xl font-black text-[#6e483b] demo-change-text">฿0.00</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer Action Button -->
+          <div class="p-3 bg-white border-t border-slate-200 flex items-center gap-2 shrink-0">
+            <button class="px-3 py-2 text-xs font-bold text-slate-500 hover:text-rose-600 transition">ล้างตะกร้า</button>
+            <button class="flex-1 py-2.5 bg-[#6e483b] hover:bg-[#57382d] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition">
+              <i data-lucide="check" class="w-4 h-4"></i>
+              <span>เสร็จสิ้นการขาย</span>
+              <span class="ml-1 opacity-90 demo-net-text">฿297.00</span>
+            </button>
+          </div>
+        </div>
+
+
+        <!-- ================================================================= -->
+        <!-- DESIGN 2: Mobile Bottom Sheet (Grab / Shopee Drawer Style) -->
+        <!-- ================================================================= -->
+        <div id="designView2" class="design-view hidden flex-1 flex flex-col bg-white overflow-hidden">
+          <!-- Drawer Handle -->
+          <div class="pt-2.5 pb-1 flex justify-center bg-white border-b border-slate-100">
+            <div class="w-12 h-1 bg-slate-300 rounded-full"></div>
+          </div>
+
+          <!-- Header -->
+          <div class="px-4 py-2 flex items-center justify-between border-b border-slate-100">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800">ยืนยันและชำระเงิน</h3>
+              <p class="text-[11px] text-slate-400">ร้านค้าบูธ KMA Cosmetics</p>
+            </div>
+            <button class="text-slate-400 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+          </div>
+
+          <!-- Scroll Area -->
+          <div class="overflow-y-auto p-4 space-y-3.5 flex-1 bg-slate-50">
+            <!-- Compact Bill Ticket -->
+            <div class="bg-white border border-slate-200 p-3 relative space-y-2">
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-dashed border-slate-200">
+                <span class="font-bold text-slate-700">สินค้า (3 ชิ้น)</span>
+                <span class="font-bold text-slate-900 demo-subtotal-text">฿297.00</span>
+              </div>
+              <div class="flex items-center justify-between text-xs pb-1.5 border-b border-dashed border-slate-200">
+                <span class="text-slate-500">ส่วนลดโปรโมชั่น</span>
+                <span class="text-rose-600 font-bold demo-discount-summary">฿0.00</span>
+              </div>
+              <div class="flex items-center justify-between pt-1">
+                <span class="text-xs font-extrabold text-slate-800">ยอดชำระสุทธิ</span>
+                <span class="text-xl font-black text-[#6e483b] demo-net-text">฿297.00</span>
+              </div>
+            </div>
+
+            <!-- Fast Cash Input Dial -->
+            <div class="bg-white border border-slate-200 p-3 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-700">รับเงินสด</span>
+                <span class="text-[10px] text-slate-400">กดปุ่มลัดด้านล่างได้ทันที</span>
+              </div>
+              <div class="relative">
+                <input type="number" oninput="updateDemoCash(this.value)" placeholder="0.00" class="w-full text-center py-2 text-2xl font-black text-slate-800 border-2 border-slate-200 focus:border-[#6e483b] focus:outline-none bg-[#FCFAF8]">
+              </div>
+              <!-- Pills -->
+              <div class="flex items-center gap-1.5">
+                <button onclick="setDemoCash('exact')" class="flex-1 py-1.5 text-xs font-bold bg-[#FAF6F2] text-[#6e483b] border border-[#E0D0C5]">พอดี</button>
+                <button onclick="setDemoCash(300)" class="flex-1 py-1.5 text-xs font-bold bg-white text-slate-700 border border-slate-200">฿300</button>
+                <button onclick="setDemoCash(500)" class="flex-1 py-1.5 text-xs font-bold bg-white text-slate-700 border border-slate-200">฿500</button>
+                <button onclick="setDemoCash(1000)" class="flex-1 py-1.5 text-xs font-bold bg-white text-slate-700 border border-slate-200">฿1,000</button>
+              </div>
+            </div>
+
+            <!-- Change Banner -->
+            <div class="p-3 bg-white border border-[#6e483b]/30 shadow-xs flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-600">เงินทอนลูกค้า</span>
+              <span class="text-2xl font-black text-[#6e483b] demo-change-text">฿0.00</span>
+            </div>
+          </div>
+
+          <!-- Bottom Full Width Action -->
+          <div class="p-3 bg-white border-t border-slate-200 shrink-0">
+            <button class="w-full py-3 bg-[#6e483b] hover:bg-[#57382d] text-white text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition">
+              <span>เสร็จสิ้นการขาย</span>
+              <span>•</span>
+              <span class="demo-net-text font-black">฿297.00</span>
+            </button>
+          </div>
+        </div>
+
+
+        <!-- ================================================================= -->
+        <!-- DESIGN 3: Smart Boutique Receipt (Modern Apple/Sephora POS) -->
+        <!-- ================================================================= -->
+        <div id="designView3" class="design-view hidden flex-1 flex flex-col bg-[#FDFBF9] overflow-hidden">
+          <!-- Minimal Header -->
+          <div class="px-5 py-4 border-b border-[#EFEAE6] flex items-center justify-between bg-white shrink-0">
+            <div>
+              <div class="text-[10px] tracking-widest text-[#8C5E4F] uppercase font-bold">KMA Booth Checkout</div>
+              <div class="text-sm font-extrabold text-slate-900">ใบเสร็จสรุปยอด &amp; รับเงินสด</div>
+            </div>
+            <button class="text-slate-400 hover:text-slate-600 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+          </div>
+
+          <div class="overflow-y-auto p-4 space-y-4 flex-1">
+            <!-- Receipt Card with Jagged Border Feeling -->
+            <div class="bg-white border border-[#EAE3DE] p-4 shadow-sm space-y-3">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-600">
+                  <span>3x KMA เบลอริ่ง ริงเคิบ คอนซีลเลอร์</span>
+                  <span class="font-bold text-slate-900">฿297.00</span>
+                </div>
+              </div>
+
+              <div class="border-t border-[#F0EAE5] pt-2 space-y-1.5 text-xs text-slate-500">
+                <div class="flex justify-between">
+                  <span>ยอดรวม (Subtotal)</span>
+                  <span class="font-bold text-slate-800 demo-subtotal-text">฿297.00</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>ส่วนลด (Discount)</span>
+                  <span class="text-rose-500 font-bold demo-discount-summary">-฿0.00</span>
+                </div>
+              </div>
+
+              <!-- Big Bold Grand Total -->
+              <div class="border-t-2 border-slate-900 pt-3 flex items-baseline justify-between">
+                <span class="text-xs font-black text-slate-900 uppercase tracking-wider">TOTAL DUE</span>
+                <span class="text-3xl font-black text-slate-900 demo-net-text">฿297.00</span>
+              </div>
+            </div>
+
+            <!-- Tender / Payment Row -->
+            <div class="bg-white border border-[#EAE3DE] p-4 shadow-sm space-y-3">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-slate-800 uppercase tracking-wide">CASH TENDERED</label>
+                <div class="flex gap-1">
+                  <button onclick="setDemoCash('exact')" class="px-2 py-0.5 text-[11px] font-bold bg-[#FAF6F2] text-[#6e483b] border border-[#E0D0C5]">Exact</button>
+                  <button onclick="setDemoCash(500)" class="px-2 py-0.5 text-[11px] font-bold bg-slate-50 text-slate-700 border border-slate-200">500</button>
+                  <button onclick="setDemoCash(1000)" class="px-2 py-0.5 text-[11px] font-bold bg-slate-50 text-slate-700 border border-slate-200">1000</button>
+                </div>
+              </div>
+              <input type="number" oninput="updateDemoCash(this.value)" placeholder="฿0.00" class="w-full text-right py-2 px-3 text-xl font-mono font-bold bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#6e483b] focus:outline-none">
+              
+              <!-- Change Box -->
+              <div class="flex items-baseline justify-between pt-2 border-t border-slate-100">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">CHANGE DUE</span>
+                <span class="text-2xl font-black text-[#6e483b] demo-change-text">฿0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 bg-white border-t border-[#EFEAE6] shrink-0">
+            <button class="w-full py-3 bg-[#6e483b] text-white text-xs font-bold tracking-widest uppercase hover:bg-[#57382d] transition shadow-xs">
+              COMPLETE TRANSACTION
+            </button>
+          </div>
+        </div>
+
+
+        <!-- ================================================================= -->
+        <!-- DESIGN 4: Minimalist Zen Luxury (Soft Sand & Espresso Theme) -->
+        <!-- ================================================================= -->
+        <div id="designView4" class="design-view hidden flex-1 flex flex-col bg-[#FAF7F4] overflow-hidden">
+          <!-- Luxury Header -->
+          <div class="px-5 py-4 border-b border-[#ECE4DE] flex items-center justify-between shrink-0 bg-white/70 backdrop-blur-xs">
+            <div>
+              <span class="text-[10px] text-[#A67C6D] uppercase tracking-widest font-semibold block">KMA Cosmetology</span>
+              <h3 class="text-sm font-semibold text-[#3D2B24] font-serif-luxury tracking-wide">Quick Checkout</h3>
+            </div>
+            <button class="text-slate-400 hover:text-slate-700 p-1"><i data-lucide="x" class="w-4 h-4"></i></button>
+          </div>
+
+          <div class="overflow-y-auto p-4 space-y-3.5 flex-1">
+            <!-- Item Row in Gentle Pill -->
+            <div class="bg-white p-3 border border-[#EFE9E4] flex items-center justify-between text-xs">
+              <div class="min-w-0 pr-2">
+                <div class="font-bold text-[#4A3831] truncate">KMA เบลอริ่ง ริงเคิบ คอนซีลเลอร์</div>
+                <div class="text-[11px] text-[#A67C6D]">฿99.00 x 3 ชิ้น</div>
+              </div>
+              <span class="font-black text-[#4A3831] text-sm">฿297.00</span>
+            </div>
+
+            <!-- Soft Hero Amount -->
+            <div class="p-4 bg-white border border-[#EFE9E4] text-center space-y-1">
+              <span class="text-[10px] uppercase tracking-widest text-[#A67C6D] font-bold">Total Payable</span>
+              <div class="text-3xl font-black text-[#6e483b] tracking-tight demo-net-text">฿297.00</div>
+              <span class="text-[11px] text-slate-400 block pt-0.5">รวมภาษีมูลค่าเพิ่มแล้ว</span>
+            </div>
+
+            <!-- Minimal Cash Box -->
+            <div class="bg-white border border-[#EFE9E4] p-3.5 space-y-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-medium text-[#4A3831]">รับเงินสด</span>
+                <span class="text-[11px] text-[#A67C6D]">ระบุยอดเงิน</span>
+              </div>
+              <div class="relative">
+                <input type="number" oninput="updateDemoCash(this.value)" placeholder="0.00" class="w-full text-center py-2 text-xl font-bold bg-[#FAF8F6] border-b-2 border-[#6e483b] focus:outline-none">
+              </div>
+              <div class="flex justify-between items-center pt-2">
+                <span class="text-xs text-[#A67C6D] font-medium">เงินทอนที่ต้องคืน:</span>
+                <span class="text-xl font-black text-[#6e483b] demo-change-text">฿0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 bg-white border-t border-[#ECE4DE] shrink-0">
+            <button class="w-full py-2.5 bg-[#4A3831] hover:bg-[#382a25] text-[#FAF6F2] text-xs font-bold tracking-wider uppercase transition shadow-2xs">
+              Confirm &amp; Record Sale
+            </button>
+          </div>
+        </div>
+
+
+        <!-- ================================================================= -->
+        <!-- DESIGN 5: Speed Booth (No-Scroll / Keypad Screen POS) -->
+        <!-- ================================================================= -->
+        <div id="designView5" class="design-view hidden flex-1 flex flex-col bg-white overflow-hidden">
+          <!-- Compact Header Bar with Total Embedded -->
+          <div class="px-3 py-2 bg-[#6e483b] text-white flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2">
+              <i data-lucide="zap" class="w-4 h-4 text-amber-300"></i>
+              <span class="text-xs font-bold">คิดเงินด่วน (Speed POS)</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-amber-200 block leading-none">ยอดสุทธิ</span>
+              <span class="text-sm font-black demo-net-text">฿297.00</span>
+            </div>
+          </div>
+
+          <!-- Body: Everything on ONE screen without scrolling! -->
+          <div class="p-3 flex-1 flex flex-col justify-between space-y-2 bg-[#FAF8F6]">
+            <!-- Compact 1-liner cart list -->
+            <div class="bg-white p-2 border border-slate-200 text-xs flex items-center justify-between">
+              <div class="truncate flex-1 pr-2">
+                <span class="font-bold text-slate-800">3x คอนซีลเลอร์</span>
+                <span class="text-[10px] text-slate-400 ml-1">฿99/ชิ้น</span>
+              </div>
+              <div class="font-bold text-slate-900">฿297.00</div>
+            </div>
+
+            <!-- Big Cash Received / Keypad Dial -->
+            <div class="bg-white p-3 border border-slate-200 flex-1 flex flex-col justify-center space-y-2">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-600">รับเงินสด</span>
+                <span class="text-xs font-mono font-bold text-slate-400">THB</span>
+              </div>
+              <input type="number" oninput="updateDemoCash(this.value)" placeholder="0.00" class="w-full text-center py-2 text-2xl font-black bg-slate-50 border border-slate-300 focus:bg-white focus:border-[#6e483b] focus:outline-none">
+              
+              <!-- Fast Touch Buttons -->
+              <div class="grid grid-cols-4 gap-1.5 pt-1">
+                <button onclick="setDemoCash('exact')" class="py-2 text-xs font-black bg-[#6e483b] text-white">พอดี</button>
+                <button onclick="setDemoCash(300)" class="py-2 text-xs font-bold bg-slate-100 text-slate-800 hover:bg-slate-200">300</button>
+                <button onclick="setDemoCash(500)" class="py-2 text-xs font-bold bg-slate-100 text-slate-800 hover:bg-slate-200">500</button>
+                <button onclick="setDemoCash(1000)" class="py-2 text-xs font-bold bg-slate-100 text-slate-800 hover:bg-slate-200">1,000</button>
+              </div>
+            </div>
+
+            <!-- Change Banner -->
+            <div class="p-2.5 bg-amber-50 border border-amber-200 flex items-center justify-between">
+              <span class="text-xs font-bold text-amber-900">เงินทอนที่ต้องจ่าย:</span>
+              <span class="text-2xl font-black text-[#6e483b] demo-change-text">฿0.00</span>
+            </div>
+
+            <!-- Instant Finish Button -->
+            <button class="w-full py-3 bg-[#6e483b] hover:bg-[#57382d] text-white text-sm font-bold shadow-md transition flex items-center justify-center gap-1.5">
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+              <span>เสร็จสิ้นการขาย (ปิดบิล)</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Instructions / Comparison Notes -->
+    <div class="w-full max-w-md mt-4 text-center">
+      <p class="text-xs text-slate-500">
+        👆 คลิกที่แท็บด้านบนเพื่อสลับดูและทดสอบกดปุ่มทั้ง 5 สไตล์ได้ทันที
+      </p>
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    let demoQty = 3;
+    let demoPricePerItem = 99;
+    let demoDiscount = 0;
+    let demoCash = 0;
+
+    const concepts = {
+      1: {
+        title: "ดีไซน์ 1: Modern Beauty POS (Clean & Airy)",
+        tag: "โปร่งโล่ง สบายตา",
+        desc: "ตัดกรอบซ้อนกรอบและหมายเลข 1, 2 ที่ดูเทอะทะออกทั้งหมด ใช้ความขาวสะอาดตา แบ่งสัดส่วนด้วยความโปร่งของพื้นที่ (Whitespace) ยอดชำระสุทธิและเงินทอนโดดเด่นด้วยโทนสีน้ำตาลพรีเมียม #6e483b"
+      },
+      2: {
+        title: "ดีไซน์ 2: Mobile Bottom Sheet (Grab / Shopee Drawer)",
+        tag: "สไตล์แอปมือถือทันสมัย",
+        desc: "ออกแบบเป็นแผ่นพับเลื่อนขึ้นจากขอบล่าง พร้อมปุ่มปิดบิลที่มีราคารวมฝังอยู่ในปุ่ม สะอาด กระชับ เหมาะกับการใช้นิ้วโป้งมือเดียวกดขายหน้าร้าน"
+      },
+      3: {
+        title: "ดีไซน์ 3: Smart Boutique Receipt (Modern Apple/Sephora POS)",
+        tag: "เรียบหรู สไตล์เคาน์เตอร์แบรนด์",
+        desc: "จำลองอารมณ์ใบเสร็จดิจิทัลสุดหรู ไร้สีสันรบกวนตา ตัวหนังสือชัดเจน แบ่งโซนยอดรวมสินค้าและโซนรับเงินสดอย่างเด็ดขาดโดยไม่ใช้กรอบหนาเตอะ"
+      },
+      4: {
+        title: "ดีไซน์ 4: Minimalist Zen Luxury (Soft Sand & Espresso Theme)",
+        tag: "โทนอบอุ่น ละมุนตา",
+        desc: "ใช้โทนสีทรายอ่อนและสีเอสเปรสโซ่เข้ม ฟอนต์คลาสสิก ให้ความรู้สึกเป็นบูธเครื่องสำอางระดับไฮเอนด์ ไม่ดูเหมือนโปรแกรม POS ทั่วไป"
+      },
+      5: {
+        title: "ดีไซน์ 5: Speed Booth (No-Scroll / Keypad Screen POS)",
+        tag: "ขายเร็ว จบในหน้าเดียว ไม่ต้องเลื่อน",
+        desc: "แก้ปัญหาการเลื่อนหน้าจอโดยรวมรายการ ยอดสุทธิ ปุ่มลัดเงินสด และเงินทอนไว้ในจอเดียว 100% พนักงานแตะ 2 ครั้งปิดการขายได้ทันที"
+      }
+    };
+
+    function switchDesign(num) {
+      // Toggle tabs
+      for (let i = 1; i <= 5; i++) {
+        const btn = document.getElementById(`tabBtn${i}`);
+        const view = document.getElementById(`designView${i}`);
+        if (i === num) {
+          btn.className = "tab-btn px-3 py-1.5 text-xs font-bold transition whitespace-nowrap bg-white text-[#4A3228] shadow-sm";
+          view.classList.remove('hidden');
+        } else {
+          btn.className = "tab-btn px-3 py-1.5 text-xs font-medium transition whitespace-nowrap bg-[#5c4034] text-slate-200 hover:text-white";
+          view.classList.add('hidden');
+        }
+      }
+
+      // Update info
+      const info = concepts[num];
+      if (info) {
+        document.getElementById('conceptTitle').textContent = info.title;
+        document.getElementById('conceptTag').textContent = info.tag;
+        document.getElementById('conceptDesc').textContent = info.desc;
+      }
+
+      lucide.createIcons();
+    }
+
+    function adjustDemoQty(delta) {
+      demoQty = Math.max(1, demoQty + delta);
+      updateDemoCalculations();
+    }
+
+    function updateDemoDiscount(val) {
+      demoDiscount = Math.max(0, Number(val) || 0);
+      updateDemoCalculations();
+    }
+
+    function updateDemoCash(val) {
+      demoCash = Math.max(0, Number(val) || 0);
+      updateDemoCalculations();
+    }
+
+    function setDemoCash(amount) {
+      const subtotal = demoQty * demoPricePerItem;
+      const net = Math.max(0, subtotal - demoDiscount);
+      if (amount === 'exact') {
+        demoCash = net;
+      } else {
+        demoCash = amount;
+      }
+      // update all cash inputs
+      document.querySelectorAll('input[type="number"]').forEach(input => {
+        if (input.placeholder === '0.00' || input.placeholder === '฿0.00') {
+          input.value = demoCash > 0 ? demoCash : '';
+        }
+      });
+      updateDemoCalculations();
+    }
+
+    function updateDemoCalculations() {
+      const subtotal = demoQty * demoPricePerItem;
+      const net = Math.max(0, subtotal - demoDiscount);
+      const change = demoCash > 0 ? demoCash - net : 0;
+
+      // Update Qty text
+      document.querySelectorAll('.demo-qty-text').forEach(el => el.textContent = demoQty);
+      document.querySelectorAll('.demo-item-total').forEach(el => el.textContent = `฿${subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`);
+      document.querySelectorAll('.demo-subtotal-text').forEach(el => el.textContent = `฿${subtotal.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`);
+      document.querySelectorAll('.demo-discount-summary').forEach(el => el.textContent = `-฿${demoDiscount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`);
+      document.querySelectorAll('.demo-net-text').forEach(el => el.textContent = `฿${net.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`);
+      
+      document.querySelectorAll('.demo-change-text').forEach(el => {
+        if (change >= 0) {
+          el.textContent = `฿${change.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
+          el.className = 'text-xl sm:text-2xl font-black text-[#6e483b] demo-change-text';
+        } else {
+          el.textContent = `ขาด ฿${Math.abs(change).toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
+          el.className = 'text-xl sm:text-2xl font-black text-rose-600 demo-change-text';
+        }
+      });
+    }
+
+    // Init
+    updateDemoCalculations();
+  </script>
+</body>
+</html>
