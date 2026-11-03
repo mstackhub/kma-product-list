@@ -1667,7 +1667,7 @@
 
       // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=7').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=8').then(reg => {
           console.log('KMA PWA Service Worker active:', reg.scope);
           // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
           reg.update();
@@ -2047,6 +2047,88 @@
       lucide.createIcons();
     }
 
+    // Render ปุ่มใส่ตะกร้า / ปุ่มปรับจำนวนสินค้า (+ -) โทนสี KMA Signature #6e483b
+    function renderCartActionButton(productId, inCartQty, isGrid = false) {
+      if (inCartQty <= 0) {
+        if (isGrid) {
+          return `
+            <button 
+              type="button" 
+              onclick="event.stopPropagation(); addToCart('${productId}')" 
+              class="w-full py-1.5 sm:py-2 px-3 text-xs font-bold bg-[#6e483b] hover:bg-[#57382d] active:scale-[0.98] text-white flex items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs" 
+              title="ใส่ตะกร้าคิดเงินด่วน"
+            >
+              <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+              <span>ใส่ตะกร้า</span>
+            </button>
+          `;
+        }
+        return `
+          <button 
+            type="button" 
+            onclick="event.stopPropagation(); addToCart('${productId}')" 
+            class="h-7 sm:h-7.5 px-3 text-[11px] sm:text-xs bg-[#6e483b] hover:bg-[#57382d] active:scale-95 text-white font-bold flex items-center gap-1.5 transition cursor-pointer shadow-2xs shrink-0" 
+            title="ใส่ตะกร้าคิดเงินด่วน"
+          >
+            <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+            <span>ใส่ตะกร้า</span>
+          </button>
+        `;
+      }
+
+      // เมื่อมีสินค้าในตะกร้า (> 0): แสดงเป็นปุ่มสเต็ปเปอร์ [-] [จำนวน] [+] สี #6e483b
+      if (isGrid) {
+        return `
+          <div class="w-full flex items-stretch h-8 border border-[#6e483b] bg-white shadow-2xs overflow-hidden">
+            <button 
+              type="button" 
+              onclick="event.stopPropagation(); updateCartQty('${productId}', -1)" 
+              class="w-10 bg-[#6e483b] hover:bg-[#57382d] active:scale-90 text-white flex items-center justify-center transition cursor-pointer"
+              title="ลดจำนวน (เหลือ ${inCartQty - 1})"
+            >
+              <i data-lucide="minus" class="w-4 h-4 stroke-[2.5]"></i>
+            </button>
+            <div class="flex-1 bg-[#FAF6F2] flex items-center justify-center gap-1.5 text-xs font-black text-[#6e483b] select-none">
+              <span class="text-[10px] text-[#A26D57] font-semibold">ในตะกร้า</span>
+              <span class="text-sm font-black">${inCartQty}</span>
+            </div>
+            <button 
+              type="button" 
+              onclick="event.stopPropagation(); updateCartQty('${productId}', 1)" 
+              class="w-10 bg-[#6e483b] hover:bg-[#57382d] active:scale-90 text-white flex items-center justify-center transition cursor-pointer"
+              title="เพิ่มจำนวน"
+            >
+              <i data-lucide="plus" class="w-4 h-4 stroke-[2.5]"></i>
+            </button>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="inline-flex items-stretch h-7 sm:h-7.5 border border-[#6e483b] bg-white shadow-2xs shrink-0 overflow-hidden">
+          <button 
+            type="button" 
+            onclick="event.stopPropagation(); updateCartQty('${productId}', -1)" 
+            class="w-7 sm:w-7.5 bg-[#6e483b] hover:bg-[#57382d] active:scale-90 text-white flex items-center justify-center transition cursor-pointer"
+            title="ลดจำนวน (เหลือ ${inCartQty - 1})"
+          >
+            <i data-lucide="minus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+          </button>
+          <div class="px-2.5 sm:px-3 bg-[#FAF6F2] flex items-center justify-center text-xs font-black text-[#6e483b] min-w-[28px] sm:min-w-[32px] select-none">
+            ${inCartQty}
+          </div>
+          <button 
+            type="button" 
+            onclick="event.stopPropagation(); updateCartQty('${productId}', 1)" 
+            class="w-7 sm:w-7.5 bg-[#6e483b] hover:bg-[#57382d] active:scale-90 text-white flex items-center justify-center transition cursor-pointer"
+            title="เพิ่มจำนวน"
+          >
+            <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+          </button>
+        </div>
+      `;
+    }
+
     // HTML Template สำหรับ Card (Grid View - ออกแบบหรูหรา Clean Luxury สไตล์เครื่องสำอาง KMA)
     function renderCard(p) {
       const original = Number(p.original_price) || 0;
@@ -2072,10 +2154,10 @@
               class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             >
 
-            <!-- In-Cart Quantity Badge on Thumbnail -->
+            <!-- In-Cart Quantity Badge on Thumbnail (#6e483b) -->
             <div data-cart-thumb-id="${p.id}" class="absolute top-2 right-10 z-10 ${inCartQty > 0 ? '' : 'hidden'}">
-              <span class="px-1.5 py-0.5 text-[10px] font-extrabold bg-slate-900/90 text-white border border-white/30 shadow-xs flex items-center gap-0.5 leading-tight">
-                <span class="text-[#C98b6f] font-bold">+</span><span class="cart-thumb-qty">${inCartQty}</span>
+              <span class="px-1.5 py-0.5 text-[10px] font-extrabold bg-[#6e483b] text-white border border-white/20 shadow-xs flex items-center gap-0.5 leading-tight">
+                <span class="text-amber-200 font-bold">+</span><span class="cart-thumb-qty">${inCartQty}</span>
               </span>
             </div>
             
@@ -2176,20 +2258,10 @@
                 </div>
               </div>
 
-              <!-- Row 2: Full-Width Prominent Quick Add to Cart Button -->
-              <button 
-                type="button" 
-                data-cart-btn-id="${p.id}"
-                onclick="event.stopPropagation(); addToCart('${p.id}')" 
-                class="w-full py-1.5 sm:py-2 px-3 text-xs font-semibold ${inCartQty > 0 ? 'bg-[#b87556] ring-1 ring-[#b87556]' : 'bg-[#C98b6f] hover:bg-[#b87556]'} active:scale-[0.98] text-white flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs" 
-                title="${inCartQty > 0 ? `อยู่ในตะกร้าแล้ว ${inCartQty} ชิ้น (กดเพื่อเพิ่มอีก)` : 'ใส่ตะกร้าคิดเงินด่วน'}"
-              >
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                <span>ใส่ตะกร้า</span>
-                <span class="cart-pill-count ${inCartQty > 0 ? '' : 'hidden'} ml-1 px-1.5 py-0.2 text-[10px] font-extrabold bg-white text-[#b87556] border border-white/40 shadow-2xs leading-none">
-                  +${inCartQty}
-                </span>
-              </button>
+              <!-- Row 2: Add to Cart / Stepper Quantity Control (#6e483b) -->
+              <div data-cart-btn-wrap="${p.id}" data-layout="grid" class="w-full">
+                ${renderCartActionButton(p.id, inCartQty, true)}
+              </div>
 
             </div>
 
@@ -2224,10 +2296,10 @@
                 onerror="this.onerror=null; this.src=getCategoryPlaceholder('${escapeJs(p.category || '')}')" 
                 class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
               >
-              <!-- In-Cart Quantity Badge on Thumbnail -->
+              <!-- In-Cart Quantity Badge on Thumbnail (#6e483b) -->
               <div data-cart-thumb-id="${p.id}" class="absolute top-0.5 left-0.5 z-10 ${inCartQty > 0 ? '' : 'hidden'}">
-                <span class="px-1 py-0.2 text-[8px] font-extrabold bg-slate-900 text-white flex items-center gap-0.5 leading-none shadow-xs">
-                  <span class="text-[#C98b6f] font-bold">+</span><span class="cart-thumb-qty">${inCartQty}</span>
+                <span class="px-1 py-0.2 text-[8px] font-extrabold bg-[#6e483b] text-white flex items-center gap-0.5 leading-none shadow-xs">
+                  <span class="text-amber-200 font-bold">+</span><span class="cart-thumb-qty">${inCartQty}</span>
                 </span>
               </div>
             </div>
@@ -2309,20 +2381,10 @@
                   ` : ''}
                 </div>
 
-                <!-- Add to Cart Button (สัมผัสนิ้วโป้งกระชับ สลิมลงตัว) -->
-                <button 
-                  type="button" 
-                  data-cart-btn-id="${p.id}"
-                  onclick="event.stopPropagation(); addToCart('${p.id}')" 
-                  class="h-7 sm:h-7.5 px-3 text-[11px] ${inCartQty > 0 ? 'bg-[#b87556] ring-1 ring-[#b87556]' : 'bg-[#C98b6f] hover:bg-[#b87556]'} active:scale-95 text-white font-bold flex items-center gap-1 transition cursor-pointer shadow-2xs shrink-0" 
-                  title="${inCartQty > 0 ? `อยู่ในตะกร้าแล้ว ${inCartQty} ชิ้น (กดเพื่อเพิ่มอีก)` : 'ใส่ตะกร้าคิดเงินด่วน'}"
-                >
-                  <i data-lucide="plus" class="w-3 h-3 stroke-[2.5]"></i>
-                  <span>ใส่ตะกร้า</span>
-                  <span class="cart-pill-count ${inCartQty > 0 ? '' : 'hidden'} ml-0.5 px-1 py-0.2 text-[9px] font-black bg-white text-[#b87556] leading-none">
-                    +${inCartQty}
-                  </span>
-                </button>
+                <!-- Add to Cart / Stepper Quantity Control (#6e483b) -->
+                <div data-cart-btn-wrap="${p.id}" data-layout="list" class="shrink-0">
+                  ${renderCartActionButton(p.id, inCartQty, false)}
+                </div>
               </div>
 
             </div>
@@ -3947,28 +4009,16 @@
     }
 
     function syncProductCartButtons() {
-      document.querySelectorAll('[data-cart-btn-id]').forEach(btn => {
-        const pid = btn.getAttribute('data-cart-btn-id');
+      // ซิงค์ปุ่ม + / - หรือ + ใส่ตะกร้า บนการ์ดสินค้าทุกตัวแบบเรียลไทม์ 0ms
+      document.querySelectorAll('[data-cart-btn-wrap]').forEach(wrap => {
+        const pid = wrap.getAttribute('data-cart-btn-wrap');
+        const isGrid = wrap.getAttribute('data-layout') === 'grid';
         const inCart = cart.find(i => i.id === pid);
         const qty = inCart ? (inCart.qty || 1) : 0;
-
-        const countSpan = btn.querySelector('.cart-pill-count');
-        if (countSpan) {
-          if (qty > 0) {
-            countSpan.textContent = `+${qty}`;
-            countSpan.classList.remove('hidden');
-            btn.classList.add('bg-[#b87556]', 'ring-1', 'ring-[#b87556]');
-            btn.classList.remove('bg-[#C98b6f]');
-            btn.setAttribute('title', `อยู่ในตะกร้าแล้ว ${qty} ชิ้น (กดเพื่อเพิ่มอีก)`);
-          } else {
-            countSpan.classList.add('hidden');
-            btn.classList.remove('bg-[#b87556]', 'ring-1', 'ring-[#b87556]');
-            btn.classList.add('bg-[#C98b6f]');
-            btn.setAttribute('title', 'ใส่ตะกร้าคิดเงินด่วน');
-          }
-        }
+        wrap.innerHTML = renderCartActionButton(pid, qty, isGrid);
       });
 
+      // ซิงค์ป้ายตัวเลขบนภาพสินค้า
       document.querySelectorAll('[data-cart-thumb-id]').forEach(wrap => {
         const pid = wrap.getAttribute('data-cart-thumb-id');
         const inCart = cart.find(i => i.id === pid);
@@ -3982,6 +4032,8 @@
           wrap.classList.add('hidden');
         }
       });
+
+      lucide.createIcons();
     }
 
     function addToCart(id) {
@@ -4014,7 +4066,10 @@
 
     function updateCartQty(id, delta) {
       const item = cart.find(i => i.id === id);
-      if (!item) return;
+      if (!item) {
+        if (delta > 0) addToCart(id);
+        return;
+      }
 
       item.qty = (item.qty || 1) + delta;
       if (item.qty <= 0) {
