@@ -1456,7 +1456,8 @@
   <!-- ========================================================================= -->
   <script>
     // App State
-    let products = [];
+    let allProducts = []; // แค็ตตาล็อกสินค้าทั้งหมดในระบบ (Master Catalog)
+    let products = []; // สินค้าที่ผ่านการกรอง (Filtered & Sorted View)
     let currentCategory = 'ทั้งหมด';
     let selectedCategories = []; // หมวดหมู่ที่เลือก (รองรับการเลือกพร้อมกันหลายหมวดหมู่, ว่าง = ทั้งหมด)
     let currentSort = 'newest';
@@ -1600,11 +1601,13 @@
         if (cached) {
           const list = JSON.parse(cached);
           if (Array.isArray(list) && list.length > 0) {
-            extractCategoriesFromProducts(list);
-            products = filterAndSortLocal(list);
+            allProducts = list;
+            extractCategoriesFromProducts(allProducts);
+            let filtered = filterAndSortLocal(allProducts);
             if (showFavoritesOnly) {
-              products = products.filter(p => favorites.includes(p.id));
+              filtered = filtered.filter(p => favorites.includes(p.id));
             }
+            products = filtered;
             renderProducts();
             updateCategoriesFilter();
             showLoading(false);
@@ -1632,7 +1635,7 @@
 
       // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=3').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=4').then(reg => {
           console.log('KMA PWA Service Worker active:', reg.scope);
           // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
           reg.update();
@@ -1761,38 +1764,36 @@
       });
     }
 
-    // ดึงข้อมูลสินค้า (รองรับ Background Sync โดยไม่ทำลายหน้าจอ)
+    // ดึงข้อมูลสินค้า (Master Catalog Sync ในเบื้องหลังโดยไม่ทำลายหน้าจอ)
     async function fetchProducts(isBackground = false) {
       const refreshIcon = document.getElementById('refreshIcon');
       if (refreshIcon) refreshIcon.classList.add('animate-spin');
 
       // แสดง Loading State หน้าจอขาวเฉพาะตอนที่ยังไม่มีสินค้าในหน่วยความจำเลยเท่านั้น
-      if (!isBackground && products.length === 0) {
+      if (!isBackground && allProducts.length === 0 && products.length === 0) {
         showLoading(true);
       }
 
       try {
         if (isServerMode) {
+          // ดึงแค็ตตาล็อกสินค้าทั้งหมดเสมอ ไม่ส่ง category เพื่อให้ได้ Master List สมบูรณ์ 100%
           const params = new URLSearchParams();
-          if (selectedCategories.length > 0) {
-            params.append('category', selectedCategories.join(','));
-          }
-          if (currentSort) params.append('sort', currentSort);
-          if (currentSearch) params.append('q', currentSearch);
           params.append('_t', Date.now());
 
           const res = await fetch(`/api/products?${params.toString()}`);
           const result = await res.json();
           if (result.success) {
             const rawList = result.data || [];
-            // บันทึกแคชเมื่อดึงรายการทั้งหมด (ไม่ติด Filter เฉพาะ)
-            if (selectedCategories.length === 0) {
-              try {
-                localStorage.setItem('kma_cached_products', JSON.stringify(rawList));
-              } catch (e) {}
+            allProducts = rawList;
+            try {
+              localStorage.setItem('kma_cached_products', JSON.stringify(rawList));
+            } catch (e) {}
+            extractCategoriesFromProducts(allProducts);
+            let filtered = filterAndSortLocal(allProducts);
+            if (showFavoritesOnly) {
+              filtered = filtered.filter(p => favorites.includes(p.id));
             }
-            extractCategoriesFromProducts(rawList);
-            products = showFavoritesOnly ? rawList.filter(p => favorites.includes(p.id)) : rawList;
+            products = filtered;
           } else {
             throw new Error(result.error);
           }
@@ -1805,20 +1806,28 @@
           );`);
           let sql = 'SELECT * FROM products';
           let rows = await queryTursoDirect(sql);
+          allProducts = rows;
           try {
             localStorage.setItem('kma_cached_products', JSON.stringify(rows));
           } catch (e) {}
-          extractCategoriesFromProducts(rows);
-          const filtered = filterAndSortLocal(rows);
-          products = showFavoritesOnly ? filtered.filter(p => favorites.includes(p.id)) : filtered;
+          extractCategoriesFromProducts(allProducts);
+          let filtered = filterAndSortLocal(allProducts);
+          if (showFavoritesOnly) {
+            filtered = filtered.filter(p => favorites.includes(p.id));
+          }
+          products = filtered;
         } else {
           // Standalone LocalStorage Mode
           let stored = localStorage.getItem('local_products');
           let list = stored ? JSON.parse(stored) : [];
           if (!stored) localStorage.setItem('local_products', JSON.stringify([]));
-          extractCategoriesFromProducts(list);
-          const filtered = filterAndSortLocal(list);
-          products = showFavoritesOnly ? filtered.filter(p => favorites.includes(p.id)) : filtered;
+          allProducts = list;
+          extractCategoriesFromProducts(allProducts);
+          let filtered = filterAndSortLocal(allProducts);
+          if (showFavoritesOnly) {
+            filtered = filtered.filter(p => favorites.includes(p.id));
+          }
+          products = filtered;
         }
 
         renderProducts();
@@ -1826,13 +1835,16 @@
       } catch (err) {
         console.warn('Fetch error:', err);
         // Fallback to local memory if anything fails
-        let stored = localStorage.getItem('kma_cached_products') || localStorage.getItem('local_products');
-        const fallbackList = stored ? JSON.parse(stored) : [];
-        extractCategoriesFromProducts(fallbackList);
-        products = filterAndSortLocal(fallbackList);
-        if (showFavoritesOnly) {
-          products = products.filter(p => favorites.includes(p.id));
+        if (allProducts.length === 0) {
+          let stored = localStorage.getItem('kma_cached_products') || localStorage.getItem('local_products');
+          allProducts = stored ? JSON.parse(stored) : [];
         }
+        extractCategoriesFromProducts(allProducts);
+        let filtered = filterAndSortLocal(allProducts);
+        if (showFavoritesOnly) {
+          filtered = filtered.filter(p => favorites.includes(p.id));
+        }
+        products = filtered;
         renderProducts();
         updateCategoriesFilter();
       } finally {
@@ -1845,7 +1857,7 @@
     function filterAndSortLocal(list) {
       let filtered = [...list];
 
-      // Filter category (รองรับการเลือกพร้อมกันหลายหมวดหมู่ Multi-Select)
+      // Filter category (รองรับการเลือกพร้อมกันหลายหมวดหมู่ Multi-Select แบบ OR)
       if (selectedCategories.length > 0) {
         const lowerSelected = selectedCategories.map(c => c.toLowerCase().trim());
         filtered = filtered.filter(p => {
@@ -1891,21 +1903,26 @@
       return filtered;
     }
 
-    // ⚡ ฟังก์ชันกรองและเรนเดอร์ทันที 0ms จากหน่วยความจำ/แคชในเครื่อง ไม่ต้องรอเน็ต
+    // ⚡ ฟังก์ชันกรองและเรนเดอร์ทันที 0ms จากหน่วยความจำ Master Catalog ในเครื่อง ไม่ต้องรอเน็ต
     function applyLocalFilterAndRender() {
-      const rawCached = localStorage.getItem('kma_cached_products');
-      if (rawCached) {
+      let source = allProducts;
+      if (!source || source.length === 0) {
         try {
-          const allItems = JSON.parse(rawCached);
-          let filtered = filterAndSortLocal(allItems);
-          if (showFavoritesOnly) {
-            filtered = filtered.filter(p => favorites.includes(p.id));
+          const raw = localStorage.getItem('kma_cached_products');
+          if (raw) {
+            source = JSON.parse(raw);
+            allProducts = source;
           }
-          products = filtered;
-          renderProducts();
-        } catch (e) {
-          console.warn('Local filter error:', e);
+        } catch (e) {}
+      }
+
+      if (source && source.length > 0) {
+        let filtered = filterAndSortLocal(source);
+        if (showFavoritesOnly) {
+          filtered = filtered.filter(p => favorites.includes(p.id));
         }
+        products = filtered;
+        renderProducts();
       }
     }
 
@@ -1945,13 +1962,35 @@
               ดูสินค้าทั้งหมด
             </button>
           `;
+        } else if (selectedCategories.length > 0 || (currentSearch && currentSearch.trim() !== '') || showPromotionOnly) {
+          // มีการใช้ตัวกรองแล้วไม่พบผลลัพธ์
+          const activeFilters = [];
+          if (selectedCategories.length > 0) activeFilters.push(`หมวดหมู่: <span class="font-bold text-slate-800">${escapeHtml(selectedCategories.join(', '))}</span>`);
+          if (currentSearch && currentSearch.trim() !== '') activeFilters.push(`ค้นหา: <span class="font-bold text-slate-800">"${escapeHtml(currentSearch)}"</span>`);
+          if (showPromotionOnly) activeFilters.push(`<span class="font-bold text-rose-600">เฉพาะสินค้าโปรโมชั่น</span>`);
+
+          empty.innerHTML = `
+            <div class="w-14 h-14 bg-[#FAF6F2] text-[#C98b6f] border border-[#eadfd7] flex items-center justify-center mx-auto mb-3 shadow-2xs">
+              <i data-lucide="filter-x" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800">ไม่พบสินค้าตามตัวกรองที่เลือก</h3>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1.5 max-w-md mx-auto leading-relaxed">
+              ${activeFilters.join(' • ')}<br>
+              ลองเลือกหมวดหมู่อื่น หรือแตะปุ่มด้านล่างเพื่อล้างตัวกรองทั้งหมด
+            </p>
+            <div class="mt-4 flex items-center justify-center gap-2 flex-wrap">
+              <button onclick="selectCategory('ทั้งหมด'); clearSearch(); if(showPromotionOnly) togglePromotionFilter();" class="inline-flex items-center gap-2 bg-[#C98b6f] hover:bg-[#b87556] text-white px-4.5 py-2 text-xs sm:text-sm font-semibold transition shadow-xs cursor-pointer active:scale-95">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> ล้างตัวกรองทั้งหมด (ดูสินค้า ${allProducts.length || 'ทั้งหมด'} รายการ)
+              </button>
+            </div>
+          `;
         } else {
           empty.innerHTML = `
             <div class="w-14 h-14 bg-pink-50 text-pink-500 flex items-center justify-center mx-auto mb-3">
               <i data-lucide="package-x" class="w-8 h-8"></i>
             </div>
             <h3 class="text-base font-bold text-slate-800">ไม่พบรายการสินค้า</h3>
-            <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">ลองค้นหาด้วยคำอื่น หรือกดปุ่ม "เพิ่มสินค้า" เพื่อบันทึกสินค้าใหม่ลงใน Turso Database</p>
+            <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">กดปุ่ม "เพิ่มสินค้า" เพื่อบันทึกสินค้าใหม่ลงในระบบ</p>
             <button onclick="openAddModal()" class="mt-4 inline-flex items-center gap-2 bg-[#C98b6f] hover:bg-[#b87556] text-white px-4 py-2 text-sm font-medium transition shadow-xs cursor-pointer">
               <i data-lucide="plus" class="w-4 h-4"></i> เพิ่มสินค้าชิ้นแรก
             </button>
@@ -2450,11 +2489,8 @@
       // ปรับแต่งปุ่มหมวดหมู่ให้ active ตามที่เลือกทันที
       updateCategoryButtonsUI();
 
-      // ⚡ กรองและแสดงผลทันที 0ms จิ้มปุ๊บเปลี่ยนปั๊บ ไม่ต้องรอเน็ต!
+      // ⚡ กรองและแสดงผลทันที 0ms จาก Master Catalog จิ้มปุ๊บเปลี่ยนปั๊บ ไม่ต้องรอเน็ต และไม่มีความเสี่ยงเน็ตหลุด!
       applyLocalFilterAndRender();
-
-      // ซิงค์เบื้องหลังแบบเงียบๆ เพื่ออัปเดตราคา/สต็อกล่าสุด
-      fetchProducts(true);
     }
 
     function updateCategoryButtonsUI() {
@@ -2972,8 +3008,7 @@
       searchTimeout = setTimeout(() => {
         currentSearch = val;
         applyLocalFilterAndRender();
-        fetchProducts(true);
-      }, 100);
+      }, 50);
     }
 
     function clearSearch() {
@@ -2982,7 +3017,6 @@
       currentSearch = '';
       document.getElementById('clearSearchBtn').classList.add('hidden');
       applyLocalFilterAndRender();
-      fetchProducts(true);
     }
 
     // ==========================================
@@ -3019,7 +3053,6 @@
       if (chevron) chevron.style.transform = '';
 
       applyLocalFilterAndRender();
-      fetchProducts(true);
     }
 
     // Close sort dropdown when clicking outside
@@ -3037,7 +3070,6 @@
     function handleSortChange(sortVal) {
       currentSort = sortVal;
       applyLocalFilterAndRender();
-      fetchProducts(true);
     }
 
     // สลับ View Mode (Grid / List)
