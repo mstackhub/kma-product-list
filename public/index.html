@@ -1954,6 +1954,8 @@
       const img = (p.image_url && p.image_url.trim()) ? p.image_url.trim() : categoryPlaceholder;
       const cats = (p.category || 'ทั่วไป').split(',').map(c => c.trim()).filter(Boolean);
       const isFav = isFavorite(p.id);
+      const inCartItem = cart.find(i => i.id === p.id);
+      const inCartQty = inCartItem ? (inCartItem.qty || 1) : 0;
 
       return `
         <div class="group bg-white border border-[#E7E0D8] hover:border-[#C98b6f] shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_24px_rgba(201,139,111,0.12)] transition-all duration-300 flex flex-col justify-between">
@@ -1966,6 +1968,13 @@
               onerror="this.onerror=null; this.src=getCategoryPlaceholder('${escapeJs(p.category || '')}')" 
               class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             >
+
+            <!-- In-Cart Quantity Badge on Thumbnail -->
+            <div data-cart-thumb-id="${p.id}" class="absolute top-2 right-10 z-10 ${inCartQty > 0 ? '' : 'hidden'}">
+              <span class="px-1.5 py-0.5 text-[10px] font-extrabold bg-slate-900/90 text-white border border-white/30 shadow-xs flex items-center gap-0.5 leading-tight">
+                <span class="text-[#C98b6f] font-bold">+</span><span class="cart-thumb-qty">${inCartQty}</span>
+              </span>
+            </div>
             
             <!-- Category Badge (Top-Left) -->
             <div class="absolute top-2 left-2 flex flex-wrap gap-1 max-w-[70%] z-10">
@@ -2067,12 +2076,16 @@
               <!-- Row 2: Full-Width Prominent Quick Add to Cart Button -->
               <button 
                 type="button" 
+                data-cart-btn-id="${p.id}"
                 onclick="event.stopPropagation(); addToCart('${p.id}')" 
-                class="w-full py-1.5 sm:py-2 px-3 text-xs font-semibold bg-[#C98b6f] hover:bg-[#b87556] active:scale-[0.98] text-white flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs" 
-                title="ใส่ตะกร้าคิดเงินด่วน"
+                class="w-full py-1.5 sm:py-2 px-3 text-xs font-semibold ${inCartQty > 0 ? 'bg-[#b87556] ring-1 ring-[#b87556]' : 'bg-[#C98b6f] hover:bg-[#b87556]'} active:scale-[0.98] text-white flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs" 
+                title="${inCartQty > 0 ? `อยู่ในตะกร้าแล้ว ${inCartQty} ชิ้น (กดเพื่อเพิ่มอีก)` : 'ใส่ตะกร้าคิดเงินด่วน'}"
               >
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 <span>ใส่ตะกร้า</span>
+                <span class="cart-pill-count ${inCartQty > 0 ? '' : 'hidden'} ml-1 px-1.5 py-0.2 text-[10px] font-extrabold bg-white text-[#b87556] border border-white/40 shadow-2xs leading-none">
+                  +${inCartQty}
+                </span>
               </button>
 
             </div>
@@ -2093,6 +2106,8 @@
       const img = (p.image_url && p.image_url.trim()) ? p.image_url.trim() : categoryPlaceholder;
       const cats = (p.category || 'ทั่วไป').split(',').map(c => c.trim()).filter(Boolean);
       const isFav = isFavorite(p.id);
+      const inCartItem = cart.find(i => i.id === p.id);
+      const inCartQty = inCartItem ? (inCartItem.qty || 1) : 0;
 
       return `
         <div class="bg-white border border-[#E7E0D8] hover:border-[#C98b6f] hover:shadow-xs transition p-3 sm:p-3.5 group">
@@ -2106,6 +2121,12 @@
                 onerror="this.onerror=null; this.src=getCategoryPlaceholder('${escapeJs(p.category || '')}')" 
                 class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
               >
+              <!-- In-Cart Quantity Badge on Thumbnail -->
+              <div data-cart-thumb-id="${p.id}" class="absolute top-1 left-1 z-10 ${inCartQty > 0 ? '' : 'hidden'}">
+                <span class="px-1.5 py-0.2 text-[9px] font-extrabold bg-slate-900/90 text-white border border-white/30 shadow-xs flex items-center gap-0.5 leading-tight">
+                  <span class="text-[#C98b6f] font-bold">+</span><span class="cart-thumb-qty">${inCartQty}</span>
+                </span>
+              </div>
               <!-- Mobile Heart Button -->
               <button 
                 type="button" 
@@ -2203,12 +2224,16 @@
 
                   <button 
                     type="button" 
+                    data-cart-btn-id="${p.id}"
                     onclick="event.stopPropagation(); addToCart('${p.id}')" 
-                    class="px-3 py-1.5 text-xs bg-[#C98b6f] hover:bg-[#b87556] active:scale-95 text-white font-semibold flex items-center gap-1 transition cursor-pointer shadow-xs ml-1" 
-                    title="ใส่ตะกร้าคิดเงินด่วน"
+                    class="px-3 py-1.5 text-xs ${inCartQty > 0 ? 'bg-[#b87556] ring-1 ring-[#b87556]' : 'bg-[#C98b6f] hover:bg-[#b87556]'} active:scale-95 text-white font-semibold flex items-center gap-1 transition cursor-pointer shadow-xs ml-1" 
+                    title="${inCartQty > 0 ? `อยู่ในตะกร้าแล้ว ${inCartQty} ชิ้น (กดเพื่อเพิ่มอีก)` : 'ใส่ตะกร้าคิดเงินด่วน'}"
                   >
                     <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                     <span>ใส่ตะกร้า</span>
+                    <span class="cart-pill-count ${inCartQty > 0 ? '' : 'hidden'} ml-1 px-1.5 py-0.2 text-[10px] font-extrabold bg-white text-[#b87556] border border-white/40 shadow-2xs leading-none">
+                      +${inCartQty}
+                    </span>
                   </button>
                 </div>
 
@@ -3837,6 +3862,47 @@
           }
         }
       }
+
+      // ซิงค์ตัวเลข +1...+n บนปุ่มสินค้าทุกตัวบนหน้าจอแบบ 0ms
+      syncProductCartButtons();
+    }
+
+    function syncProductCartButtons() {
+      document.querySelectorAll('[data-cart-btn-id]').forEach(btn => {
+        const pid = btn.getAttribute('data-cart-btn-id');
+        const inCart = cart.find(i => i.id === pid);
+        const qty = inCart ? (inCart.qty || 1) : 0;
+
+        const countSpan = btn.querySelector('.cart-pill-count');
+        if (countSpan) {
+          if (qty > 0) {
+            countSpan.textContent = `+${qty}`;
+            countSpan.classList.remove('hidden');
+            btn.classList.add('bg-[#b87556]', 'ring-1', 'ring-[#b87556]');
+            btn.classList.remove('bg-[#C98b6f]');
+            btn.setAttribute('title', `อยู่ในตะกร้าแล้ว ${qty} ชิ้น (กดเพื่อเพิ่มอีก)`);
+          } else {
+            countSpan.classList.add('hidden');
+            btn.classList.remove('bg-[#b87556]', 'ring-1', 'ring-[#b87556]');
+            btn.classList.add('bg-[#C98b6f]');
+            btn.setAttribute('title', 'ใส่ตะกร้าคิดเงินด่วน');
+          }
+        }
+      });
+
+      document.querySelectorAll('[data-cart-thumb-id]').forEach(wrap => {
+        const pid = wrap.getAttribute('data-cart-thumb-id');
+        const inCart = cart.find(i => i.id === pid);
+        const qty = inCart ? (inCart.qty || 1) : 0;
+        const qtySpan = wrap.querySelector('.cart-thumb-qty');
+
+        if (qty > 0) {
+          if (qtySpan) qtySpan.textContent = qty;
+          wrap.classList.remove('hidden');
+        } else {
+          wrap.classList.add('hidden');
+        }
+      });
     }
 
     function addToCart(id) {
