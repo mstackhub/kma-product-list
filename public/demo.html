@@ -236,7 +236,7 @@
       <!-- Brand Logo -->
       <div class="flex items-center min-w-0">
         <a href="https://www.kmacosme.com" target="_blank" rel="noopener noreferrer" title="ไปยังเว็บไซต์ KMACosme" class="shrink-0 hover:opacity-85 transition">
-          <img src="kma-logo.png" alt="KMA Cosmetics" class="h-6 sm:h-7 object-contain">
+          <img src="kma-logo.png" alt="KMA Cosmetics" class="h-8 sm:h-9 object-contain">
         </a>
       </div>
 
@@ -1652,7 +1652,7 @@
 
       // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=18').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=19').then(reg => {
           console.log('KMA PWA Service Worker active:', reg.scope);
           // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
           reg.update();
