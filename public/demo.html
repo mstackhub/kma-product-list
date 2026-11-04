@@ -69,7 +69,6 @@
     
     /* ป้องกัน Tab / Tap Highlight สีฟ้า และกรอบ Focus จาก Chrome / Android / Safari */
     *, *::before, *::after {
-      border-radius: 0px !important;
       -webkit-tap-highlight-color: transparent !important;
       -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
     }
@@ -83,10 +82,10 @@
       outline: none !important;
     }
     
-    /* SweetAlert2 KMA Brand: Compact & Sleek (ลดความสูงและขนาด ไม่ใหญ่เทอะทะ) */
+    /* SweetAlert2 KMA Brand: Compact & Sleek (Border Radius 8px สวยงาม เรียบร้อย) */
     .swal2-popup:not(.swal2-toast) {
       font-family: 'Sarabun', sans-serif !important;
-      border-radius: 0px !important;
+      border-radius: 8px !important;
       border: 1px solid #eadfd7 !important;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
       padding: 1.25rem 1rem !important;
@@ -94,6 +93,7 @@
       max-width: 320px !important;
     }
     .swal2-popup.swal2-toast {
+      border-radius: 8px !important;
       padding: 0.5rem 0.85rem !important;
       font-size: 0.85rem !important;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12) !important;
@@ -135,7 +135,7 @@
       font-size: 0.8rem !important;
       font-weight: 700 !important;
       padding: 0.45rem 0.85rem !important;
-      border-radius: 0px !important;
+      border-radius: 8px !important;
       flex: 1 !important;
       margin: 0 !important;
     }
@@ -299,7 +299,7 @@
     </div>
 
     <!-- Controls: Search, Sort, Categories & View Toggle -->
-    <section id="filterControlsBox" class="bg-white p-3.5 sm:p-4 border border-slate-200 mb-4 space-y-3">
+    <section id="filterControlsBox" class="bg-white p-3.5 sm:p-4 border border-slate-200 mb-4 space-y-3 rounded-lg shadow-xs">
       
       <!-- Top Row: Search & Sort & View Switcher -->
       <div class="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between">
@@ -312,7 +312,7 @@
             id="searchInput" 
             placeholder="ค้นหาชื่อสินค้า หรือหมวดหมู่..." 
             oninput="handleSearch(this.value)"
-            class="w-full pl-9 pr-8 py-2 text-sm bg-white border border-slate-300 focus:outline-none focus:border-[#6e483b] transition"
+            class="w-full pl-9 pr-8 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#6e483b] transition"
           >
           <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer">
             <i data-lucide="x" class="w-4 h-4"></i>
@@ -328,7 +328,7 @@
               type="button" 
               id="sortDropdownBtn" 
               onclick="toggleSortDropdown()"
-              class="w-full sm:w-52 px-3.5 py-2 text-sm bg-white border border-slate-300 hover:border-[#6e483b] focus:outline-none focus:border-[#6e483b] flex items-center justify-between gap-2 text-slate-800 font-medium transition cursor-pointer"
+              class="w-full sm:w-52 px-3.5 py-2 text-sm bg-white border border-slate-300 rounded-lg hover:border-[#6e483b] focus:outline-none focus:border-[#6e483b] flex items-center justify-between gap-2 text-slate-800 font-medium transition cursor-pointer"
             >
               <span id="sortSelectedLabel" class="truncate font-medium text-xs sm:text-sm">วันที่สร้าง: ล่าสุด</span>
               <i data-lucide="chevron-down" id="sortChevronIcon" class="w-4 h-4 text-slate-400 shrink-0 transform transition-transform"></i>
@@ -337,7 +337,7 @@
             <!-- Custom Dropdown Menu -->
             <div 
               id="sortDropdownMenu" 
-              class="hidden absolute right-0 mt-1 w-full sm:w-56 bg-white border border-slate-300 shadow-xl z-50 py-1"
+              class="hidden absolute right-0 mt-1 w-full sm:w-56 bg-white border border-slate-300 rounded-lg shadow-xl z-50 py-1"
             >
               <button type="button" onclick="selectCustomSort('newest', 'วันที่สร้าง: ล่าสุด')" class="sort-option w-full px-4 py-2 text-left text-xs sm:text-sm flex items-center justify-between hover:bg-[#faf6f3] hover:text-[#6e483b] bg-[#faf6f3] text-[#6e483b] font-semibold transition cursor-pointer" data-value="newest">
                 <span>วันที่สร้าง: ล่าสุด</span>
@@ -363,17 +363,17 @@
           </div>
 
           <!-- View Toggle (List / Grid) -->
-          <div class="flex bg-slate-100 p-0.5 border border-slate-200">
-            <button id="viewListBtn" onclick="setViewMode('list')" title="แสดงแบบรายการ (List)" class="p-1.5 text-slate-800 bg-white border border-slate-200 shadow-xs transition cursor-pointer">
+          <div class="flex bg-slate-100 p-0.5 border border-slate-200 rounded-lg overflow-hidden">
+            <button id="viewListBtn" onclick="setViewMode('list')" title="แสดงแบบรายการ (List)" class="p-1.5 text-slate-800 bg-white border border-slate-200 rounded-md shadow-xs transition cursor-pointer">
               <i data-lucide="list" class="w-4 h-4"></i>
             </button>
-            <button id="viewGridBtn" onclick="setViewMode('grid')" title="แสดงแบบการ์ด (Grid)" class="p-1.5 text-slate-400 hover:text-slate-800 transition cursor-pointer">
+            <button id="viewGridBtn" onclick="setViewMode('grid')" title="แสดงแบบการ์ด (Grid)" class="p-1.5 text-slate-400 hover:text-slate-800 rounded-md transition cursor-pointer">
               <i data-lucide="layout-grid" class="w-4 h-4"></i>
             </button>
           </div>
 
           <!-- Refresh Button -->
-          <button onclick="fetchProducts()" title="รีเฟรชข้อมูล" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition border border-slate-300 cursor-pointer">
+          <button onclick="fetchProducts()" title="รีเฟรชข้อมูล" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition border border-slate-300 rounded-lg cursor-pointer">
             <i data-lucide="refresh-cw" id="refreshIcon" class="w-4 h-4"></i>
           </button>
         </div>
@@ -394,7 +394,7 @@
             type="button" 
             onclick="openCategoryManagerModal()" 
             title="จัดการหมวดหมู่ (ลบ / เปลี่ยนชื่อ / เพิ่ม)"
-            class="px-2.5 py-1 text-xs font-bold text-[#6e483b] hover:text-[#57382d] bg-white hover:bg-[#FAF6F2] border border-[#6e483b]/40 hover:border-[#6e483b] transition cursor-pointer shadow-2xs"
+            class="px-2.5 py-1 text-xs font-bold text-[#6e483b] hover:text-[#57382d] bg-white hover:bg-[#FAF6F2] border border-[#6e483b]/40 hover:border-[#6e483b] rounded-lg transition cursor-pointer shadow-2xs"
           >
             จัดการหมวดหมู่
           </button>
@@ -411,7 +411,7 @@
             type="button" 
             onclick="toggleCategoryExpand()" 
             id="categoryExpandBtn"
-            class="w-full py-1.5 px-3 text-[11px] font-bold text-[#6e483b] hover:text-[#57382d] bg-[#FAF6F2]/80 hover:bg-[#FAF6F2] border border-[#eadfd7] flex items-center justify-center gap-1.5 transition cursor-pointer active:bg-[#f0e4dc]"
+            class="w-full py-1.5 px-3 text-[11px] font-bold text-[#6e483b] hover:text-[#57382d] bg-[#FAF6F2]/80 hover:bg-[#FAF6F2] border border-[#eadfd7] rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer active:bg-[#f0e4dc]"
           >
             <span id="categoryExpandText">ดูหมวดหมู่เพิ่มเติม (อีก 3 กลุ่ม)</span>
             <i id="categoryExpandIcon" data-lucide="chevron-down" class="w-3.5 h-3.5 text-[#6e483b]"></i>
@@ -424,7 +424,7 @@
     <div class="flex items-center justify-between text-xs text-slate-500 mb-3 px-0.5">
       <div class="flex items-center gap-2 flex-wrap">
         <span>แสดง <span id="productCount" class="font-bold text-slate-800">0</span> รายการ</span>
-        <span id="activeFilterBadge" class="hidden inline-flex items-center gap-1.5 px-2 py-0.5 text-xs bg-[#6e483b]/10 text-[#6e483b] font-semibold border border-[#6e483b]/30">
+        <span id="activeFilterBadge" class="hidden inline-flex items-center gap-1.5 px-2 py-0.5 text-xs bg-[#6e483b]/10 text-[#6e483b] font-semibold border border-[#6e483b]/30 rounded-lg">
           <span id="activeFilterName"></span>
           <button type="button" onclick="selectCategory('ทั้งหมด')" class="hover:text-rose-600 font-bold ml-1 cursor-pointer" title="ล้างตัวกรองหมวดหมู่">✕</button>
         </span>
@@ -753,7 +753,7 @@
   <div id="cartModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-hidden">
     <div class="fixed inset-0" onclick="closeCartModal()"></div>
 
-    <div class="relative bg-white max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border border-[#ECE4DE] z-10 animate-in fade-in zoom-in-95 duration-150">
+    <div class="relative bg-white max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl border border-[#ECE4DE] z-10 animate-in fade-in zoom-in-95 duration-150 rounded-lg overflow-hidden">
       
       <!-- Modal Header (Minimalist Zen Luxury: โทนทรายและเอสเปรสโซ่ เรียบหรู สะอาดตา) -->
       <div class="px-4 py-3 bg-white/95 border-b border-[#ECE4DE] flex items-center justify-between shrink-0 sticky top-0 z-20">
@@ -903,11 +903,11 @@
 
             <!-- Banknote Buttons (พอดี, ฿500, ฿1,000, ฿1,500, ฿2,000) -->
             <div class="grid grid-cols-5 gap-1 pt-0.5">
-              <button type="button" onclick="setQuickCash('exact')" class="py-1.5 text-xs font-bold bg-[#FAF6F2] hover:bg-[#F0E6DE] text-[#6e483b] border border-[#E0D0C5] transition cursor-pointer text-center whitespace-nowrap shadow-2xs">พอดี</button>
-              <button type="button" onclick="setQuickCash(500)" class="py-1.5 text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition cursor-pointer text-center whitespace-nowrap">฿500</button>
-              <button type="button" onclick="setQuickCash(1000)" class="py-1.5 text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition cursor-pointer text-center whitespace-nowrap">฿1,000</button>
-              <button type="button" onclick="setQuickCash(1500)" class="py-1.5 text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition cursor-pointer text-center whitespace-nowrap">฿1,500</button>
-              <button type="button" onclick="setQuickCash(2000)" class="py-1.5 text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition cursor-pointer text-center whitespace-nowrap">฿2,000</button>
+              <button type="button" onclick="setQuickCash('exact')" class="py-1.5 text-xs font-bold bg-[#FAF6F2] hover:bg-[#F0E6DE] text-[#6e483b] border border-[#E0D0C5] rounded-lg transition cursor-pointer text-center whitespace-nowrap shadow-2xs">พอดี</button>
+              <button type="button" onclick="setQuickCash(500)" class="py-1.5 text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg transition cursor-pointer text-center whitespace-nowrap">฿500</button>
+              <button type="button" onclick="setQuickCash(1000)" class="py-1.5 text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg transition cursor-pointer text-center whitespace-nowrap">฿1,000</button>
+              <button type="button" onclick="setQuickCash(1500)" class="py-1.5 text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg transition cursor-pointer text-center whitespace-nowrap">฿1,500</button>
+              <button type="button" onclick="setQuickCash(2000)" class="py-1.5 text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg transition cursor-pointer text-center whitespace-nowrap">฿2,000</button>
             </div>
 
             <!-- Minimal Change Box -->
@@ -933,7 +933,7 @@
           <button 
             type="button" 
             onclick="scrollToCartPayment()" 
-            class="text-[10px] text-[#6e483b] font-semibold flex items-center gap-1 bg-[#FAF7F4] px-2 py-0.5 border border-[#ECE4DE] cursor-pointer transition ml-1 shadow-2xs"
+            class="text-[10px] text-[#6e483b] font-semibold flex items-center gap-1 bg-[#FAF7F4] px-2 py-0.5 border border-[#ECE4DE] rounded-lg cursor-pointer transition ml-1 shadow-2xs"
             title="เลื่อนลงไปกรอกส่วนลดและรับเงินสด"
           >
             <span>คิดเงิน/ทอน</span>
@@ -953,7 +953,7 @@
         <button 
           type="button" 
           onclick="confirmClearCart()" 
-          class="px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-300 transition cursor-pointer"
+          class="px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-300 rounded-lg transition cursor-pointer"
         >
           ล้างตะกร้า
         </button>
@@ -961,7 +961,7 @@
         <button 
           type="button" 
           onclick="finishCartTransaction()" 
-          class="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#6e483b] hover:bg-[#57382d] active:scale-95 text-white px-5 py-2.5 text-xs font-bold tracking-wider uppercase transition cursor-pointer shadow-sm"
+          class="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#6e483b] hover:bg-[#57382d] active:scale-95 text-white px-5 py-2.5 text-xs font-bold tracking-wider uppercase rounded-lg transition cursor-pointer shadow-sm"
         >
           <i data-lucide="check" class="w-4 h-4"></i>
           <span>เสร็จสิ้นการขาย</span>
@@ -1637,7 +1637,7 @@
 
       // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=12').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=13').then(reg => {
           console.log('KMA PWA Service Worker active:', reg.scope);
           // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
           reg.update();
@@ -2030,7 +2030,29 @@
       lucide.createIcons();
     }
 
-    // Render ปุ่มใส่ตะกร้า / ปุ่มปรับจำนวนสินค้า (+ -) โทนสี KMA Signature #6e483b
+    // Action Menu สำหรับจัดการสินค้าแต่ละชิ้น (ซ่อนเรียบร้อยในปุ่ม 3 จุด)
+    function toggleProductActionMenu(productId) {
+      const menu = document.getElementById(`actionMenu-${productId}`);
+      if (!menu) return;
+      const isHidden = menu.classList.contains('hidden');
+      closeAllActionMenus();
+      if (isHidden) {
+        menu.classList.remove('hidden');
+      }
+    }
+
+    function closeAllActionMenus() {
+      document.querySelectorAll('.product-action-dropdown').forEach(el => el.classList.add('hidden'));
+    }
+
+    // ปิดเมนู action อัตโนมัติเมื่อแตะส่วนอื่นของหน้าจอ
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.action-menu-wrap')) {
+        closeAllActionMenus();
+      }
+    });
+
+    // Render ปุ่มใส่ตะกร้า / ปุ่มปรับจำนวนสินค้า (+ -) โทนสี KMA Signature #6e483b (Border Radius 8px)
     function renderCartActionButton(productId, inCartQty, isGrid = false) {
       if (inCartQty <= 0) {
         if (isGrid) {
@@ -2038,10 +2060,10 @@
             <button 
               type="button" 
               onclick="event.stopPropagation(); addToCart('${productId}')" 
-              class="w-full py-1.5 sm:py-2 px-3 text-xs font-bold bg-[#6e483b] hover:bg-[#57382d] active:scale-[0.98] text-white flex items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs" 
-              title="ใส่ตะกร้าคิดเงินด่วน"
+              class="w-full py-2 px-3 text-xs sm:text-sm font-bold bg-[#6e483b] hover:bg-[#57382d] active:scale-[0.98] text-white flex items-center justify-center gap-1.5 transition cursor-pointer shadow-2xs rounded-lg" 
+              title="ใส่ตะกร้าคิดเงิน"
             >
-              <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+              <i data-lucide="plus" class="w-4 h-4 stroke-[2.5]"></i>
               <span>ใส่ตะกร้า</span>
             </button>
           `;
@@ -2050,10 +2072,10 @@
           <button 
             type="button" 
             onclick="event.stopPropagation(); addToCart('${productId}')" 
-            class="h-7 sm:h-7.5 px-3 text-[11px] sm:text-xs bg-[#6e483b] hover:bg-[#57382d] active:scale-95 text-white font-bold flex items-center gap-1.5 transition cursor-pointer shadow-2xs shrink-0" 
-            title="ใส่ตะกร้าคิดเงินด่วน"
+            class="h-8 sm:h-8.5 px-3.5 text-xs sm:text-sm bg-[#6e483b] hover:bg-[#57382d] active:scale-95 text-white font-bold flex items-center gap-1.5 transition cursor-pointer shadow-2xs shrink-0 rounded-lg" 
+            title="ใส่ตะกร้าคิดเงิน"
           >
-            <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+            <i data-lucide="plus" class="w-4 h-4 stroke-[2.5]"></i>
             <span>ใส่ตะกร้า</span>
           </button>
         `;
@@ -2062,7 +2084,7 @@
       // เมื่อมีสินค้าในตะกร้า (> 0): แสดงเป็นปุ่มสเต็ปเปอร์ [-] [จำนวน] [+] สี #6e483b
       if (isGrid) {
         return `
-          <div class="w-full flex items-stretch h-8 border border-[#6e483b] bg-white shadow-2xs overflow-hidden">
+          <div class="w-full flex items-stretch h-8.5 border border-[#6e483b] bg-white shadow-2xs overflow-hidden rounded-lg">
             <button 
               type="button" 
               onclick="event.stopPropagation(); updateCartQty('${productId}', -1)" 
@@ -2088,22 +2110,22 @@
       }
 
       return `
-        <div class="inline-flex items-stretch h-7 sm:h-7.5 border border-[#6e483b] bg-white shadow-2xs shrink-0 overflow-hidden">
+        <div class="inline-flex items-stretch h-8 sm:h-8.5 border border-[#6e483b] bg-white shadow-2xs shrink-0 overflow-hidden rounded-lg">
           <button 
             type="button" 
             onclick="event.stopPropagation(); updateCartQty('${productId}', -1)" 
-            class="w-7 sm:w-7.5 bg-[#6e483b] hover:bg-[#57382d] active:scale-90 text-white flex items-center justify-center transition cursor-pointer"
+            class="w-8 sm:w-8.5 bg-[#6e483b] hover:bg-[#57382d] active:scale-90 text-white flex items-center justify-center transition cursor-pointer"
             title="ลดจำนวน (เหลือ ${inCartQty - 1})"
           >
             <i data-lucide="minus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
           </button>
-          <div class="px-2.5 sm:px-3 bg-[#FAF6F2] flex items-center justify-center text-xs font-black text-[#6e483b] min-w-[28px] sm:min-w-[32px] select-none">
+          <div class="px-3 bg-[#FAF6F2] flex items-center justify-center text-sm font-black text-[#6e483b] min-w-[32px] select-none">
             ${inCartQty}
           </div>
           <button 
             type="button" 
             onclick="event.stopPropagation(); updateCartQty('${productId}', 1)" 
-            class="w-7 sm:w-7.5 bg-[#6e483b] hover:bg-[#57382d] active:scale-90 text-white flex items-center justify-center transition cursor-pointer"
+            class="w-8 sm:w-8.5 bg-[#6e483b] hover:bg-[#57382d] active:scale-90 text-white flex items-center justify-center transition cursor-pointer"
             title="เพิ่มจำนวน"
           >
             <i data-lucide="plus" class="w-3.5 h-3.5 stroke-[2.5]"></i>
@@ -2126,7 +2148,7 @@
       const inCartQty = inCartItem ? (inCartItem.qty || 1) : 0;
 
       return `
-        <div class="group bg-white border border-[#E7E0D8] hover:border-[#6e483b] shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_24px_rgba(201,139,111,0.12)] transition-all duration-300 flex flex-col justify-between">
+        <div class="group bg-white border border-[#E7E0D8] hover:border-[#6e483b] shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_24px_rgba(201,139,111,0.12)] rounded-lg transition-all duration-300 flex flex-col justify-between overflow-hidden">
           
           <!-- Image Container (Clean White Stage for Cosmetics Products) -->
           <div class="relative w-full aspect-square bg-white p-2.5 sm:p-3 overflow-hidden flex items-center justify-center border-b border-[#F0EAE4]">
@@ -2136,18 +2158,11 @@
               onerror="this.onerror=null; this.src=getCategoryPlaceholder('${escapeJs(p.category || '')}')" 
               class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             >
-
-            <!-- In-Cart Quantity Badge on Thumbnail (#6e483b) -->
-            <div data-cart-thumb-id="${p.id}" class="absolute top-2 right-10 z-10 ${inCartQty > 0 ? '' : 'hidden'}">
-              <span class="px-1.5 py-0.5 text-[10px] font-extrabold bg-[#6e483b] text-white border border-white/20 shadow-xs flex items-center gap-0.5 leading-tight">
-                <span class="text-amber-200 font-bold">+</span><span class="cart-thumb-qty">${inCartQty}</span>
-              </span>
-            </div>
             
             <!-- Category Badge (Top-Left) -->
             <div class="absolute top-2 left-2 flex flex-wrap gap-1 max-w-[70%] z-10">
               ${cats.map(c => `
-                <button type="button" onclick="event.stopPropagation(); selectCategory('${escapeJs(c)}')" class="px-2 py-0.5 text-[10px] font-semibold bg-white/95 text-[#995C41] border border-[#E7E0D8] shadow-2xs cursor-pointer hover:bg-[#6e483b] hover:text-white transition tracking-wide" title="กรองหมวดหมู่: ${escapeHtml(c)}">
+                <button type="button" onclick="event.stopPropagation(); selectCategory('${escapeJs(c)}')" class="px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold bg-white/95 text-[#995C41] border border-[#E7E0D8] rounded-lg shadow-2xs cursor-pointer hover:bg-[#6e483b] hover:text-white transition tracking-wide" title="กรองหมวดหมู่: ${escapeHtml(c)}">
                   ${escapeHtml(c)}
                 </button>
               `).join('')}
@@ -2157,7 +2172,7 @@
             <button 
               type="button" 
               onclick="event.stopPropagation(); toggleFavorite('${p.id}')" 
-              class="absolute top-2 right-2 z-10 w-7 h-7 flex items-center justify-center bg-white/95 hover:bg-white border border-[#E7E0D8] shadow-2xs transition hover:scale-110 active:scale-95 cursor-pointer ${isFav ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500'}"
+              class="absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center bg-white/95 hover:bg-white border border-[#E7E0D8] shadow-2xs transition hover:scale-110 active:scale-95 cursor-pointer ${isFav ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500'}"
               title="${isFav ? 'นำออกจากสินค้าที่ถูกใจ' : 'บันทึกเป็นสินค้าที่ถูกใจ'}"
             >
               <i data-lucide="heart" class="w-3.5 h-3.5 ${isFav ? 'fill-rose-500 text-rose-500' : ''}"></i>
@@ -2166,7 +2181,7 @@
             <!-- Promo Badge (Bottom-Left) -->
             ${(p.promotion && p.promotion.trim()) ? `
               <div class="absolute bottom-2 left-2 z-10 max-w-[70%]">
-                <span class="px-2 py-0.5 text-[10px] font-bold bg-[#6e483b] text-white shadow-xs inline-flex items-center truncate" title="${escapeHtml(p.promotion)}">
+                <span class="px-2 py-0.5 text-[10px] sm:text-[11px] font-bold bg-[#6e483b] text-white rounded-lg shadow-xs inline-flex items-center truncate" title="${escapeHtml(p.promotion)}">
                   <span class="truncate">${escapeHtml(p.promotion)}</span>
                 </span>
               </div>
@@ -2174,7 +2189,7 @@
 
             <!-- Discount Badge (Bottom-Right) -->
             ${hasDiscount ? `
-              <span class="absolute bottom-2 right-2 px-1.5 py-0.5 text-[10px] font-bold bg-rose-600 text-white shadow-xs">
+              <span class="absolute bottom-2 right-2 px-1.5 py-0.5 text-[10px] sm:text-[11px] font-bold bg-rose-600 text-white rounded-lg shadow-xs">
                 ลด ${discountPercent}%
               </span>
             ` : ''}
@@ -2183,10 +2198,10 @@
           <!-- Product Details & Actions -->
           <div class="p-3 sm:p-3.5 flex-1 flex flex-col justify-between bg-white">
             <div>
-              <div class="text-[10px] uppercase font-bold text-[#57382d] tracking-wider truncate mb-1">
+              <div class="text-[10px] sm:text-[11px] uppercase font-bold text-[#57382d] tracking-wider truncate mb-1">
                 ${escapeHtml(cats[0] || 'KMA')}
               </div>
-              <h4 class="font-bold text-slate-900 text-xs sm:text-sm line-clamp-2 leading-snug group-hover:text-[#6e483b] transition-colors min-h-[2.4rem]" title="${escapeHtml(p.name)}">
+              <h4 class="font-bold text-slate-900 text-sm sm:text-[15px] line-clamp-2 leading-snug group-hover:text-[#6e483b] transition-colors min-h-[2.4rem]" title="${escapeHtml(p.name)}">
                 ${escapeHtml(p.name)}
               </h4>
               ${p.description ? `
@@ -2199,45 +2214,56 @@
             <!-- Price & Actions Section -->
             <div class="mt-3 pt-2.5 border-t border-[#F0EAE4] space-y-2">
               
-              <!-- Row 1: Price (Left) + Utility Icons (Right - NO TEXT WRAPPING) -->
+              <!-- Row 1: Price (Left) + Clean 3-Dots Action Menu (Right) -->
               <div class="flex items-center justify-between gap-1">
                 <div class="flex items-baseline gap-1.5 flex-wrap">
-                  <span class="text-sm sm:text-base font-extrabold text-slate-900 leading-none">
+                  <span class="text-base sm:text-lg font-extrabold text-slate-900 leading-none">
                     ฿${sale.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                   </span>
                   ${hasDiscount ? `
-                    <span class="text-[11px] text-slate-400 line-through">
+                    <span class="text-xs text-slate-400 line-through">
                       ฿${original.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                     </span>
                   ` : ''}
                 </div>
 
-                <!-- Clean Utility Icons: Copy, Edit, Delete -->
-                <div class="flex items-center gap-0.5 shrink-0">
+                <!-- Clean 3-Dots Action Menu Dropdown -->
+                <div class="relative action-menu-wrap shrink-0">
                   <button 
-                    type="button"
-                    onclick="event.stopPropagation(); duplicateProduct('${p.id}')" 
-                    class="p-1.5 text-slate-400 hover:text-[#6e483b] hover:bg-[#FAF6F2] transition cursor-pointer"
-                    title="คัดลอกสินค้านี้"
+                    type="button" 
+                    onclick="event.stopPropagation(); toggleProductActionMenu('${p.id}')" 
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-[#6e483b] hover:bg-[#FAF6F2] transition cursor-pointer"
+                    title="จัดการสินค้านี้"
                   >
-                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
                   </button>
-                  <button 
-                    type="button"
-                    onclick="event.stopPropagation(); promptEditProduct('${p.id}')" 
-                    class="p-1.5 text-slate-400 hover:text-[#6e483b] hover:bg-[#FAF6F2] transition cursor-pointer"
-                    title="แก้ไข"
-                  >
-                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                  </button>
-                  <button 
-                    type="button"
-                    onclick="event.stopPropagation(); promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
-                    class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                    title="ลบ"
-                  >
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                  </button>
+                  
+                  <div id="actionMenu-${p.id}" class="product-action-dropdown hidden absolute right-0 bottom-8 z-30 w-36 bg-white rounded-lg shadow-xl border border-[#E7E0D8] py-1 text-xs divide-y divide-slate-100">
+                    <button 
+                      type="button" 
+                      onclick="event.stopPropagation(); closeAllActionMenus(); promptEditProduct('${p.id}')" 
+                      class="w-full px-3 py-2 text-left text-slate-700 hover:bg-[#FAF6F2] hover:text-[#6e483b] flex items-center gap-2 transition cursor-pointer"
+                    >
+                      <i data-lucide="edit-3" class="w-3.5 h-3.5 text-[#6e483b]"></i>
+                      <span>แก้ไขสินค้า</span>
+                    </button>
+                    <button 
+                      type="button" 
+                      onclick="event.stopPropagation(); closeAllActionMenus(); duplicateProduct('${p.id}')" 
+                      class="w-full px-3 py-2 text-left text-slate-700 hover:bg-[#FAF6F2] hover:text-[#6e483b] flex items-center gap-2 transition cursor-pointer"
+                    >
+                      <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-500"></i>
+                      <span>คัดลอกสินค้า</span>
+                    </button>
+                    <button 
+                      type="button" 
+                      onclick="event.stopPropagation(); closeAllActionMenus(); promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
+                      class="w-full px-3 py-2 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition cursor-pointer"
+                    >
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-500"></i>
+                      <span>ลบสินค้านี้</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -2254,7 +2280,7 @@
       `;
     }
 
-    // HTML Template สำหรับ List View (Mobile First: กะทัดรัด สลิม สัดส่วนลงตัว ไม่สูงเทอะทะ)
+    // HTML Template สำหรับ List View (Mobile First: เพิ่มความสูงเล็กน้อย ขยายฟอนต์ มุมโค้งมน 8px ย้ายหัวใจไปมุมซ้ายบนรูปภาพ)
     function renderListItem(p) {
       const original = Number(p.original_price) || 0;
       const sale = Number(p.sale_price) || original;
@@ -2268,97 +2294,106 @@
       const inCartQty = inCartItem ? (inCartItem.qty || 1) : 0;
 
       return `
-        <div class="bg-white border border-[#E7E0D8] hover:border-[#6e483b] hover:shadow-xs transition p-2 sm:p-2.5 group">
-          <div class="flex items-center gap-2.5 sm:gap-3">
+        <div class="bg-white border border-[#E7E0D8] hover:border-[#6e483b] hover:shadow-xs rounded-lg transition p-3 sm:p-3.5 group relative">
+          <div class="flex items-center gap-3 sm:gap-3.5">
             
-            <!-- Product Thumbnail with Badges (กะทัดรัด สลิม) -->
-            <div class="w-16 h-16 sm:w-18 sm:h-18 shrink-0 bg-[#FAF6F2]/40 border border-[#eadfd7] p-1 overflow-hidden relative flex items-center justify-center">
+            <!-- Product Thumbnail (ขนาด 76px พร้อมมุมโค้งมน 8px และหัวใจมุมซ้ายบน เอา +n ออก) -->
+            <div class="w-[76px] h-[76px] sm:w-20 sm:h-20 shrink-0 bg-[#FAF6F2]/50 border border-[#eadfd7] rounded-lg p-1.5 overflow-hidden relative flex items-center justify-center">
               <img 
                 src="${escapeHtml(img)}" 
                 alt="${escapeHtml(p.name)}" 
                 onerror="this.onerror=null; this.src=getCategoryPlaceholder('${escapeJs(p.category || '')}')" 
                 class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
               >
-              <!-- In-Cart Quantity Badge on Thumbnail (#6e483b) -->
-              <div data-cart-thumb-id="${p.id}" class="absolute top-0.5 left-0.5 z-10 ${inCartQty > 0 ? '' : 'hidden'}">
-                <span class="px-1 py-0.2 text-[8px] font-extrabold bg-[#6e483b] text-white flex items-center gap-0.5 leading-none shadow-xs">
-                  <span class="text-amber-200 font-bold">+</span><span class="cart-thumb-qty">${inCartQty}</span>
-                </span>
-              </div>
+              
+              <!-- Heart Button (ย้ายมามุมซ้ายบนของรูปภาพ สไตล์โมเดิร์นคลีน สะดวก ไม่ชนปุ่มอื่น) -->
+              <button 
+                type="button" 
+                onclick="event.stopPropagation(); toggleFavorite('${p.id}')" 
+                class="absolute top-1 left-1 z-10 w-6 h-6 rounded-full flex items-center justify-center bg-white/95 hover:bg-white border border-[#E7E0D8] shadow-2xs transition hover:scale-110 active:scale-90 cursor-pointer ${isFav ? 'text-rose-500' : 'text-slate-300 hover:text-rose-500'}"
+                title="${isFav ? 'นำออกจากสินค้าที่ถูกใจ' : 'บันทึกเป็นสินค้าที่ถูกใจ'}"
+              >
+                <i data-lucide="heart" class="w-3.5 h-3.5 ${isFav ? 'fill-rose-500 text-rose-500' : ''}"></i>
+              </button>
             </div>
 
             <!-- Product Details -->
-            <div class="flex-1 min-w-0 flex flex-col justify-between">
+            <div class="flex-1 min-w-0 flex flex-col justify-between py-0.5">
               
-              <!-- Top Row: Tags (Left) + Management Toolbar (Top-Right: ปลอดภัย ไม่ชนนิ้วเวลาขาย) -->
+              <!-- Top Row: Tags (Left) + Management Dropdown (Top-Right: ซ่อนเรียบร้อยในปุ่ม 3 จุด) -->
               <div class="flex items-center justify-between gap-1.5">
                 <div class="flex flex-wrap items-center gap-1">
                   ${cats.slice(0, 2).map(c => `
-                    <button type="button" onclick="event.stopPropagation(); selectCategory('${escapeJs(c)}')" class="px-1.5 py-0.2 text-[9px] font-semibold bg-[#FAF6F2] hover:bg-[#6e483b] text-[#995c41] hover:text-white border border-[#eadfd7] transition cursor-pointer">
+                    <button type="button" onclick="event.stopPropagation(); selectCategory('${escapeJs(c)}')" class="px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold bg-[#FAF6F2] hover:bg-[#6e483b] text-[#995c41] hover:text-white border border-[#eadfd7] rounded-lg transition cursor-pointer">
                       ${escapeHtml(c)}
                     </button>
                   `).join('')}
-                  ${cats.length > 2 ? `<span class="text-[9px] text-slate-400 font-medium">+${cats.length - 2}</span>` : ''}
+                  ${cats.length > 2 ? `<span class="text-[10px] text-slate-400 font-medium">+${cats.length - 2}</span>` : ''}
                   ${(p.promotion && p.promotion.trim()) ? `
-                    <span class="inline-flex items-center px-1.5 py-0.2 text-[9px] font-bold bg-[#6e483b] text-white shadow-2xs">
+                    <span class="inline-flex items-center px-2 py-0.5 text-[10px] sm:text-[11px] font-bold bg-[#6e483b] text-white rounded-lg shadow-2xs">
                       <span>${escapeHtml(p.promotion.trim())}</span>
                     </span>
                   ` : ''}
                 </div>
 
-                <!-- Admin Action Icons (Copy, Edit, Trash, Heart) ชัดเจนแต่สลิม -->
-                <div class="flex items-center gap-0.5 shrink-0">
+                <!-- 3-Dots Action Menu (ซ่อนปุ่มคัดลอก ลบ แก้ไข ไว้อย่างเป็นระเบียบ แต่กดใช้ได้ทันที) -->
+                <div class="relative action-menu-wrap shrink-0">
                   <button 
-                    type="button"
-                    onclick="event.stopPropagation(); duplicateProduct('${p.id}')" 
-                    class="p-1 text-slate-400 hover:text-[#6e483b] hover:bg-[#FAF6F2] transition cursor-pointer"
-                    title="คัดลอกสินค้านี้"
+                    type="button" 
+                    onclick="event.stopPropagation(); toggleProductActionMenu('${p.id}')" 
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-[#6e483b] hover:bg-[#FAF6F2] transition cursor-pointer"
+                    title="จัดการสินค้านี้"
                   >
-                    <i data-lucide="copy" class="w-3 h-3"></i>
+                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
                   </button>
-                  <button 
-                    type="button"
-                    onclick="event.stopPropagation(); promptEditProduct('${p.id}')" 
-                    class="p-1 text-slate-400 hover:text-[#6e483b] hover:bg-[#FAF6F2] transition cursor-pointer"
-                    title="แก้ไขข้อมูลสินค้า"
-                  >
-                    <i data-lucide="edit-3" class="w-3 h-3"></i>
-                  </button>
-                  <button 
-                    type="button"
-                    onclick="event.stopPropagation(); promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
-                    class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                    title="ลบสินค้านี้"
-                  >
-                    <i data-lucide="trash-2" class="w-3 h-3"></i>
-                  </button>
-                  <button 
-                    type="button"
-                    onclick="event.stopPropagation(); toggleFavorite('${p.id}')" 
-                    class="p-1 ${isFav ? 'text-rose-500' : 'text-slate-300 hover:text-rose-500'} hover:bg-rose-50 transition cursor-pointer"
-                    title="${isFav ? 'นำออกจากสินค้าที่ถูกใจ' : 'บันทึกเป็นสินค้าที่ถูกใจ'}"
-                  >
-                    <i data-lucide="heart" class="w-3 h-3 ${isFav ? 'fill-rose-500' : ''}"></i>
-                  </button>
+                  
+                  <!-- Dropdown Action Menu -->
+                  <div id="actionMenu-${p.id}" class="product-action-dropdown hidden absolute right-0 top-8 z-30 w-36 bg-white rounded-lg shadow-xl border border-[#E7E0D8] py-1 text-xs divide-y divide-slate-100">
+                    <button 
+                      type="button" 
+                      onclick="event.stopPropagation(); closeAllActionMenus(); promptEditProduct('${p.id}')" 
+                      class="w-full px-3 py-2 text-left text-slate-700 hover:bg-[#FAF6F2] hover:text-[#6e483b] flex items-center gap-2 transition cursor-pointer"
+                    >
+                      <i data-lucide="edit-3" class="w-3.5 h-3.5 text-[#6e483b]"></i>
+                      <span>แก้ไขสินค้า</span>
+                    </button>
+                    <button 
+                      type="button" 
+                      onclick="event.stopPropagation(); closeAllActionMenus(); duplicateProduct('${p.id}')" 
+                      class="w-full px-3 py-2 text-left text-slate-700 hover:bg-[#FAF6F2] hover:text-[#6e483b] flex items-center gap-2 transition cursor-pointer"
+                    >
+                      <i data-lucide="copy" class="w-3.5 h-3.5 text-slate-500"></i>
+                      <span>คัดลอกสินค้า</span>
+                    </button>
+                    <button 
+                      type="button" 
+                      onclick="event.stopPropagation(); closeAllActionMenus(); promptDeleteProduct('${p.id}', '${escapeJs(p.name)}')" 
+                      class="w-full px-3 py-2 text-left text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition cursor-pointer"
+                    >
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-500"></i>
+                      <span>ลบสินค้านี้</span>
+                    </button>
+                  </div>
                 </div>
+
               </div>
 
-              <!-- Product Name (กระชับพอดีบรรทัด ไม่ดันให้การ์ดยาว) -->
-              <h4 class="font-bold text-slate-900 text-xs leading-snug line-clamp-1 group-hover:text-[#6e483b] transition-colors mt-0.5" title="${escapeHtml(p.name)}">
+              <!-- Product Name (ขนาดฟอนต์ใหญ่ขึ้น อ่านง่าย สบายตา) -->
+              <h4 class="font-bold text-slate-900 text-sm sm:text-[15px] leading-snug line-clamp-1 group-hover:text-[#6e483b] transition-colors mt-1" title="${escapeHtml(p.name)}">
                 ${escapeHtml(p.name)}
               </h4>
 
-              <!-- Bottom Row: Price (Left) & Dedicated Add to Cart Button (Right: คล่องตัว ไม่เกะกะ) -->
-              <div class="mt-1.5 pt-1 border-t border-[#F5EFEB] flex items-center justify-between gap-2">
+              <!-- Bottom Row: Price & Stepper Control -->
+              <div class="mt-2 pt-1.5 border-t border-[#F5EFEB] flex items-center justify-between gap-2">
                 <div class="flex items-baseline gap-1.5">
-                  <span class="text-sm sm:text-base font-black text-slate-900 leading-none tracking-tight">
+                  <span class="text-base sm:text-lg font-black text-slate-900 leading-none tracking-tight">
                     ฿${sale.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                   </span>
                   ${hasDiscount ? `
-                    <span class="text-[10px] text-slate-400 line-through">
+                    <span class="text-xs text-slate-400 line-through">
                       ฿${original.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                     </span>
-                    <span class="px-1 py-0.2 text-[8px] sm:text-[9px] font-bold bg-rose-50 text-rose-600 border border-rose-200 leading-none">
+                    <span class="px-1.5 py-0.5 text-[10px] sm:text-[11px] font-bold bg-rose-50 text-rose-600 border border-rose-200 rounded-lg leading-none">
                       ลด ${discountPercent}%
                     </span>
                   ` : ''}
@@ -2382,15 +2417,15 @@
         ? (selectedCategories.length === 0 && !showFavoritesOnly)
         : (selectedCategories.includes(cat) && !showFavoritesOnly);
 
-      const activeCls = 'active bg-[#6e483b] text-white border-[#6e483b] shadow-2xs font-bold';
-      const inactiveCls = 'bg-[#FAF6F2] hover:bg-white text-slate-700 hover:text-[#6e483b] border-[#eadfd7] hover:border-[#6e483b]/50 font-medium';
+      const activeCls = 'active bg-[#6e483b] text-white border-[#6e483b] shadow-2xs font-bold rounded-lg';
+      const inactiveCls = 'bg-[#FAF6F2] hover:bg-white text-slate-700 hover:text-[#6e483b] border-[#eadfd7] hover:border-[#6e483b]/50 font-medium rounded-lg';
 
       return `
         <button 
           type="button"
           data-cat="${escapeHtml(cat)}" 
           onclick="selectCategory('${escapeJs(cat)}')" 
-          class="category-btn ${isActive ? activeCls : inactiveCls} px-2.5 py-1 text-[11px] sm:text-xs border transition cursor-pointer shrink-0 whitespace-nowrap"
+          class="category-btn ${isActive ? activeCls : inactiveCls} px-2.5 py-1 text-[11px] sm:text-xs border transition cursor-pointer shrink-0 whitespace-nowrap rounded-lg"
         >
           ${escapeHtml(cat)}
         </button>
@@ -2562,9 +2597,9 @@
           : (selectedCategories.includes(btnCat) && !showFavoritesOnly);
 
         if (isActive) {
-          btn.className = 'category-btn active px-2.5 py-1 text-[11px] sm:text-xs font-bold bg-[#6e483b] text-white border border-[#6e483b] shadow-2xs transition cursor-pointer shrink-0 whitespace-nowrap';
+          btn.className = 'category-btn active px-2.5 py-1 text-[11px] sm:text-xs font-bold bg-[#6e483b] text-white border border-[#6e483b] shadow-2xs transition cursor-pointer shrink-0 whitespace-nowrap rounded-lg';
         } else {
-          btn.className = 'category-btn px-2.5 py-1 text-[11px] sm:text-xs font-medium bg-[#FAF6F2] hover:bg-white text-slate-700 hover:text-[#6e483b] border border-[#eadfd7] hover:border-[#6e483b]/50 transition cursor-pointer shrink-0 whitespace-nowrap';
+          btn.className = 'category-btn px-2.5 py-1 text-[11px] sm:text-xs font-medium bg-[#FAF6F2] hover:bg-white text-slate-700 hover:text-[#6e483b] border border-[#eadfd7] hover:border-[#6e483b]/50 transition cursor-pointer shrink-0 whitespace-nowrap rounded-lg';
         }
       });
     }

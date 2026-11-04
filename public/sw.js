@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kma-booth-v12';
+const CACHE_NAME = 'kma-booth-v13';
 
 // Install: บังคับให้อัปเดตและข้ามการรอทันที
 self.addEventListener('install', event => {
