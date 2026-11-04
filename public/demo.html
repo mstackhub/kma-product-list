@@ -270,6 +270,12 @@
     </div>
   </header>
 
+  <!-- Offline Notification Banner (แจ้งเตือนเมื่อไม่มีสัญญาณอินเทอร์เน็ต) -->
+  <div id="offlineBanner" class="hidden bg-[#FAF6F2] border-b border-[#eadfd7] px-4 py-2 text-center text-xs font-semibold text-[#6e483b] flex items-center justify-center gap-2 transition-all">
+    <i data-lucide="wifi-off" class="w-4 h-4 text-[#6e483b]"></i>
+    <span>คุณกำลังใช้งานในโหมดออฟไลน์ (แคตตาล็อก & คิดเงินด่วนหน้าบูธยังทำงานได้ปกติ 100%)</span>
+  </div>
+
   <!-- ========================================================================= -->
   <!-- Main Container                                                            -->
   <!-- ========================================================================= -->
@@ -1625,8 +1631,30 @@
     updateFavoritesBadges();
     updateCartBadges();
 
+    // ระบบตรวจจับสถานะ Online / Offline อัตโนมัติ
+    function updateOnlineStatus() {
+      const banner = document.getElementById('offlineBanner');
+      if (!banner) return;
+      if (!navigator.onLine) {
+        banner.classList.remove('hidden');
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
+
+    window.addEventListener('online', () => {
+      updateOnlineStatus();
+      fetchProducts(true);
+      showToast('success', 'เชื่อมต่ออินเทอร์เน็ตแล้ว (ซิงค์ข้อมูลกับคลาวด์เรียบร้อย)');
+    });
+    window.addEventListener('offline', () => {
+      updateOnlineStatus();
+    });
+
     // On Document Ready
     document.addEventListener('DOMContentLoaded', () => {
+      updateOnlineStatus();
       if (allProducts.length === 0) {
         loadCachedData();
       }
@@ -1640,7 +1668,7 @@
 
       // ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=22').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=23').then(reg => {
           reg.update();
         }).catch(err => {
           console.warn('PWA SW register error:', err);

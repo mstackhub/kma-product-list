@@ -1,7 +1,20 @@
-const CACHE_NAME = 'kma-booth-v22';
+const CACHE_NAME = 'kma-booth-v23';
 
-// Install: บังคับให้อัปเดตและข้ามการรอทันที
+const PRECACHE_ASSETS = [
+  '/',
+  '/index.html',
+  '/kma-logo.png',
+  '/line-qr.png',
+  '/manifest.json'
+];
+
+// Install: แคชไฟล์หลักของระบบทันที พร้อมเปิดใช้งานออฟไลน์ 100%
 self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(PRECACHE_ASSETS).catch(err => console.warn('Pre-cache error:', err));
+    })
+  );
   self.skipWaiting();
 });
 
