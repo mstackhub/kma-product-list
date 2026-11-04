@@ -463,15 +463,17 @@
     </div>
 
     <!-- Empty State -->
-    <div id="emptyState" class="hidden bg-white p-12 text-center border border-dashed border-slate-300">
-      <div class="w-14 h-14 bg-pink-50 text-pink-500 flex items-center justify-center mx-auto mb-3">
-        <i data-lucide="package-x" class="w-8 h-8"></i>
+    <div id="emptyState" class="hidden bg-white py-12 px-5 text-center border border-[#E7E0D8] rounded-lg shadow-2xs">
+      <div class="w-14 h-14 bg-[#FAF6F2] text-[#6e483b] border border-[#eadfd7] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-xs">
+        <i data-lucide="package-x" class="w-7 h-7"></i>
       </div>
-      <h3 class="text-base font-bold text-slate-800">ไม่พบรายการสินค้า</h3>
-      <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">ลองค้นหาด้วยคำอื่น หรือกดปุ่ม "เพิ่มสินค้า" เพื่อบันทึกสินค้าใหม่ลงใน Turso Database</p>
-      <button onclick="openAddModal()" class="mt-4 inline-flex items-center gap-2 bg-[#6e483b] hover:bg-[#57382d] text-white px-4 py-2 text-sm font-medium transition shadow-sm">
-        <i data-lucide="plus" class="w-4 h-4"></i> เพิ่มสินค้าชิ้นแรก
-      </button>
+      <h3 class="text-base sm:text-lg font-bold text-[#3D2B24]">ไม่พบรายการสินค้า</h3>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">ลองค้นหาด้วยคำอื่น หรือกดปุ่ม "เพิ่มสินค้า" เพื่อบันทึกสินค้าใหม่</p>
+      <div class="mt-4 flex items-center justify-center">
+        <button onclick="openAddModal()" class="inline-flex items-center gap-2 bg-[#6e483b] hover:bg-[#57382d] active:scale-95 text-white px-5 py-2.5 text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer rounded-lg">
+          <i data-lucide="plus" class="w-4 h-4"></i> เพิ่มสินค้าใหม่
+        </button>
+      </div>
     </div>
 
     <!-- Grid View Container (2 cols on mobile, 3-4 cols on tablet & desktop) -->
@@ -1637,7 +1639,7 @@
 
       // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=14').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=15').then(reg => {
           console.log('KMA PWA Service Worker active:', reg.scope);
           // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
           reg.update();
@@ -1966,47 +1968,59 @@
 
         if (showFavoritesOnly) {
           empty.innerHTML = `
-            <div class="w-14 h-14 bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-3">
-              <i data-lucide="heart-off" class="w-8 h-8"></i>
+            <div class="w-14 h-14 bg-rose-50 text-rose-500 border border-rose-200 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-xs">
+              <i data-lucide="heart-off" class="w-7 h-7"></i>
             </div>
-            <h3 class="text-base font-bold text-slate-800">ยังไม่มีสินค้าที่ถูกใจ</h3>
-            <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">แตะไอคอนรูปหัวใจ ❤️ บนสินค้าที่คุณชอบเพื่อบันทึกไว้ในรายการโปรด</p>
-            <button onclick="toggleFavoritesOnly(false)" class="mt-4 inline-flex items-center gap-2 bg-[#6e483b] hover:bg-[#57382d] text-white px-4 py-2 text-sm font-medium transition shadow-xs cursor-pointer">
-              ดูสินค้าทั้งหมด
-            </button>
+            <h3 class="text-base sm:text-lg font-bold text-[#3D2B24]">ยังไม่มีสินค้าที่ถูกใจ</h3>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
+              แตะไอคอนรูปหัวใจ ❤️ บนรูปภาพสินค้าเพื่อบันทึกไว้ในรายการโปรด
+            </p>
+            <div class="mt-4 flex items-center justify-center">
+              <button onclick="toggleFavoritesOnly(false)" class="inline-flex items-center gap-2 bg-[#6e483b] hover:bg-[#57382d] active:scale-95 text-white px-5 py-2.5 text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer rounded-lg">
+                <span>ดูสินค้าทั้งหมด</span>
+              </button>
+            </div>
           `;
         } else if ((currentCategory && currentCategory !== 'ทั้งหมด') || (currentSearch && currentSearch.trim() !== '') || showPromotionOnly) {
           // มีการใช้ตัวกรองแล้วไม่พบผลลัพธ์
           const activeFilters = [];
-          if (currentCategory && currentCategory !== 'ทั้งหมด') activeFilters.push(`หมวดหมู่: <span class="font-bold text-slate-800">${escapeHtml(currentCategory)}</span>`);
-          if (currentSearch && currentSearch.trim() !== '') activeFilters.push(`ค้นหา: <span class="font-bold text-slate-800">"${escapeHtml(currentSearch)}"</span>`);
-          if (showPromotionOnly) activeFilters.push(`<span class="font-bold text-rose-600">เฉพาะสินค้าโปรโมชั่น</span>`);
+          if (currentCategory && currentCategory !== 'ทั้งหมด') activeFilters.push(`หมวดหมู่: <span class="font-bold text-[#6e483b]">${escapeHtml(currentCategory)}</span>`);
+          if (currentSearch && currentSearch.trim() !== '') activeFilters.push(`ค้นหา: <span class="font-bold text-[#6e483b]">"${escapeHtml(currentSearch)}"</span>`);
+          if (showPromotionOnly) activeFilters.push(`<span class="font-bold text-rose-600">โปรโมชั่น</span>`);
 
           empty.innerHTML = `
-            <div class="w-14 h-14 bg-[#FAF6F2] text-[#6e483b] border border-[#eadfd7] flex items-center justify-center mx-auto mb-3 shadow-2xs">
+            <div class="w-14 h-14 bg-[#FAF6F2] text-[#6e483b] border border-[#eadfd7] rounded-2xl flex items-center justify-center mx-auto mb-3.5 shadow-xs">
               <i data-lucide="filter-x" class="w-7 h-7"></i>
             </div>
-            <h3 class="text-base font-bold text-slate-800">ไม่พบสินค้าตามตัวกรองที่เลือก</h3>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1.5 max-w-md mx-auto leading-relaxed">
-              ${activeFilters.join(' • ')}<br>
-              ลองเลือกหมวดหมู่อื่น หรือแตะปุ่มด้านล่างเพื่อล้างตัวกรองทั้งหมด
+            <h3 class="text-base sm:text-lg font-bold text-[#3D2B24]">ไม่พบสินค้าในหมวดหมู่นี้</h3>
+            <div class="my-2.5 flex justify-center flex-wrap gap-1.5">
+              ${activeFilters.map(f => `<span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-[#FAF6F2] text-slate-700 border border-[#eadfd7] rounded-lg">${f}</span>`).join('')}
+            </div>
+            <p class="text-xs sm:text-sm text-slate-500 max-w-xs sm:max-w-sm mx-auto leading-relaxed">
+              ลองเลือกหมวดหมู่อื่น หรือแตะปุ่มด้านล่างเพื่อดูสินค้าทั้งหมด
             </p>
-            <div class="mt-4 flex items-center justify-center gap-2 flex-wrap">
-              <button onclick="selectCategory('ทั้งหมด'); clearSearch(); if(showPromotionOnly) togglePromotionFilter();" class="inline-flex items-center gap-2 bg-[#6e483b] hover:bg-[#57382d] text-white px-4.5 py-2 text-xs sm:text-sm font-semibold transition shadow-xs cursor-pointer active:scale-95">
-                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> ล้างตัวกรองทั้งหมด (ดูสินค้า ${allProducts.length || 'ทั้งหมด'} รายการ)
+            <div class="mt-4 flex items-center justify-center">
+              <button onclick="selectCategory('ทั้งหมด'); clearSearch(); if(showPromotionOnly) togglePromotionFilter();" class="inline-flex items-center justify-center gap-2 bg-[#6e483b] hover:bg-[#57382d] active:scale-95 text-white px-5 py-2.5 text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer rounded-lg">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                <span>ดูสินค้าทั้งหมด (${allProducts.length || 0} รายการ)</span>
               </button>
             </div>
           `;
         } else {
           empty.innerHTML = `
-            <div class="w-14 h-14 bg-pink-50 text-pink-500 flex items-center justify-center mx-auto mb-3">
-              <i data-lucide="package-x" class="w-8 h-8"></i>
+            <div class="w-14 h-14 bg-[#FAF6F2] text-[#6e483b] border border-[#eadfd7] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-xs">
+              <i data-lucide="package-x" class="w-7 h-7"></i>
             </div>
-            <h3 class="text-base font-bold text-slate-800">ไม่พบรายการสินค้า</h3>
-            <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">กดปุ่ม "เพิ่มสินค้า" เพื่อบันทึกสินค้าใหม่ลงในระบบ</p>
-            <button onclick="openAddModal()" class="mt-4 inline-flex items-center gap-2 bg-[#6e483b] hover:bg-[#57382d] text-white px-4 py-2 text-sm font-medium transition shadow-xs cursor-pointer">
-              <i data-lucide="plus" class="w-4 h-4"></i> เพิ่มสินค้าชิ้นแรก
-            </button>
+            <h3 class="text-base sm:text-lg font-bold text-[#3D2B24]">ไม่พบรายการสินค้า</h3>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
+              แตะปุ่มด้านล่างเพื่อเพิ่มสินค้าชิ้นแรกเข้าสู่ระบบ
+            </p>
+            <div class="mt-4 flex items-center justify-center">
+              <button onclick="openAddModal()" class="inline-flex items-center gap-2 bg-[#6e483b] hover:bg-[#57382d] active:scale-95 text-white px-5 py-2.5 text-xs sm:text-sm font-bold transition shadow-xs cursor-pointer rounded-lg">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>เพิ่มสินค้าใหม่</span>
+              </button>
+            </div>
           `;
         }
         lucide.createIcons();
