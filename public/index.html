@@ -615,7 +615,7 @@
           <i data-lucide="calculator" class="w-4 h-4 mb-0.5 text-[#6e483b]"></i>
           <span id="bottomCartBadge" class="hidden absolute -top-1.5 -right-3.5 px-1.5 py-0.2 text-[9px] font-bold bg-[#6e483b] text-white leading-none shadow-2xs">0</span>
         </div>
-        <span id="navCartLabel" class="text-[11px] sm:text-xs">คิดเงินด่วน</span>
+        <span id="navCartLabel" class="text-[11px] sm:text-xs">คิดเงิน</span>
       </button>
 
       <!-- เมนู 4: ช่องทางการติดต่อ -->
@@ -758,8 +758,7 @@
       <!-- Modal Header (Minimalist Zen Luxury: โทนทรายและเอสเปรสโซ่ เรียบหรู สะอาดตา) -->
       <div class="px-4 py-3 bg-white/95 border-b border-[#ECE4DE] flex items-center justify-between shrink-0 sticky top-0 z-20">
         <div>
-          <span class="text-[10px] text-[#A67C6D] uppercase tracking-widest font-semibold block">KMA Cosmetology</span>
-          <h3 class="text-sm font-bold text-[#3D2B24] tracking-wide">คิดเงินด่วนหน้าบูธ (Quick Checkout)</h3>
+          <h3 class="text-base font-bold text-[#3D2B24] tracking-wide">คิดเงิน</h3>
         </div>
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold text-[#6e483b] bg-[#FAF7F4] px-2 py-0.5 border border-[#ECE4DE] shadow-2xs">
@@ -1638,7 +1637,7 @@
 
       // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=10').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=11').then(reg => {
           console.log('KMA PWA Service Worker active:', reg.scope);
           // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
           reg.update();
@@ -3967,7 +3966,7 @@
           }
         } else {
           bottomBadge.classList.add('hidden');
-          if (navCartLabel) navCartLabel.textContent = 'คิดเงินด่วน';
+          if (navCartLabel) navCartLabel.textContent = 'คิดเงิน';
           if (navCartBtn) {
             navCartBtn.classList.remove('text-[#6e483b]', 'font-bold');
             navCartBtn.classList.add('text-slate-500', 'font-medium');
