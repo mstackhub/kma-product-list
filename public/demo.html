@@ -424,8 +424,11 @@
     <div class="flex items-center justify-between text-xs text-slate-500 mb-3 px-0.5">
       <div class="flex items-center gap-2 flex-wrap">
         <span>แสดง <span id="productCount" class="font-bold text-slate-800">0</span> รายการ</span>
-        <span id="activeFilterBadge" class="hidden inline-flex items-center gap-1.5 px-2 py-0.5 text-xs bg-[#6e483b]/10 text-[#6e483b] font-semibold border border-[#6e483b]/30 rounded-lg">
+        <span id="activeFilterBadge" class="hidden inline-flex items-center gap-1.5 px-2.5 py-1 text-xs bg-[#6e483b]/10 text-[#6e483b] font-semibold border border-[#6e483b]/30 rounded-lg">
           <span id="activeFilterName"></span>
+          <button type="button" id="categoryLogicToggleBtn" onclick="toggleCategoryFilterLogic()" class="hidden text-[10px] bg-white border border-[#6e483b]/40 hover:bg-[#6e483b] hover:text-white px-1.5 py-0.2 rounded-md transition cursor-pointer ml-0.5" title="สลับโหมด รวมหมวด (OR) / ต้องมีครบ (AND)">
+            รวมหมวด (OR)
+          </button>
           <button type="button" onclick="selectCategory('ทั้งหมด')" class="hover:text-rose-600 font-bold ml-1 cursor-pointer" title="ล้างตัวกรองหมวดหมู่">✕</button>
         </span>
       </div>
@@ -1463,7 +1466,8 @@
     let allProducts = []; // แค็ตตาล็อกสินค้าทั้งหมดในระบบ (Master Catalog)
     let products = []; // สินค้าที่ผ่านการกรอง (Filtered & Sorted View)
     let currentCategory = 'ทั้งหมด';
-    let selectedCategories = []; // หมวดหมู่ที่เลือก (รองรับการเลือกพร้อมกันหลายหมวดหมู่, ว่าง = ทั้งหมด)
+    let selectedCategories = []; // หมวดหมู่ที่เลือก (รองรับการเลือกพร้อมกันมากกว่า 1 หมวดหมู่ Multi-Select)
+    let categoryFilterLogic = 'or'; // 'or' (รวมทุกหมวดที่เลือก) | 'and' (ต้องมีครบทุกหมวดที่เลือก)
     let currentSort = 'newest';
     let currentSearch = '';
     let viewMode = 'list'; // 'list' | 'grid' (Default เป็นแบบ List รายการ)
@@ -1639,7 +1643,7 @@
 
       // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=16').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=17').then(reg => {
           console.log('KMA PWA Service Worker active:', reg.scope);
           // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
           reg.update();
@@ -1861,13 +1865,14 @@
     function filterAndSortLocal(list) {
       let filtered = [...list];
 
-      // Filter category: เลือกหมวดหมู่ไหน ก็แสดงสินค้าในหมวดหมู่นั้น (Single Selection ชัดเจน ตรงไปตรงมา)
-      if (currentCategory && currentCategory !== 'ทั้งหมด') {
-        const target = currentCategory.toLowerCase().trim();
+      // Filter category: รองรับการเลือกพร้อมกันมากกว่า 1 หมวดหมู่ (Multi-Select)
+      if (selectedCategories.length > 0) {
+        const lowerSelected = selectedCategories.map(c => c.toLowerCase().trim());
         filtered = filtered.filter(p => {
           if (!p.category) return false;
           const cats = p.category.split(',').map(c => c.trim().toLowerCase());
-          return cats.some(c => {
+          
+          const matchSingle = (target) => cats.some(c => {
             if (c === target) return true;
             if (target.includes('&')) {
               const parts = target.split('&').map(x => x.trim());
@@ -1879,6 +1884,13 @@
             }
             return target.length >= 2 && (c.includes(target) || target.includes(c));
           });
+
+          if (categoryFilterLogic === 'and') {
+            return lowerSelected.every(target => matchSingle(target));
+          } else {
+            // Default 'or': เลือกหมวดไหน ก็แสดงหมวดนั้นได้มากกว่า 1 หมวด (เช่น รองพื้น + คุชชั่น)
+            return lowerSelected.some(target => matchSingle(target));
+          }
         });
       }
 
@@ -1981,10 +1993,10 @@
               </button>
             </div>
           `;
-        } else if ((currentCategory && currentCategory !== 'ทั้งหมด') || (currentSearch && currentSearch.trim() !== '') || showPromotionOnly) {
+        } else if (selectedCategories.length > 0 || (currentSearch && currentSearch.trim() !== '') || showPromotionOnly) {
           // มีการใช้ตัวกรองแล้วไม่พบผลลัพธ์
           const activeFilters = [];
-          if (currentCategory && currentCategory !== 'ทั้งหมด') activeFilters.push(`หมวดหมู่: <span class="font-bold text-[#6e483b]">${escapeHtml(currentCategory)}</span>`);
+          if (selectedCategories.length > 0) activeFilters.push(`หมวดหมู่: <span class="font-bold text-[#6e483b]">${escapeHtml(selectedCategories.join(', '))}</span>`);
           if (currentSearch && currentSearch.trim() !== '') activeFilters.push(`ค้นหา: <span class="font-bold text-[#6e483b]">"${escapeHtml(currentSearch)}"</span>`);
           if (showPromotionOnly) activeFilters.push(`<span class="font-bold text-rose-600">โปรโมชั่น</span>`);
 
@@ -2428,8 +2440,8 @@
     function renderCategoryRowPill(cat) {
       const isAll = cat === 'ทั้งหมด';
       const isActive = isAll 
-        ? ((!currentCategory || currentCategory === 'ทั้งหมด') && !showFavoritesOnly)
-        : (cat === currentCategory && !showFavoritesOnly);
+        ? (selectedCategories.length === 0 && !showFavoritesOnly)
+        : (selectedCategories.includes(cat) && !showFavoritesOnly);
 
       const activeCls = 'active bg-[#6e483b] text-white border-[#6e483b] shadow-2xs font-bold rounded-lg';
       const inactiveCls = 'bg-[#FAF6F2] hover:bg-white text-slate-700 hover:text-[#6e483b] border-[#eadfd7] hover:border-[#6e483b]/50 font-medium rounded-lg';
@@ -2480,7 +2492,7 @@
       const row4Items = [...row4Preset.filter(c => !excludedCategories.includes(c)), ...otherItems];
 
       // หากมีการเลือกหมวดหมู่ที่อยู่ในกลุ่ม 2, 3 หรือ 4 ให้ขยายอัตโนมัติเพื่อให้เห็นปุ่มที่เลือก
-      if (currentCategory && currentCategory !== 'ทั้งหมด' && (row2Items.includes(currentCategory) || row3Items.includes(currentCategory) || row4Items.includes(currentCategory))) {
+      if (selectedCategories.some(c => row2Items.includes(c) || row3Items.includes(c) || row4Items.includes(c))) {
         isCategoryExpanded = true;
       }
 
@@ -2552,7 +2564,7 @@
       updateCategoriesFilter();
     }
 
-    // กรองตามหมวดหมู่ (รองรับ Multi-select และปุ่ม "ทั้งหมด" จะเคลียร์ทั้งหมด)
+    // กรองตามหมวดหมู่ (รองรับเลือกได้มากกว่า 1 หมวดหมู่ Multi-Select)
     function selectCategory(cat) {
       if (showFavoritesOnly) {
         showFavoritesOnly = false;
@@ -2571,39 +2583,69 @@
         if (navProdBtn) navProdBtn.className = 'flex flex-col items-center justify-center h-full text-[#6e483b] font-semibold transition cursor-pointer hover:bg-[#faf6f3] relative';
       }
 
-      if (cat === 'ทั้งหมด' || currentCategory === cat) {
-        // เมื่อกด "ทั้งหมด" หรือแตะซ้ำที่หมวดเดิม ให้กลับมาแสดงทั้งหมด
-        currentCategory = 'ทั้งหมด';
+      if (cat === 'ทั้งหมด') {
+        // เมื่อกด "ทั้งหมด" ให้ล้างหมวดหมู่ที่เลือกทั้งหมดทันที!
         selectedCategories = [];
+        currentCategory = 'ทั้งหมด';
       } else {
-        // เลือกหมวดหมู่ไหน ก็ให้เป็นหมวดหมู่นั้นเดี่ยวๆ ทันที
-        currentCategory = cat;
-        selectedCategories = [cat];
+        // เลือกหมวดหมู่: รองรับเลือกได้มากกว่า 1 (ถ้ามีอยู่แล้วแตะซ้ำจะเอาออก ถ้ายังไม่มีจะเพิ่มเข้าไป)
+        const idx = selectedCategories.indexOf(cat);
+        if (idx !== -1) {
+          selectedCategories.splice(idx, 1);
+        } else {
+          selectedCategories.push(cat);
+        }
+        currentCategory = selectedCategories.length > 0 ? selectedCategories.join(', ') : 'ทั้งหมด';
       }
 
       const badge = document.getElementById('activeFilterBadge');
       const nameEl = document.getElementById('activeFilterName');
-      if (currentCategory && currentCategory !== 'ทั้งหมด') {
-        if (nameEl) nameEl.textContent = `หมวดหมู่: ${currentCategory}`;
+      const logicBtn = document.getElementById('categoryLogicToggleBtn');
+
+      if (selectedCategories.length > 0) {
+        if (nameEl) {
+          nameEl.textContent = selectedCategories.length === 1 
+            ? `หมวดหมู่: ${selectedCategories[0]}` 
+            : `หมวดหมู่ (${selectedCategories.length}): ${selectedCategories.join(', ')}`;
+        }
         if (badge) badge.classList.remove('hidden');
+        if (logicBtn) {
+          if (selectedCategories.length > 1) {
+            logicBtn.classList.remove('hidden');
+            logicBtn.textContent = categoryFilterLogic === 'and' ? 'โหมด: ต้องมีครบ (AND)' : 'โหมด: รวมหมวด (OR)';
+          } else {
+            logicBtn.classList.add('hidden');
+          }
+        }
       } else {
         if (badge) badge.classList.add('hidden');
+        if (logicBtn) logicBtn.classList.add('hidden');
       }
 
-      // ปรับแต่งปุ่มหมวดหมู่ให้ active ตามที่เลือกทันที (มี active ปุ่มเดียว)
+      // ปรับแต่งปุ่มหมวดหมู่ให้ active ตามที่เลือกทันที
       updateCategoryButtonsUI();
 
       // ⚡ กรองและแสดงผลทันที 0ms จาก Master Catalog จิ้มปุ๊บเปลี่ยนปั๊บ ไม่ต้องรอเน็ต และไม่มีความเสี่ยงเน็ตหลุด!
       applyLocalFilterAndRender();
     }
 
+    // สลับโหมดการกรองเมื่อเลือกหลายหมวดหมู่ (รวมหมวด OR / ต้องมีครบ AND)
+    function toggleCategoryFilterLogic() {
+      categoryFilterLogic = categoryFilterLogic === 'or' ? 'and' : 'or';
+      const logicBtn = document.getElementById('categoryLogicToggleBtn');
+      if (logicBtn) {
+        logicBtn.textContent = categoryFilterLogic === 'and' ? 'โหมด: ต้องมีครบ (AND)' : 'โหมด: รวมหมวด (OR)';
+      }
+      applyLocalFilterAndRender();
+    }
+
     function updateCategoryButtonsUI() {
-      const isAll = !currentCategory || currentCategory === 'ทั้งหมด';
+      const isAll = selectedCategories.length === 0;
       document.querySelectorAll('#categoryContainer .category-btn').forEach(btn => {
         const btnCat = btn.getAttribute('data-cat') || 'ทั้งหมด';
         const isActive = btnCat === 'ทั้งหมด' 
           ? (isAll && !showFavoritesOnly)
-          : (btnCat === currentCategory && !showFavoritesOnly);
+          : (selectedCategories.includes(btnCat) && !showFavoritesOnly);
 
         if (isActive) {
           btn.className = 'category-btn active px-2.5 py-1 text-[11px] sm:text-xs font-bold bg-[#6e483b] text-white border border-[#6e483b] shadow-2xs transition cursor-pointer shrink-0 whitespace-nowrap rounded-lg';
