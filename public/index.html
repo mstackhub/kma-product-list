@@ -1639,7 +1639,7 @@
 
       // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=15').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=16').then(reg => {
           console.log('KMA PWA Service Worker active:', reg.scope);
           // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
           reg.update();
@@ -2332,9 +2332,14 @@
             <!-- Product Details -->
             <div class="flex-1 min-w-0 flex flex-col justify-between py-0.5">
               
-              <!-- Top Row: Tags (Left) + Management Dropdown (Top-Right: ซ่อนเรียบร้อยในปุ่ม 3 จุด) -->
+              <!-- Top Row: Discount Tag (First) + Tags + Management Dropdown (Top-Right) -->
               <div class="flex items-center justify-between gap-1.5">
                 <div class="flex flex-wrap items-center gap-1">
+                  ${hasDiscount ? `
+                    <span class="inline-flex items-center px-2 py-0.5 text-[10px] sm:text-[11px] font-bold bg-rose-50 text-rose-600 border border-rose-200 rounded-lg shadow-2xs leading-none">
+                      ลด ${discountPercent}%
+                    </span>
+                  ` : ''}
                   ${cats.slice(0, 2).map(c => `
                     <button type="button" onclick="event.stopPropagation(); selectCategory('${escapeJs(c)}')" class="px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold bg-[#FAF6F2] hover:bg-[#6e483b] text-[#995c41] hover:text-white border border-[#eadfd7] rounded-lg transition cursor-pointer">
                       ${escapeHtml(c)}
@@ -2404,9 +2409,6 @@
                   ${hasDiscount ? `
                     <span class="text-xs text-slate-400 line-through">
                       ฿${original.toLocaleString('th-TH', { minimumFractionDigits: 2 })}
-                    </span>
-                    <span class="px-1.5 py-0.5 text-[10px] sm:text-[11px] font-bold bg-rose-50 text-rose-600 border border-rose-200 rounded-lg leading-none">
-                      ลด ${discountPercent}%
                     </span>
                   ` : ''}
                 </div>
