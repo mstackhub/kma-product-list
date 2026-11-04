@@ -1620,11 +1620,7 @@
           if (Array.isArray(list) && list.length > 0) {
             allProducts = list;
             extractCategoriesFromProducts(allProducts);
-            let filtered = filterAndSortLocal(allProducts);
-            if (showFavoritesOnly) {
-              filtered = filtered.filter(p => favorites.includes(p.id));
-            }
-            products = filtered;
+            products = filterAndSortLocal(allProducts);
             renderProducts();
             updateCategoriesFilter();
             showLoading(false);
@@ -1652,7 +1648,7 @@
 
       // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=19').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=20').then(reg => {
           console.log('KMA PWA Service Worker active:', reg.scope);
           // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
           reg.update();
@@ -1806,11 +1802,7 @@
               localStorage.setItem('kma_cached_products', JSON.stringify(rawList));
             } catch (e) {}
             extractCategoriesFromProducts(allProducts);
-            let filtered = filterAndSortLocal(allProducts);
-            if (showFavoritesOnly) {
-              filtered = filtered.filter(p => favorites.includes(p.id));
-            }
-            products = filtered;
+            products = filterAndSortLocal(allProducts);
           } else {
             throw new Error(result.error);
           }
@@ -1828,11 +1820,7 @@
             localStorage.setItem('kma_cached_products', JSON.stringify(rows));
           } catch (e) {}
           extractCategoriesFromProducts(allProducts);
-          let filtered = filterAndSortLocal(allProducts);
-          if (showFavoritesOnly) {
-            filtered = filtered.filter(p => favorites.includes(p.id));
-          }
-          products = filtered;
+          products = filterAndSortLocal(allProducts);
         } else {
           // Standalone LocalStorage Mode
           let stored = localStorage.getItem('local_products');
@@ -1840,11 +1828,7 @@
           if (!stored) localStorage.setItem('local_products', JSON.stringify([]));
           allProducts = list;
           extractCategoriesFromProducts(allProducts);
-          let filtered = filterAndSortLocal(allProducts);
-          if (showFavoritesOnly) {
-            filtered = filtered.filter(p => favorites.includes(p.id));
-          }
-          products = filtered;
+          products = filterAndSortLocal(allProducts);
         }
 
         renderProducts();
@@ -1857,11 +1841,7 @@
           allProducts = stored ? JSON.parse(stored) : [];
         }
         extractCategoriesFromProducts(allProducts);
-        let filtered = filterAndSortLocal(allProducts);
-        if (showFavoritesOnly) {
-          filtered = filtered.filter(p => favorites.includes(p.id));
-        }
-        products = filtered;
+        products = filterAndSortLocal(allProducts);
         renderProducts();
         updateCategoriesFilter();
       } finally {
@@ -1874,38 +1854,43 @@
     function filterAndSortLocal(list) {
       let filtered = [...list];
 
-      // Filter category: รองรับการเลือกพร้อมกันมากกว่า 1 หมวดหมู่ (Multi-Select)
-      if (selectedCategories.length > 0) {
-        const lowerSelected = selectedCategories.map(c => c.toLowerCase().trim());
-        filtered = filtered.filter(p => {
-          if (!p.category) return false;
-          const cats = p.category.split(',').map(c => c.trim().toLowerCase());
-          
-          const matchSingle = (target) => cats.some(c => {
-            if (c === target) return true;
-            if (target.includes('&')) {
-              const parts = target.split('&').map(x => x.trim());
-              if (parts.some(x => x && (c === x || c.includes(x) || x.includes(c)))) return true;
+      // เมื่ออยู่ในหน้า "ที่ถูกใจ": แสดงเฉพาะสินค้าที่กดถูกใจไว้ทั้งหมด ไม่โดนตัวกรองหมวดหมู่หน้าหลักบล็อก
+      if (showFavoritesOnly) {
+        filtered = filtered.filter(p => favorites.includes(p.id));
+      } else {
+        // Filter category: รองรับการเลือกพร้อมกันมากกว่า 1 หมวดหมู่ (Multi-Select)
+        if (selectedCategories.length > 0) {
+          const lowerSelected = selectedCategories.map(c => c.toLowerCase().trim());
+          filtered = filtered.filter(p => {
+            if (!p.category) return false;
+            const cats = p.category.split(',').map(c => c.trim().toLowerCase());
+            
+            const matchSingle = (target) => cats.some(c => {
+              if (c === target) return true;
+              if (target.includes('&')) {
+                const parts = target.split('&').map(x => x.trim());
+                if (parts.some(x => x && (c === x || c.includes(x) || x.includes(c)))) return true;
+              }
+              if (c.includes('&')) {
+                const parts = c.split('&').map(x => x.trim());
+                if (parts.some(x => x && (target === x || target.includes(x) || x.includes(target)))) return true;
+              }
+              return target.length >= 2 && (c.includes(target) || target.includes(c));
+            });
+
+            if (categoryFilterLogic === 'and') {
+              return lowerSelected.every(target => matchSingle(target));
+            } else {
+              // Default 'or': เลือกหมวดไหน ก็แสดงหมวดนั้นได้มากกว่า 1 หมวด (เช่น รองพื้น + คุชชั่น)
+              return lowerSelected.some(target => matchSingle(target));
             }
-            if (c.includes('&')) {
-              const parts = c.split('&').map(x => x.trim());
-              if (parts.some(x => x && (target === x || target.includes(x) || x.includes(target)))) return true;
-            }
-            return target.length >= 2 && (c.includes(target) || target.includes(c));
           });
+        }
 
-          if (categoryFilterLogic === 'and') {
-            return lowerSelected.every(target => matchSingle(target));
-          } else {
-            // Default 'or': เลือกหมวดไหน ก็แสดงหมวดนั้นได้มากกว่า 1 หมวด (เช่น รองพื้น + คุชชั่น)
-            return lowerSelected.some(target => matchSingle(target));
-          }
-        });
-      }
-
-      // Filter promotion only (Feature 4: ป้ายโปรโมชั่น)
-      if (showPromotionOnly) {
-        filtered = filtered.filter(p => p.promotion && p.promotion.trim() !== '');
+        // Filter promotion only (Feature 4: ป้ายโปรโมชั่น)
+        if (showPromotionOnly) {
+          filtered = filtered.filter(p => p.promotion && p.promotion.trim() !== '');
+        }
       }
 
       // Filter search
@@ -1953,11 +1938,7 @@
       }
 
       if (source && source.length > 0) {
-        let filtered = filterAndSortLocal(source);
-        if (showFavoritesOnly) {
-          filtered = filtered.filter(p => favorites.includes(p.id));
-        }
-        products = filtered;
+        products = filterAndSortLocal(source);
         renderProducts();
       }
     }
@@ -3877,11 +3858,8 @@
       }
       saveFavorites();
 
-      if (showFavoritesOnly) {
-        fetchProducts();
-      } else {
-        renderProducts();
-      }
+      // อัปเดตทันทีแบบ Instant 0ms ไม่ต้องรอเน็ตเวิร์ก
+      applyLocalFilterAndRender();
     }
 
     function toggleFavoritesOnly(forceVal) {
@@ -3911,36 +3889,28 @@
         if (navFavInd) navFavInd.classList.remove('hidden');
         if (navProdBtn) navProdBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative';
         if (navProdInd) navProdInd.classList.add('hidden');
-
-        // กรองและแสดงผลสินค้าที่ถูกใจทันที (0ms) ป้องกันการแสดงสินค้าหน้าหลักแว็บๆ
-        const rawStored = localStorage.getItem('kma_cached_products');
-        const allItems = rawStored ? JSON.parse(rawStored) : (products || []);
-        products = allItems.filter(p => favorites.includes(p.id));
-        renderProducts();
       } else {
         if (filterBox) filterBox.classList.remove('hidden');
         if (favHeader) favHeader.classList.add('hidden');
 
-        if (!currentCategory || currentCategory === 'ทั้งหมด') {
+        if (selectedCategories.length === 0) {
           if (badge) badge.classList.add('hidden');
         } else {
-          if (nameEl) nameEl.textContent = `หมวดหมู่: ${currentCategory}`;
           if (badge) badge.classList.remove('hidden');
         }
         if (navProdBtn) navProdBtn.className = 'flex flex-col items-center justify-center h-full text-[#6e483b] font-semibold transition cursor-pointer hover:bg-[#faf6f3] relative';
         if (navProdInd) navProdInd.classList.remove('hidden');
         if (navFavBtn) navFavBtn.className = 'flex flex-col items-center justify-center h-full text-slate-500 font-medium transition cursor-pointer hover:bg-slate-50 relative border-l border-slate-100';
         if (navFavInd) navFavInd.classList.add('hidden');
-
-        // คืนค่ารายการสินค้าทั้งหมดทันที (0ms)
-        const rawStored = localStorage.getItem('kma_cached_products');
-        if (rawStored) {
-          products = filterAndSortLocal(JSON.parse(rawStored));
-          renderProducts();
-        }
       }
 
-      fetchProducts(true);
+      // แสดงผลทันที 0ms จากแคชในเครื่อง สลับแท็บไวทันที ไม่กระตุก ไม่ช้า
+      applyLocalFilterAndRender();
+
+      // ดึงข้อมูลในเบื้องหลังเฉพาะตอนที่ยังไม่มีแคชสินค้าในเครื่องเลย
+      if (!allProducts || allProducts.length === 0) {
+        fetchProducts(true);
+      }
       lucide.createIcons();
     }
 
@@ -4038,12 +4008,7 @@
           btn.className = 'shrink-0 px-2.5 py-1.5 text-xs font-semibold bg-white text-rose-600 border border-rose-300 hover:bg-rose-50 hover:border-rose-400 transition cursor-pointer flex items-center gap-1.5 shadow-2xs';
         }
       }
-      // Re-apply filter
-      products = filterAndSortLocal(JSON.parse(localStorage.getItem('kma_cached_products') || '[]'));
-      if (showFavoritesOnly) {
-        products = products.filter(p => favorites.includes(p.id));
-      }
-      renderProducts();
+      applyLocalFilterAndRender();
     }
 
     // =========================================================================
