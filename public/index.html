@@ -926,15 +926,6 @@
               </div>
             </div>
           </div>
-              <div>
-                <div id="changeStatusLabel" class="text-xs text-[#A67C6D] font-medium">เงินทอนที่ต้องคืน:</div>
-                <div id="changeStatusSub" class="text-[10px] text-slate-400">คำนวณอัตโนมัติ</div>
-              </div>
-              <div class="text-2xl font-black text-[#6e483b] tracking-tight">
-                <span id="changeDueText">฿0.00</span>
-              </div>
-            </div>
-          </div>
 
         </div>
 
@@ -1648,7 +1639,7 @@
 
       // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=20').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=21').then(reg => {
           console.log('KMA PWA Service Worker active:', reg.scope);
           // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
           reg.update();
@@ -4302,7 +4293,7 @@
 
             <!-- Row 2: Stepper [- 1 +] on Left, Subtotal on Right -->
             <div class="flex items-center justify-between pt-1.5 border-t border-[#F5EFEB]">
-              <div class="inline-flex items-stretch h-6 border border-[#6e483b] bg-white shrink-0 overflow-hidden shadow-2xs rounded-lg">
+              <div class="inline-flex items-stretch h-6 border border-[#6e483b] bg-white shrink-0 overflow-hidden shadow-2xs rounded">
                 <button type="button" onclick="updateCartQty('${item.id}', -1)" class="w-6 h-full bg-[#6e483b] hover:bg-[#57382d] text-white flex items-center justify-center font-bold text-xs cursor-pointer transition">-</button>
                 <span class="w-7 bg-[#FAF6F2] text-center text-xs font-black text-[#6e483b] h-full flex items-center justify-center">${item.qty || 1}</span>
                 <button type="button" onclick="updateCartQty('${item.id}', 1)" class="w-6 h-full bg-[#6e483b] hover:bg-[#57382d] text-white flex items-center justify-center font-bold text-xs cursor-pointer transition">+</button>
