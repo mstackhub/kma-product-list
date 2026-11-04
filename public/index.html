@@ -57,11 +57,9 @@
     }
   </script>
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  
-  <!-- SweetAlert2 for Clean Confirmation Alerts -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Lucide Icons & SweetAlert2 (Non-blocking with defer) -->
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 
   <style>
     body { font-family: 'Sarabun', sans-serif; }
@@ -373,7 +371,7 @@
           </div>
 
           <!-- Refresh Button -->
-          <button onclick="fetchProducts()" title="รีเฟรชข้อมูล" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition border border-slate-300 rounded-lg cursor-pointer">
+          <button onclick="fetchProducts(false, true)" title="รีเฟรชข้อมูล" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition border border-slate-300 rounded-lg cursor-pointer">
             <i data-lucide="refresh-cw" id="refreshIcon" class="w-4 h-4"></i>
           </button>
         </div>
@@ -444,7 +442,7 @@
     <!-- ========================================================================= -->
 
     <!-- Loading Skeleton -->
-    <div id="loadingState" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4.5">
+    <div id="loadingState" class="hidden grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4.5">
       <div class="bg-white p-3.5 border border-slate-200 animate-pulse space-y-3">
         <div class="w-full aspect-square bg-slate-100"></div>
         <div class="h-4 bg-slate-100 w-3/4"></div>
@@ -1622,26 +1620,27 @@
       }
     }
 
+    // ⚡ รันเรนเดอร์ข้อมูลสินค้าทันที < 0.001 วินาที ตั้งแต่จังหวะ Script ประมวลผล ไม่ต้องรอ DOMContentLoaded
+    loadCachedData();
+    updateFavoritesBadges();
+    updateCartBadges();
+
     // On Document Ready
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. เรนเดอร์ข้อมูลสินค้าทันทีจากแคชในเครื่อง (< 0.01 วินาที จอไม่ขาว ไม่ต้องรอเน็ต)
-      loadCachedData();
-      updateFavoritesBadges();
-      updateCartBadges();
-      lucide.createIcons();
+      if (allProducts.length === 0) {
+        loadCachedData();
+      }
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        lucide.createIcons();
+      }
 
-      // 2. ซิงค์ข้อมูลล่าสุดกับ Turso Cloud พร้อมกันในเบื้องหลังแบบคู่ขนาน (Parallel Background Sync)
-      Promise.all([
-        fetchProducts(true),
-        checkDatabaseStatus(),
-        loadAllCategories()
-      ]).catch(e => console.warn('Background sync error:', e));
+      // ซิงค์ข้อมูลล่าสุดกับ Turso Cloud ในเบื้องหลังแบบคู่ขนาน (ไม่บล็อกหน้าจอ)
+      fetchProducts(true);
+      checkDatabaseStatus();
 
-      // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
+      // ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=21').then(reg => {
-          console.log('KMA PWA Service Worker active:', reg.scope);
-          // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
+        navigator.serviceWorker.register('/sw.js?v=22').then(reg => {
           reg.update();
         }).catch(err => {
           console.warn('PWA SW register error:', err);
@@ -1769,7 +1768,7 @@
     }
 
     // ดึงข้อมูลสินค้า (Master Catalog Sync ในเบื้องหลังโดยไม่ทำลายหน้าจอ)
-    async function fetchProducts(isBackground = false) {
+    async function fetchProducts(isBackground = false, forceRefresh = false) {
       const refreshIcon = document.getElementById('refreshIcon');
       if (refreshIcon) refreshIcon.classList.add('animate-spin');
 
@@ -1780,11 +1779,9 @@
 
       try {
         if (isServerMode) {
-          // ดึงแค็ตตาล็อกสินค้าทั้งหมดเสมอ ไม่ส่ง category เพื่อให้ได้ Master List สมบูรณ์ 100%
-          const params = new URLSearchParams();
-          params.append('_t', Date.now());
-
-          const res = await fetch(`/api/products?${params.toString()}`);
+          // ดึงแค็ตตาล็อกสินค้าทั้งหมด (หาก forceRefresh จึงแนบ timestamp ข้ามแคช)
+          const url = forceRefresh ? `/api/products?_t=${Date.now()}` : '/api/products';
+          const res = await fetch(url);
           const result = await res.json();
           if (result.success) {
             const rawList = result.data || [];

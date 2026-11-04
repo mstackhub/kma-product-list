@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kma-booth-v21';
+const CACHE_NAME = 'kma-booth-v22';
 
 // Install: บังคับให้อัปเดตและข้ามการรอทันที
 self.addEventListener('install', event => {
@@ -10,7 +10,7 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
-        keys.map(key => caches.delete(key))
+        keys.filter(k => k !== CACHE_NAME).map(key => caches.delete(key))
       );
     })
   );
@@ -21,7 +21,26 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // สำหรับ API: Network-First (ถ้าออฟไลน์ถึงดึงแคช)
+  // สำหรับ API GET /api/products: Stale-While-Revalidate (โหลดแคชทันที 0ms อัปเดตในเบื้องหลัง)
+  if (url.pathname.startsWith('/api/products') && event.request.method === 'GET') {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(cache => {
+        return cache.match(event.request).then(cachedResponse => {
+          const fetchPromise = fetch(event.request).then(networkResponse => {
+            if (networkResponse && networkResponse.status === 200) {
+              cache.put(event.request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(() => cachedResponse);
+
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+
+  // สำหรับ API อื่นๆ (POST / PUT / DELETE หรือสถานะ): Network-First
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(event.request).catch(() => caches.match(event.request))

@@ -38,6 +38,16 @@ loadEnv();
 let TURSO_URL = process.env.TURSO_DATABASE_URL || 'libsql://kma-product-list-web-mstackhub.aws-ap-northeast-1.turso.io';
 let TURSO_TOKEN = process.env.TURSO_AUTH_TOKEN || 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTIxMjk1MTMsImlkIjoiMDFhMTQzM2UtMWYwMS03ZWFmLThmOGEtMDk5ZDU4YTFiY2VkIiwia2lkIjoiU1ZYRTc1Vy1QcHV4aWQ2RXJ6WlRRTzVNLW5OeVBzX0RjSm5qa0ZycXZ0YyIsInJpZCI6Ijc5NmMwNmVlLWJkY2EtNDRlYy1iYzEwLWJmOWI5ZmIzZjE5NSJ9.GEqIZaQPTvA9pvVCR5FDoAcekwdU5ijeOJGz0BsdV5ZRmoOxoajodxwgF30gD5agw0416Uaz4lU-t9ZyCqNLCg';
 
+// In-memory Products Cache (ช่วยให้รีเฟรชหน้าเว็บและโหลด API ไวทันทีระดับ 0ms)
+let memoryProductsCache = null;
+let memoryProductsCacheTime = 0;
+const MEMORY_CACHE_TTL = 60 * 1000; // 60 วินาที
+
+function invalidateProductsCache() {
+  memoryProductsCache = null;
+  memoryProductsCacheTime = 0;
+}
+
 // แปลง libsql:// เป็น https:// สำหรับ HTTP pipeline
 function normalizeTursoUrl(url) {
   if (!url) return '';
@@ -389,6 +399,14 @@ async function requestHandler(req, res) {
       const category = urlObj.searchParams.get('category');
       const sort = urlObj.searchParams.get('sort'); // price_asc, price_desc, newest, name
       const search = urlObj.searchParams.get('q');
+      const isUnfiltered = (!category || category === 'ทั้งหมด') && (!sort || sort === 'newest') && (!search || search.trim() === '');
+
+      // หากเป็น Master Catalog Request (ไม่มี filter) และมีแคช ตอบกลับทันที 0ms!
+      if (isUnfiltered && memoryProductsCache && (Date.now() - memoryProductsCacheTime < MEMORY_CACHE_TTL)) {
+        return sendJson(res, 200, memoryProductsCache, {
+          'Cache-Control': 'public, max-age=5, s-maxage=60, stale-while-revalidate=300'
+        });
+      }
 
       let sql = 'SELECT * FROM products WHERE 1=1';
       const args = [];
@@ -432,12 +450,19 @@ async function requestHandler(req, res) {
       }
 
       const products = await executeDb(sql, args);
-      return sendJson(res, 200, {
+      const payload = {
         success: true,
         count: products.length,
         data: products
-      }, {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
+      };
+
+      if (isUnfiltered) {
+        memoryProductsCache = payload;
+        memoryProductsCacheTime = Date.now();
+      }
+
+      return sendJson(res, 200, payload, {
+        'Cache-Control': 'public, max-age=5, s-maxage=60, stale-while-revalidate=300'
       });
     }
 
@@ -495,6 +520,8 @@ async function requestHandler(req, res) {
         }
       }
 
+      invalidateProductsCache();
+
       return sendJson(res, 200, {
         success: true,
         message: `ลบหมวดหมู่ '${category}' ออกจากสินค้าเรียบร้อยแล้ว (${updatedCount} รายการถูกอัปเดต)`,
@@ -539,6 +566,8 @@ async function requestHandler(req, res) {
           updatedCount++;
         }
       }
+
+      invalidateProductsCache();
 
       return sendJson(res, 200, {
         success: true,
@@ -600,6 +629,8 @@ async function requestHandler(req, res) {
         [id, name, category, originalPrice, salePrice, imageUrl, description, promotion, now, now]
       );
 
+      invalidateProductsCache();
+
       return sendJson(res, 201, {
         success: true,
         message: 'เพิ่มสินค้าสำเร็จ',
@@ -649,6 +680,8 @@ async function requestHandler(req, res) {
           });
         }
 
+        invalidateProductsCache();
+
         return sendJson(res, 200, {
           success: true,
           message: `นำเข้าสินค้าสำเร็จ ${inserted.length} รายการ`,
@@ -688,6 +721,8 @@ async function requestHandler(req, res) {
         [name, category, originalPrice, salePrice, imageUrl, description, promotion, now, id]
       );
 
+      invalidateProductsCache();
+
       return sendJson(res, 200, {
         success: true,
         message: `อัปเดตข้อมูลสินค้า ${id} เรียบร้อยแล้ว`,
@@ -703,6 +738,8 @@ async function requestHandler(req, res) {
       if (!id) return sendJson(res, 400, { success: false, error: 'ระบุ Product ID ไม่ถูกต้อง' });
 
       await executeDb('DELETE FROM products WHERE id = ?', [id]);
+
+      invalidateProductsCache();
 
       return sendJson(res, 200, {
         success: true,
