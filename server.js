@@ -408,7 +408,7 @@ async function requestHandler(req, res) {
               `%,${cleanCat}`
             );
           }
-          sql += ` AND (${conditions.join(' OR ')})`;
+          sql += ` AND (${conditions.join(' AND ')})`;
         }
       }
 

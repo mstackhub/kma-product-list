@@ -1637,7 +1637,7 @@
 
       // 3. ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=11').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=12').then(reg => {
           console.log('KMA PWA Service Worker active:', reg.scope);
           // บังคับตรวจสอบและดึงอัปเดต Service Worker ล่าสุดทันที
           reg.update();
@@ -1859,13 +1859,26 @@
     function filterAndSortLocal(list) {
       let filtered = [...list];
 
-      // Filter category (รองรับการเลือกพร้อมกันหลายหมวดหมู่ Multi-Select แบบ OR)
+      // Filter category (Multi-Select แบบ AND: รายการสินค้าต้องมีครบทุกหมวดหมู่/tag ที่เลือก)
       if (selectedCategories.length > 0) {
         const lowerSelected = selectedCategories.map(c => c.toLowerCase().trim());
         filtered = filtered.filter(p => {
           if (!p.category) return false;
           const cats = p.category.split(',').map(c => c.trim().toLowerCase());
-          return cats.some(c => lowerSelected.some(target => c === target || (target.length >= 2 && (c.includes(target) || target.includes(c)))));
+          return lowerSelected.every(target => 
+            cats.some(c => {
+              if (c === target) return true;
+              if (target.includes('&')) {
+                const parts = target.split('&').map(x => x.trim());
+                if (parts.some(x => x && (c === x || c.includes(x) || x.includes(c)))) return true;
+              }
+              if (c.includes('&')) {
+                const parts = c.split('&').map(x => x.trim());
+                if (parts.some(x => x && (target === x || target.includes(x) || x.includes(target)))) return true;
+              }
+              return target.length >= 2 && (c.includes(target) || target.includes(c));
+            })
+          );
         });
       }
 
