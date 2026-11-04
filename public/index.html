@@ -240,18 +240,6 @@
 
       <!-- Action Buttons -->
       <div class="flex items-center gap-2 shrink-0">
-        <!-- KMACosme Website Link Button -->
-        <a 
-          href="https://www.kmacosme.com" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-1.5 bg-white hover:bg-[#faf6f3] text-slate-800 hover:text-[#6e483b] border border-slate-300 hover:border-[#6e483b] px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-lg transition shrink-0 cursor-pointer shadow-xs"
-          title="ไปยังเว็บไซต์ www.kmacosme.com"
-        >
-          <i data-lucide="globe" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#6e483b]"></i>
-          <span>KMACosme</span>
-        </a>
-
         <!-- Excel / CSV Bulk Button -->
         <button 
           onclick="openCsvModal()" 
@@ -1668,7 +1656,7 @@
 
       // ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=24').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=25').then(reg => {
           reg.update();
         }).catch(err => {
           console.warn('PWA SW register error:', err);
