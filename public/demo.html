@@ -376,8 +376,8 @@
             </button>
           </div>
 
-          <!-- Refresh Button -->
-          <button onclick="fetchProducts(false, true)" title="รีเฟรชข้อมูล" class="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition border border-slate-300 rounded-lg cursor-pointer">
+          <!-- Refresh Button (ซ่อนเรียบร้อยตามคำขอผู้ใช้) -->
+          <button id="refreshBtn" onclick="fetchProducts(false, true)" title="รีเฟรชข้อมูล" class="hidden p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition border border-slate-300 rounded-lg cursor-pointer">
             <i data-lucide="refresh-cw" id="refreshIcon" class="w-4 h-4"></i>
           </button>
         </div>
@@ -1668,7 +1668,7 @@
 
       // ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=23').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=24').then(reg => {
           reg.update();
         }).catch(err => {
           console.warn('PWA SW register error:', err);
