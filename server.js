@@ -616,18 +616,19 @@ async function requestHandler(req, res) {
       const description = body.description ? body.description.trim() : '';
       const promotion = body.promotion ? body.promotion.trim() : '';
 
-      // ป้องกัน Double Submit / Request ซ้ำซ้อนภายใน 4 วินาที
+      // ตรวจสอบสินค้าซ้ำ (ทั้งการกดส่งย้ำ Double Submit และชื่อสินค้าซ้ำในระบบ)
       try {
-        const recentRows = await executeDb(
-          'SELECT id, name, category, original_price, sale_price, image_url, description, promotion, created_at, updated_at FROM products WHERE name = ? AND category = ? AND sale_price = ? ORDER BY created_at DESC LIMIT 1',
-          [name, category, salePrice]
+        const existingRows = await executeDb(
+          'SELECT id, name, category, original_price, sale_price, image_url, description, promotion, created_at, updated_at FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) ORDER BY created_at DESC LIMIT 1',
+          [name]
         );
-        if (recentRows && recentRows.length > 0) {
-          const lastItem = recentRows[0];
+        if (existingRows && existingRows.length > 0) {
+          const lastItem = existingRows[0];
           const lastTime = new Date(lastItem.created_at).getTime();
           const timeDiff = Date.now() - lastTime;
-          // ถ้าถูกสร้างไปเมื่อไม่เกิน 4 วินาทีที่แล้ว ให้ถือเป็น duplicate request จากการกดย้ำ
-          if (timeDiff >= 0 && timeDiff < 4000) {
+
+          // 1. ป้องกันการกดย้ำ / Double Click ภายใน 10 วินาที
+          if (timeDiff >= 0 && timeDiff < 10000) {
             console.log(`⚠️ Prevented duplicate product creation: "${name}" created ${timeDiff}ms ago`);
             return sendJson(res, 200, {
               success: true,
@@ -635,12 +636,22 @@ async function requestHandler(req, res) {
               data: lastItem
             });
           }
+
+          // 2. ถ้ามีสินค้าชื่อนี้อยู่แล้ว และไม่ได้ส่ง flag ยืนยันสร้างซ้ำ (allow_duplicate)
+          if (!body.allow_duplicate) {
+            return sendJson(res, 409, {
+              success: false,
+              error: `มีสินค้าชื่อ "${name}" อยู่ในระบบแล้ว (รหัส: ${lastItem.id})`,
+              duplicate: true,
+              existingProduct: lastItem
+            });
+          }
         }
       } catch (checkErr) {
         console.warn('Duplicate check warning:', checkErr.message);
       }
 
-      const id = 'PRD-' + Date.now().toString().slice(-6);
+      const id = 'PRD-' + Date.now().toString().slice(-7) + Math.floor(Math.random() * 90 + 10);
       const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
 
       await executeDb(

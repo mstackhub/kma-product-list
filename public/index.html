@@ -1675,6 +1675,20 @@
       }
     }
 
+    // Helper กรองสินค้าไม่ให้มี ID ซ้ำกันในหน่วยความจำ
+    function deduplicateProducts(list) {
+      if (!Array.isArray(list)) return [];
+      const seen = new Set();
+      const result = [];
+      for (const item of list) {
+        if (!item || !item.id) continue;
+        if (seen.has(item.id)) continue;
+        seen.add(item.id);
+        result.push(item);
+      }
+      return result;
+    }
+
     // โหลดข้อมูลแคชทันที: สเต็ป 1 LocalStorage (0.001s) -> สเต็ป 2 IndexedDB (0.01s รูปเต็ม)
     function loadCachedData() {
       let hasData = false;
@@ -1685,7 +1699,7 @@
         if (cached) {
           const list = JSON.parse(cached);
           if (Array.isArray(list) && list.length > 0) {
-            allProducts = list;
+            allProducts = deduplicateProducts(list);
             extractCategoriesFromProducts(allProducts);
             products = filterAndSortLocal(allProducts);
             renderProducts();
@@ -1701,7 +1715,7 @@
       // สเต็ป 2: ดึงชุดสมบูรณ์พร้อมรูปภาพ Base64 จาก IndexedDB อัปเดตทันที
       loadCatalogFromIdb().then(idbList => {
         if (Array.isArray(idbList) && idbList.length > 0) {
-          allProducts = idbList;
+          allProducts = deduplicateProducts(idbList);
           extractCategoriesFromProducts(allProducts);
           products = filterAndSortLocal(allProducts);
           renderProducts();
@@ -3637,7 +3651,42 @@
       const description = document.getElementById('formDescription').value.trim();
       const promotion = (document.getElementById('formPromotion')?.value || '').trim();
 
-      const payload = { id, name, category, original_price, sale_price, image_url, description, promotion };
+      // ตรวจสอบชื่อสินค้าซ้ำในระบบก่อนบันทึก (ป้องกันการสร้างสินค้าซ้ำซ้อนโดยไม่ได้ตั้งใจ)
+      let allowDuplicate = false;
+      if (!id) {
+        const cleanNewName = name.toLowerCase();
+        const dupItem = allProducts.find(p => p.name && p.name.trim().toLowerCase() === cleanNewName);
+        if (dupItem) {
+          const dupAction = await Swal.fire({
+            icon: 'warning',
+            title: 'พบสินค้าชื่อซ้ำในระบบ!',
+            html: `มีสินค้าชื่อ <b class="text-[#6e483b]">"${escapeHtml(dupItem.name)}"</b> อยู่แล้วในระบบ<br><span class="text-xs text-slate-500">(รหัส: ${escapeHtml(dupItem.id)} | ราคา: ฿${dupItem.sale_price})</span><br><br>คุณต้องการทำรายการใด?`,
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonColor: '#6e483b',
+            denyButtonColor: '#0284c7',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'ยืนยันสร้างซ้ำ',
+            denyButtonText: 'ไปแก้ไขสินค้าเดิม',
+            cancelButtonText: 'ยกเลิก',
+            reverseButtons: true
+          });
+
+          if (dupAction.isDenied) {
+            closeProductModal();
+            promptEditProduct(dupItem.id);
+            return;
+          }
+
+          if (!dupAction.isConfirmed) {
+            return; // ยกเลิก
+          }
+
+          allowDuplicate = true;
+        }
+      }
+
+      const payload = { id, name, category, original_price, sale_price, image_url, description, promotion, allow_duplicate: allowDuplicate };
 
       // ถ้าเป็นการแก้ไข (Edit): แสดง Alert แจ้งเตือนยืนยันก่อนเสมอ!
       if (id) {
@@ -3719,6 +3768,20 @@
             }
             showToast('success', id ? 'แก้ไขข้อมูลสำเร็จแล้ว' : 'เพิ่มสินค้าเรียบร้อยแล้ว');
             await fetchProducts(true, true);
+          } else if (data.duplicate) {
+            const act = await Swal.fire({
+              icon: 'warning',
+              title: 'มีสินค้านี้ในระบบแล้ว',
+              html: `${escapeHtml(data.error)}<br><span class="text-xs text-slate-500">รหัสเดิม: ${escapeHtml(data.existingProduct?.id || '')}</span>`,
+              showCancelButton: true,
+              confirmButtonColor: '#0284c7',
+              confirmButtonText: 'ไปแก้ไขสินค้านี้',
+              cancelButtonText: 'ปิด'
+            });
+            if (act.isConfirmed && data.existingProduct) {
+              closeProductModal();
+              promptEditProduct(data.existingProduct.id);
+            }
           } else {
             showToast('error', data.error || 'เกิดข้อผิดพลาดในการบันทึก');
           }
@@ -3735,7 +3798,14 @@
             const idx = products.findIndex(p => p.id === id);
             if (idx !== -1) products[idx] = { ...products[idx], ...payload, updated_at: now };
           } else {
-            const newId = 'PRD-' + Date.now().toString().slice(-6);
+            if (!allowDuplicate) {
+              const rows = await queryTursoDirect('SELECT id, name, category, sale_price FROM products WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) LIMIT 1', [name]);
+              if (rows && rows.length > 0) {
+                showToast('error', `มีสินค้าชื่อ "${name}" ในระบบแล้ว (รหัส: ${rows[0].id})`);
+                return;
+              }
+            }
+            const newId = 'PRD-' + Date.now().toString().slice(-7) + Math.floor(Math.random() * 90 + 10);
             await queryTursoDirect(
               'INSERT INTO products (id, name, category, original_price, sale_price, image_url, description, promotion, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
               [newId, name, category, original_price, sale_price, image_url, description, promotion, now, now]
