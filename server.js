@@ -401,10 +401,10 @@ async function requestHandler(req, res) {
       const search = urlObj.searchParams.get('q');
       const isUnfiltered = (!category || category === 'ทั้งหมด') && (!sort || sort === 'newest') && (!search || search.trim() === '');
 
-      // หากเป็น Master Catalog Request (ไม่มี filter) และมีแคช ตอบกลับทันที 0ms!
+      // หากเป็น Master Catalog Request (ไม่มี filter) และมีแคชใน Memory ตอบกลับทันที 0ms!
       if (isUnfiltered && memoryProductsCache && (Date.now() - memoryProductsCacheTime < MEMORY_CACHE_TTL)) {
         return sendJson(res, 200, memoryProductsCache, {
-          'Cache-Control': 'public, max-age=5, s-maxage=60, stale-while-revalidate=300'
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
         });
       }
 
@@ -462,7 +462,7 @@ async function requestHandler(req, res) {
       }
 
       return sendJson(res, 200, payload, {
-        'Cache-Control': 'public, max-age=5, s-maxage=60, stale-while-revalidate=300'
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
       });
     }
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kma-booth-v26';
+const CACHE_NAME = 'kma-booth-v27';
 
 const PRECACHE_ASSETS = [
   '/',
@@ -36,8 +36,27 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // 1. สำหรับ API GET /api/products: Stale-While-Revalidate (ตอบแคชทันที 0ms อัปเดตในเบื้องหลัง)
+  // 1. สำหรับ API GET /api/products
   if (url.pathname.startsWith('/api/products') && event.request.method === 'GET') {
+    const isForceRefresh = url.searchParams.has('_t');
+
+    // ถ้าเป็นการ Force Refresh (เช่น หลังเพิ่ม/แก้/ลบสินค้า หรือสั่งดึงสด): บังคับข้ามแคชดึงฐานข้อมูลจริงทันที
+    if (isForceRefresh) {
+      event.respondWith(
+        fetch(event.request).then(networkResponse => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put('/api/products', clone);
+            });
+          }
+          return networkResponse;
+        }).catch(() => caches.match('/api/products'))
+      );
+      return;
+    }
+
+    // กรณีโหลดปกติ: Stale-While-Revalidate (ตอบแคชทันที 0ms อัปเดตในเบื้องหลัง)
     event.respondWith(
       caches.open(CACHE_NAME).then(cache => {
         return cache.match(event.request).then(cachedResponse => {
@@ -55,10 +74,23 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 2. สำหรับ API อื่นๆ (POST / PUT / DELETE หรือสถานะ): Network-First
+  // 2. สำหรับ API อื่นๆ (POST / PUT / DELETE หรือสถานะ): Network-First พร้อมล้างแคชสินค้าทันทีเมื่อข้อมูลเปลี่ยน
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
+      fetch(event.request).then(response => {
+        // หากเป็นการเพิ่ม แก้ไข หรือลบสินค้า ให้ล้างแคชเก่าทิ้งทันที
+        if (event.request.method !== 'GET') {
+          caches.open(CACHE_NAME).then(cache => {
+            cache.delete('/api/products');
+            cache.keys().then(keys => {
+              keys.forEach(k => {
+                if (k.url.includes('/api/products')) cache.delete(k);
+              });
+            });
+          });
+        }
+        return response;
+      }).catch(() => caches.match(event.request))
     );
     return;
   }

@@ -1666,7 +1666,7 @@
 
       // ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=26').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=27').then(reg => {
           reg.update();
         }).catch(err => {
           console.warn('PWA SW register error:', err);
@@ -3601,23 +3601,36 @@
             // Optimistic UI Update: อัปเดตข้อมูลบนหน้าจอและแคชทันที 0 มิลลิวินาที!
             if (data.data) {
               if (id) {
+                const allIdx = allProducts.findIndex(p => p.id === id);
+                if (allIdx !== -1) allProducts[allIdx] = { ...allProducts[allIdx], ...data.data };
                 const idx = products.findIndex(p => p.id === id);
                 if (idx !== -1) products[idx] = { ...products[idx], ...data.data };
               } else {
-                const exists = products.some(p => p.id === data.data.id);
+                const exists = allProducts.some(p => p.id === data.data.id);
                 if (!exists) {
-                  products.unshift(data.data);
+                  allProducts.unshift(data.data);
                 }
+                // รีเซ็ตตัวกรองหมวดหมู่และการค้นหา เพื่อให้ผู้ใช้เห็นสินค้าใหม่ที่เพิ่งเพิ่มอยู่บนสุดทันที
+                selectedCategories = [];
+                currentSearch = '';
+                showPromotionOnly = false;
+                showFavoritesOnly = false;
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) searchInput.value = '';
+                const clearSearchBtn = document.getElementById('clearSearchBtn');
+                if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
+                
+                products = filterAndSortLocal(allProducts);
               }
               try {
-                localStorage.setItem('kma_cached_products', JSON.stringify(products));
+                localStorage.setItem('kma_cached_products', JSON.stringify(allProducts));
               } catch (e) {}
-              extractCategoriesFromProducts(products);
+              extractCategoriesFromProducts(allProducts);
               renderProducts();
               updateCategoriesFilter();
             }
             showToast('success', id ? 'แก้ไขข้อมูลสำเร็จแล้ว' : 'เพิ่มสินค้าเรียบร้อยแล้ว');
-            await fetchProducts(true);
+            await fetchProducts(true, true);
           } else {
             showToast('error', data.error || 'เกิดข้อผิดพลาดในการบันทึก');
           }
@@ -3629,6 +3642,8 @@
               'UPDATE products SET name = ?, category = ?, original_price = ?, sale_price = ?, image_url = ?, description = ?, promotion = ?, updated_at = ? WHERE id = ?',
               [name, category, original_price, sale_price, image_url, description, promotion, now, id]
             );
+            const allIdx = allProducts.findIndex(p => p.id === id);
+            if (allIdx !== -1) allProducts[allIdx] = { ...allProducts[allIdx], ...payload, updated_at: now };
             const idx = products.findIndex(p => p.id === id);
             if (idx !== -1) products[idx] = { ...products[idx], ...payload, updated_at: now };
           } else {
@@ -3637,17 +3652,26 @@
               'INSERT INTO products (id, name, category, original_price, sale_price, image_url, description, promotion, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
               [newId, name, category, original_price, sale_price, image_url, description, promotion, now, now]
             );
-            products.unshift({ id: newId, ...payload, created_at: now, updated_at: now });
+            allProducts.unshift({ id: newId, ...payload, created_at: now, updated_at: now });
+            selectedCategories = [];
+            currentSearch = '';
+            showPromotionOnly = false;
+            showFavoritesOnly = false;
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.value = '';
+            const clearSearchBtn = document.getElementById('clearSearchBtn');
+            if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
+            products = filterAndSortLocal(allProducts);
           }
           try {
-            localStorage.setItem('kma_cached_products', JSON.stringify(products));
+            localStorage.setItem('kma_cached_products', JSON.stringify(allProducts));
           } catch (e) {}
-          extractCategoriesFromProducts(products);
+          extractCategoriesFromProducts(allProducts);
           renderProducts();
           updateCategoriesFilter();
           closeProductModal();
           showToast('success', id ? 'แก้ไขข้อมูลบน Turso สำเร็จแล้ว' : 'เพิ่มสินค้าบน Turso เรียบร้อยแล้ว');
-          await fetchProducts(true);
+          await fetchProducts(true, true);
         } else {
           // LocalStorage Mode
           let stored = JSON.parse(localStorage.getItem('local_products') || '[]');
@@ -3707,27 +3731,31 @@
             const data = await res.json();
             if (data.success) {
               // Optimistic UI Update: ลบออกจากหน้าจอและแคชทันที 0 มิลลิวินาที!
+              allProducts = allProducts.filter(item => item.id !== id);
               products = products.filter(item => item.id !== id);
               try {
-                localStorage.setItem('kma_cached_products', JSON.stringify(products));
+                localStorage.setItem('kma_cached_products', JSON.stringify(allProducts));
               } catch (e) {}
+              extractCategoriesFromProducts(allProducts);
               renderProducts();
               updateCategoriesFilter();
               showToast('success', `ลบสินค้า ${id} เรียบร้อยแล้ว`);
-              await fetchProducts(true);
+              await fetchProducts(true, true);
             } else {
               showToast('error', data.error || 'ลบสินค้าไม่สำเร็จ');
             }
           } else if (tursoUrl && tursoToken) {
             await queryTursoDirect('DELETE FROM products WHERE id = ?', [id]);
+            allProducts = allProducts.filter(item => item.id !== id);
             products = products.filter(item => item.id !== id);
             try {
-              localStorage.setItem('kma_cached_products', JSON.stringify(products));
+              localStorage.setItem('kma_cached_products', JSON.stringify(allProducts));
             } catch (e) {}
+            extractCategoriesFromProducts(allProducts);
             renderProducts();
             updateCategoriesFilter();
             showToast('success', `ลบสินค้า ${id} บน Turso เรียบร้อยแล้ว`);
-            await fetchProducts(true);
+            await fetchProducts(true, true);
           } else {
             let stored = JSON.parse(localStorage.getItem('local_products') || '[]');
             stored = stored.filter(item => item.id !== id);
