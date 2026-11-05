@@ -475,8 +475,6 @@
     <div id="gridContainer" class="hidden grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4.5">
       <!-- Product Cards will be rendered dynamically here -->
     </div>
-      <!-- Product Cards will be rendered dynamically here -->
-    </div>
 
     <!-- List View Container (Mobile First - Always shows Name + Price) -->
     <div id="tableContainer" class="hidden space-y-3">
@@ -1605,8 +1603,83 @@
       }
     }
 
-    // โหลดข้อมูลแคชจากเครื่องขึ้นมาแสดงผลทันที (Instant Render < 0.01 วินาที ไม่ต้องรอเน็ต)
+    // =========================================================================
+    // IndexedDB Master Storage (เก็บแค็ตตาล็อกสินค้าเต็มรูปแบบ ไม่จำกัดขนาด 0ms)
+    // =========================================================================
+    const IDB_NAME = 'kma_catalog_db_v1';
+    const IDB_STORE = 'products';
+
+    function openIdb() {
+      return new Promise((resolve) => {
+        if (!window.indexedDB) return resolve(null);
+        try {
+          const req = indexedDB.open(IDB_NAME, 1);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(IDB_STORE)) {
+              db.createObjectStore(IDB_STORE);
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => resolve(null);
+        } catch (e) {
+          resolve(null);
+        }
+      });
+    }
+
+    async function saveCatalogToIdb(list) {
+      try {
+        const db = await openIdb();
+        if (!db) return;
+        const tx = db.transaction(IDB_STORE, 'readwrite');
+        const store = tx.objectStore(IDB_STORE);
+        store.put(list, 'master_list');
+      } catch (e) {
+        console.warn('IDB save error:', e);
+      }
+    }
+
+    async function loadCatalogFromIdb() {
+      try {
+        const db = await openIdb();
+        if (!db) return null;
+        return new Promise((resolve) => {
+          const tx = db.transaction(IDB_STORE, 'readonly');
+          const store = tx.objectStore(IDB_STORE);
+          const req = store.get('master_list');
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // บันทึกแคช 2 สเต็ป: IndexedDB (รูปเต็มไม่จำกัด) + LocalStorage (Lightweight กันโควต้า 5MB เต็ม)
+    function persistProductsCache(list) {
+      if (!Array.isArray(list) || list.length === 0) return;
+      
+      // 1. เก็บชุดสมบูรณ์ (รวมรูปทุกชิ้น) ลงใน IndexedDB
+      saveCatalogToIdb(list);
+
+      // 2. เก็บชุด Lightweight ลงใน LocalStorage
+      try {
+        const light = list.map(p => {
+          const isHeavy = p.image_url && p.image_url.startsWith('data:');
+          return isHeavy ? { ...p, image_url: '' } : p;
+        });
+        localStorage.setItem('kma_cached_products', JSON.stringify(light));
+      } catch (e) {
+        console.warn('LocalStorage save warning:', e);
+      }
+    }
+
+    // โหลดข้อมูลแคชทันที: สเต็ป 1 LocalStorage (0.001s) -> สเต็ป 2 IndexedDB (0.01s รูปเต็ม)
     function loadCachedData() {
+      let hasData = false;
+
+      // สเต็ป 1: ดึงจาก LocalStorage ทันที 0ms (แสดงชื่อ หมวดหมู่ ราคา ทันทีไม่รออะไร)
       try {
         const cached = localStorage.getItem('kma_cached_products');
         if (cached) {
@@ -1618,11 +1691,26 @@
             renderProducts();
             updateCategoriesFilter();
             showLoading(false);
+            hasData = true;
           }
         }
       } catch (e) {
         console.warn('Cache load error:', e);
       }
+
+      // สเต็ป 2: ดึงชุดสมบูรณ์พร้อมรูปภาพ Base64 จาก IndexedDB อัปเดตทันที
+      loadCatalogFromIdb().then(idbList => {
+        if (Array.isArray(idbList) && idbList.length > 0) {
+          allProducts = idbList;
+          extractCategoriesFromProducts(allProducts);
+          products = filterAndSortLocal(allProducts);
+          renderProducts();
+          updateCategoriesFilter();
+          showLoading(false);
+        }
+      }).catch(() => {});
+
+      return hasData;
     }
 
     // ⚡ รันเรนเดอร์ข้อมูลสินค้าทันที < 0.001 วินาที ตั้งแต่จังหวะ Script ประมวลผล ไม่ต้องรอ DOMContentLoaded
@@ -1666,7 +1754,7 @@
 
       // ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=27').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=28').then(reg => {
           reg.update();
         }).catch(err => {
           console.warn('PWA SW register error:', err);
@@ -1817,7 +1905,7 @@
             const rawList = result.data || [];
             allProducts = rawList;
             try {
-              localStorage.setItem('kma_cached_products', JSON.stringify(rawList));
+              persistProductsCache(rawList);
             } catch (e) {}
             extractCategoriesFromProducts(allProducts);
             products = filterAndSortLocal(allProducts);
@@ -1835,7 +1923,7 @@
           let rows = await queryTursoDirect(sql);
           allProducts = rows;
           try {
-            localStorage.setItem('kma_cached_products', JSON.stringify(rows));
+            persistProductsCache(rows);
           } catch (e) {}
           extractCategoriesFromProducts(allProducts);
           products = filterAndSortLocal(allProducts);
@@ -2953,7 +3041,7 @@
               }
             });
             if (dirty) {
-              localStorage.setItem('kma_cached_products', JSON.stringify(list));
+              persistProductsCache(list);
               products = filterAndSortLocal(list);
             }
           } catch(e) {}
@@ -3056,7 +3144,7 @@
                 p.category = Array.from(new Set(updated)).join(', ');
               }
             });
-            localStorage.setItem('kma_cached_products', JSON.stringify(list));
+            persistProductsCache(list);
             products = filterAndSortLocal(list);
           } catch(e) {}
         }
@@ -3623,7 +3711,7 @@
                 products = filterAndSortLocal(allProducts);
               }
               try {
-                localStorage.setItem('kma_cached_products', JSON.stringify(allProducts));
+                persistProductsCache(allProducts);
               } catch (e) {}
               extractCategoriesFromProducts(allProducts);
               renderProducts();
@@ -3664,7 +3752,7 @@
             products = filterAndSortLocal(allProducts);
           }
           try {
-            localStorage.setItem('kma_cached_products', JSON.stringify(allProducts));
+            persistProductsCache(allProducts);
           } catch (e) {}
           extractCategoriesFromProducts(allProducts);
           renderProducts();
@@ -3686,7 +3774,7 @@
             stored.unshift({ id: newId, name, category, original_price, sale_price, image_url, description, promotion, created_at: now, updated_at: now });
           }
           localStorage.setItem('local_products', JSON.stringify(stored));
-          localStorage.setItem('kma_cached_products', JSON.stringify(stored));
+          persistProductsCache(stored);
           products = stored;
           extractCategoriesFromProducts(products);
           renderProducts();
@@ -3734,7 +3822,7 @@
               allProducts = allProducts.filter(item => item.id !== id);
               products = products.filter(item => item.id !== id);
               try {
-                localStorage.setItem('kma_cached_products', JSON.stringify(allProducts));
+                persistProductsCache(allProducts);
               } catch (e) {}
               extractCategoriesFromProducts(allProducts);
               renderProducts();
@@ -3749,7 +3837,7 @@
             allProducts = allProducts.filter(item => item.id !== id);
             products = products.filter(item => item.id !== id);
             try {
-              localStorage.setItem('kma_cached_products', JSON.stringify(allProducts));
+              persistProductsCache(allProducts);
             } catch (e) {}
             extractCategoriesFromProducts(allProducts);
             renderProducts();
@@ -3760,7 +3848,7 @@
             let stored = JSON.parse(localStorage.getItem('local_products') || '[]');
             stored = stored.filter(item => item.id !== id);
             localStorage.setItem('local_products', JSON.stringify(stored));
-            localStorage.setItem('kma_cached_products', JSON.stringify(stored));
+            persistProductsCache(stored);
             products = stored;
             renderProducts();
             updateCategoriesFilter();
@@ -4804,7 +4892,7 @@
             }
             products.unshift({ id: newId, ...p, created_at: now, updated_at: now });
           }
-          localStorage.setItem('kma_cached_products', JSON.stringify(products));
+          persistProductsCache(products);
           extractCategoriesFromProducts(products);
           renderProducts();
           updateCategoriesFilter();

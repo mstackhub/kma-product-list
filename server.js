@@ -8,6 +8,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
 const { execSync } = require('child_process');
 
 const PORT = process.env.PORT || 3000;
@@ -236,8 +237,26 @@ function parseBody(req) {
   });
 }
 
-// Helper ส่ง JSON Response พร้อม HTTP Headers เพิ่มเติม (เช่น Cache-Control)
+// Helper ส่ง JSON Response พร้อม HTTP Headers เพิ่มเติม และบีบอัด GZIP ช่วยให้โหลดเร็วขึ้น
 function sendJson(res, statusCode, data, extraHeaders = {}) {
+  const jsonStr = JSON.stringify(data);
+  const acceptEncoding = (res.req && res.req.headers && res.req.headers['accept-encoding']) || '';
+  
+  if (acceptEncoding.includes('gzip') && jsonStr.length > 1024) {
+    const compressed = zlib.gzipSync(Buffer.from(jsonStr));
+    res.writeHead(statusCode, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Encoding': 'gzip',
+      'Content-Length': compressed.length,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      ...extraHeaders
+    });
+    res.end(compressed);
+    return;
+  }
+
   res.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
@@ -245,7 +264,7 @@ function sendJson(res, statusCode, data, extraHeaders = {}) {
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     ...extraHeaders
   });
-  res.end(JSON.stringify(data));
+  res.end(jsonStr);
 }
 
 // MIME Types สำหรับ Static Files

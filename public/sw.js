@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kma-booth-v27';
+const CACHE_NAME = 'kma-booth-v28';
 
 const PRECACHE_ASSETS = [
   '/',
