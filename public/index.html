@@ -24,8 +24,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
   
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS (Local 0ms) -->
+  <script src="/tailwind.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -57,9 +57,9 @@
     }
   </script>
 
-  <!-- Lucide Icons & SweetAlert2 (Non-blocking with defer) -->
-  <script src="https://unpkg.com/lucide@latest" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+  <!-- Lucide Icons & SweetAlert2 (Local 0ms, Zero CDN Delays) -->
+  <script src="/lucide.min.js"></script>
+  <script src="/sweetalert2.all.min.js" defer></script>
 
   <style>
     body { font-family: 'Sarabun', sans-serif; }
@@ -1594,6 +1594,17 @@
 
     const DEFAULT_IMG = getCategoryPlaceholder('ทั่วไป');
 
+    // Helper สำหรับสร้างไอคอน Lucide ให้ปลอดภัย ไม่กระตุก และเรนเดอร์ทันที
+    function refreshIcons() {
+      if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+        try {
+          lucide.createIcons();
+        } catch (e) {
+          console.warn('Lucide icon warning:', e);
+        }
+      }
+    }
+
     // โหลดข้อมูลแคชจากเครื่องขึ้นมาแสดงผลทันที (Instant Render < 0.01 วินาที ไม่ต้องรอเน็ต)
     function loadCachedData() {
       try {
@@ -1618,6 +1629,7 @@
     loadCachedData();
     updateFavoritesBadges();
     updateCartBadges();
+    refreshIcons();
 
     // ระบบตรวจจับสถานะ Online / Offline อัตโนมัติ
     function updateOnlineStatus() {
@@ -1625,7 +1637,7 @@
       if (!banner) return;
       if (!navigator.onLine) {
         banner.classList.remove('hidden');
-        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        refreshIcons();
       } else {
         banner.classList.add('hidden');
       }
@@ -1646,9 +1658,7 @@
       if (allProducts.length === 0) {
         loadCachedData();
       }
-      if (typeof lucide !== 'undefined' && lucide.createIcons) {
-        lucide.createIcons();
-      }
+      refreshIcons();
 
       // ซิงค์ข้อมูลล่าสุดกับ Turso Cloud ในเบื้องหลังแบบคู่ขนาน (ไม่บล็อกหน้าจอ)
       fetchProducts(true);
@@ -1656,12 +1666,16 @@
 
       // ลงทะเบียน PWA Service Worker สำหรับใช้งานออฟไลน์ (Network-First Auto-Update)
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js?v=25').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=26').then(reg => {
           reg.update();
         }).catch(err => {
           console.warn('PWA SW register error:', err);
         });
       }
+    });
+
+    window.addEventListener('load', () => {
+      refreshIcons();
     });
 
     // โหลดหมวดหมู่ทั้งหมดจาก API เพื่อคงปุ่มหมวดหมู่ไว้เสมอ
@@ -2029,7 +2043,7 @@
             </div>
           `;
         }
-        lucide.createIcons();
+        refreshIcons();
         return;
       }
 
@@ -2045,7 +2059,7 @@
         table.innerHTML = products.map(renderListItem).join('');
       }
 
-      lucide.createIcons();
+      refreshIcons();
     }
 
     // Action Menu สำหรับจัดการสินค้าแต่ละชิ้น (ซ่อนเรียบร้อยในปุ่ม 3 จุด)
@@ -2549,7 +2563,7 @@
       }
 
       renderSuggestedCategories();
-      if (typeof lucide !== 'undefined') lucide.createIcons();
+      refreshIcons();
     }
 
     // ฟังก์ชันสลับแสดง/ซ่อนหมวดหมู่เพิ่มเติมเฉพาะ Mobile
@@ -2766,7 +2780,7 @@
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
       renderCategoryManagerList();
-      lucide.createIcons();
+      refreshIcons();
     }
 
     function closeCategoryManagerModal() {
@@ -2878,7 +2892,7 @@
         excludedBox.classList.add('hidden');
       }
 
-      lucide.createIcons();
+      refreshIcons();
     }
 
     // ลบหมวดหมู่ (พร้อมแจ้งเตือนยืนยัน และลบออกจากสินค้าในฐานข้อมูล)
@@ -3383,7 +3397,7 @@
       document.getElementById('pricePreviewDiscount').classList.add('hidden');
 
       document.getElementById('productModal').classList.remove('hidden');
-      lucide.createIcons();
+      refreshIcons();
 
       const formEl = document.getElementById('productForm');
       if (formEl) formEl.scrollTop = 0;
@@ -3448,7 +3462,7 @@
 
       updatePricePreview();
       document.getElementById('productModal').classList.remove('hidden');
-      lucide.createIcons();
+      refreshIcons();
 
       const formEl = document.getElementById('productForm');
       if (formEl) formEl.scrollTop = 0;
@@ -3494,7 +3508,7 @@
 
       updatePricePreview();
       document.getElementById('productModal').classList.remove('hidden');
-      lucide.createIcons();
+      refreshIcons();
 
       const formEl = document.getElementById('productForm');
       if (formEl) formEl.scrollTop = 0;
@@ -3915,7 +3929,7 @@
       if (!allProducts || allProducts.length === 0) {
         fetchProducts(true);
       }
-      lucide.createIcons();
+      refreshIcons();
     }
 
     function switchToProductsTab() {
@@ -3961,7 +3975,7 @@
       }
       if (contactInd) contactInd.classList.remove('hidden');
 
-      lucide.createIcons();
+      refreshIcons();
     }
 
     function closeContactModal() {
@@ -4082,7 +4096,7 @@
         }
       });
 
-      lucide.createIcons();
+      refreshIcons();
     }
 
     function addToCart(id) {
@@ -4321,13 +4335,13 @@
       }).join('');
 
       calculateCartTotals();
-      lucide.createIcons();
+      refreshIcons();
     }
 
     function openCartModal() {
       renderCart();
       document.getElementById('cartModal')?.classList.remove('hidden');
-      lucide.createIcons();
+      refreshIcons();
     }
 
     function closeCartModal() {
@@ -4394,7 +4408,7 @@
         textEl.className = 'text-2xl font-black text-rose-600 tracking-tight';
         textEl.textContent = '฿' + Math.abs(change).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       }
-      lucide.createIcons();
+      refreshIcons();
     }
 
     async function confirmClearCart() {
@@ -4493,7 +4507,7 @@
       if (countEl) countEl.textContent = (allItems || products).length;
       document.getElementById('csvModal')?.classList.remove('hidden');
       switchCsvTab('export');
-      lucide.createIcons();
+      refreshIcons();
     }
 
     function closeCsvModal() {

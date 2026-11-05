@@ -1,24 +1,27 @@
-const CACHE_NAME = 'kma-booth-v25';
+const CACHE_NAME = 'kma-booth-v26';
 
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
+  '/tailwind.min.js',
+  '/lucide.min.js',
+  '/sweetalert2.all.min.js',
   '/kma-logo.png',
   '/line-qr.png',
   '/manifest.json'
 ];
 
-// Install: แคชไฟล์หลักของระบบทันที พร้อมเปิดใช้งานออฟไลน์ 100%
+// Install: แคชไฟล์หลักทั้งหมดทันทีแบบ Offline-Ready 100%
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(PRECACHE_ASSETS).catch(err => console.warn('Pre-cache error:', err));
+      return cache.addAll(PRECACHE_ASSETS).catch(err => console.warn('Pre-cache warning:', err));
     })
   );
   self.skipWaiting();
 });
 
-// Activate: ล้าง Cache เก่าทั้งหมดทันที เพื่อไม่ให้ค้าง UI รุ่นเก่า
+// Activate: ล้าง Cache เก่าทั้งหมดทันทีเพื่ออัปเดตระบบ
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
@@ -30,11 +33,10 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: HTML ใช้ Network-First เสมอ เพื่อให้ได้เวอร์ชันล่าสุด 100%
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // สำหรับ API GET /api/products: Stale-While-Revalidate (โหลดแคชทันที 0ms อัปเดตในเบื้องหลัง)
+  // 1. สำหรับ API GET /api/products: Stale-While-Revalidate (ตอบแคชทันที 0ms อัปเดตในเบื้องหลัง)
   if (url.pathname.startsWith('/api/products') && event.request.method === 'GET') {
     event.respondWith(
       caches.open(CACHE_NAME).then(cache => {
@@ -53,7 +55,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // สำหรับ API อื่นๆ (POST / PUT / DELETE หรือสถานะ): Network-First
+  // 2. สำหรับ API อื่นๆ (POST / PUT / DELETE หรือสถานะ): Network-First
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(event.request).catch(() => caches.match(event.request))
@@ -61,33 +63,94 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // สำหรับหน้าเว็บ HTML และ Navigation: บังคับ Network-First เสมอ ป้องกันแคชเก่าใน LINE
-  if (event.request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+  // 3. สำหรับ Static Assets ท้องถิ่น (.js, .css, .png, .jpg, .svg, .json): Cache-First ตอบทันที 0ms!
+  if (
+    url.origin === self.location.origin &&
+    (url.pathname.endsWith('.js') ||
+     url.pathname.endsWith('.png') ||
+     url.pathname.endsWith('.jpg') ||
+     url.pathname.endsWith('.jpeg') ||
+     url.pathname.endsWith('.svg') ||
+     url.pathname.endsWith('.json') ||
+     url.pathname.endsWith('.css')) &&
+    url.pathname !== '/sw.js'
+  ) {
     event.respondWith(
-      fetch(event.request)
-        .then(networkResponse => {
+      caches.match(event.request).then(cachedResponse => {
+        if (cachedResponse) {
+          // มีในแคช ส่งกลับทันที 0ms แล้วอัปเดตในเบื้องหลัง (SWR)
+          fetch(event.request).then(networkResponse => {
+            if (networkResponse && networkResponse.status === 200) {
+              caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse));
+            }
+          }).catch(() => {});
+          return cachedResponse;
+        }
+        return fetch(event.request).then(networkResponse => {
           if (networkResponse && networkResponse.status === 200) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, responseToCache);
-            });
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
           }
           return networkResponse;
-        })
-        .catch(() => caches.match(event.request))
+        });
+      })
     );
     return;
   }
 
-  // สำหรับ Assets ทั่วไป: Stale-While-Revalidate
+  // 4. สำหรับหน้าเว็บ HTML และ Navigation: พยายามดึงเน็ต แต่ถ้าเกิน 1.5 วินาที ดึง Cache ทันที ไม่ให้หน้าค้าง!
+  if (event.request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html')) {
+    event.respondWith(
+      new Promise(resolve => {
+        let isResolved = false;
+        const timeoutTimer = setTimeout(() => {
+          if (!isResolved) {
+            caches.match(event.request).then(cached => {
+              if (cached && !isResolved) {
+                isResolved = true;
+                resolve(cached);
+              }
+            });
+          }
+        }, 1500);
+
+        fetch(event.request).then(networkResponse => {
+          if (networkResponse && networkResponse.status === 200) {
+            if (!isResolved) {
+              isResolved = true;
+              clearTimeout(timeoutTimer);
+              const clone = networkResponse.clone();
+              caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+              resolve(networkResponse);
+            } else {
+              caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse.clone()));
+            }
+          } else {
+            if (!isResolved) {
+              isResolved = true;
+              clearTimeout(timeoutTimer);
+              caches.match(event.request).then(cached => resolve(cached || networkResponse));
+            }
+          }
+        }).catch(() => {
+          if (!isResolved) {
+            isResolved = true;
+            clearTimeout(timeoutTimer);
+            caches.match(event.request).then(cached => resolve(cached));
+          }
+        });
+      })
+    );
+    return;
+  }
+
+  // 5. Assets อื่นๆ: Stale-While-Revalidate
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       const fetchPromise = fetch(event.request).then(networkResponse => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
+        if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return networkResponse;
       }).catch(() => cachedResponse);
